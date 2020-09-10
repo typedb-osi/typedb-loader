@@ -1,0 +1,115 @@
+{
+  "processors": [
+    {
+      "processor": "person",
+      "processorType": "entity",
+      "schemaType": "person",
+      "conceptGenerators": {
+        "attributes": {
+          "first-name": {
+            "attributeType": "first-name",
+            "valueType": "string",
+            "required": false
+          },
+          "last-name": {
+            "attributeType": "last-name",
+            "valueType": "string",
+            "required": false
+          },
+          "phone-number": {
+            "attributeType": "phone-number",
+            "valueType": "string",
+            "required": true
+          },
+          "city": {
+            "attributeType": "city",
+            "valueType": "string",
+            "required": false
+          },
+          "age": {
+            "attributeType": "age",
+            "valueType": "long",
+            "required": false
+          },
+          "nick-name": {
+            "attributeType": "nick-name",
+            "valueType": "string",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "processor": "company",
+      "processorType": "entity",
+      "schemaType": "company",
+      "conceptGenerators": {
+        "attributes": {
+          "name": {
+            "attributeType": "name",
+            "valueType": "string",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "processor": "contract",
+      "processorType": "relation",
+      "schemaType": "contract",
+      "conceptGenerators": {
+        "players": {
+          "provider": {
+            "playerType": "company",
+            "uniquePlayerId": "name",
+            "idValueType": "string",
+            "roleType": "provider",
+            "required": true
+          },
+          "customer": {
+            "playerType": "person",
+            "uniquePlayerId": "phone-number",
+            "idValueType": "string",
+            "roleType": "customer",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "processor": "call",
+      "processorType": "relation",
+      "schemaType": "call",
+      "conceptGenerators": {
+        "players": {
+          "caller": {
+            "playerType": "person",
+            "uniquePlayerId": "phone-number",
+            "idValueType": "string",
+            "roleType": "caller",
+            "required": true
+          },
+          "callee": {
+            "playerType": "person",
+            "uniquePlayerId": "phone-number",
+            "idValueType": "string",
+            "roleType": "callee",
+            "required": true
+          }
+        },
+        "attributes": {
+          "started-at": {
+            "attributeType": "started-at",
+            "valueType": "datetime",
+            "required": true
+          },
+          "duration": {
+            "attributeType": "duration",
+            "valueType": "long",
+            "required": true
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+define
+
+entity1 sub entity,
+    has entity1-id,
+    has entity1-name,
+    has entity1-exp,
+    plays player-one;
+entity1-id sub attribute, value string;
+entity1-name sub attribute, value string;
+entity1-exp sub attribute, value string;
+
+entity2 sub entity,
+    has entity2-id,
+    has entity2-bool,
+    has entity2-double,
+    plays player-two;
+entity2-id sub attribute, value string;
+entity2-bool sub attribute, value boolean;
+entity2-double sub attribute, value double;
+
+entity3 sub entity,
+    has entity3-id,
+    has entity3-int,
+    plays player-optional;
+entity3-id sub attribute, value string;
+entity3-int sub attribute, value long;
+
+rel1 sub relation,
+    relates player-one,
+    relates player-two,
+    relates player-optional,
+    has relAt-1,
+    has relAt-2;
+relAt-1 sub attribute, value string;
+relAt-2 sub attribute, value string;
+

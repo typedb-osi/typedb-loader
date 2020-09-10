@@ -1,0 +1,114 @@
+{
+  "processors":
+  [
+    {
+      "processor": "entity1",
+      "processorType": "entity",
+      "schemaType": "entity1",
+      "conceptGenerators": {
+        "attributes": {
+          "entity1-id": {
+            "attributeType": "entity1-id",
+            "valueType": "string",
+            "required": true
+          },
+          "entity1-name": {
+            "attributeType": "entity1-name",
+            "valueType": "string",
+            "required": true
+          },
+          "entity1-exp": {
+            "attributeType": "entity1-exp",
+            "valueType": "string",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "processor": "entity2",
+      "processorType": "entity",
+      "schemaType": "entity2",
+      "conceptGenerators": {
+        "attributes": {
+          "entity2-id": {
+            "attributeType": "entity2-id",
+            "valueType": "string",
+            "required": true
+          },
+          "entity2-bool": {
+            "attributeType": "entity2-bool",
+            "valueType": "boolean",
+            "required": false
+          },
+          "entity2-double": {
+            "attributeType": "entity2-double",
+            "valueType": "double",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "processor": "entity3",
+      "processorType": "entity",
+      "schemaType": "entity3",
+      "conceptGenerators": {
+        "attributes": {
+          "entity3-id": {
+            "attributeType": "entity3-id",
+            "valueType": "string",
+            "required": true
+          },
+          "entity3-int": {
+            "attributeType": "entity3-int",
+            "valueType": "long",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "processor": "rel1",
+      "processorType": "relation",
+      "schemaType": "rel1",
+      "conceptGenerators": {
+        "players": {
+          "player-one": {
+            "playerType": "entity1",
+            "roleType": "player-one",
+            "required": true,
+            "uniquePlayerId": "entity1-id",
+            "idValueType": "string"
+          },
+          "player-two": {
+            "playerType": "entity2",
+            "roleType": "player-two",
+            "required": true,
+            "uniquePlayerId": "entity2-id",
+            "idValueType": "string"
+          },
+          "player-optional": {
+            "playerType": "entity3",
+            "roleType": "player-optional",
+            "required": false,
+            "uniquePlayerId": "entity3-id",
+            "idValueType": "string"
+          }
+        },
+        "attributes": {
+          "relAt-1": {
+            "attributeType": "relAt-1",
+            "valueType": "string",
+            "required": true
+          },
+          "relAt-2": {
+            "attributeType": "relAt-2",
+            "valueType": "string",
+            "required": false
+          }
+        }
+      }
+    }
+  ]
+}

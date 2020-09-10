@@ -1,0 +1,6 @@
+<configuration>
+    <logger name="io.netty.util.internal" level="ERROR"/>
+    <logger name="io.netty" level="OFF"/>
+    <logger name="io.grpc" level="OFF"/>
+    <root level="OFF"/>
+</configuration>

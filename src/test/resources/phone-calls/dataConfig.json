@@ -1,0 +1,90 @@
+{
+  "person": {
+    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/person.csv",
+    "sep": ",",
+    "processor": "person",
+    "batchSize": 2000,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "first_name",
+        "generator": "first-name"
+      },
+      {
+        "columnName": "last_name",
+        "generator" : "last-name"
+      },
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number"
+      },
+      {
+        "columnName": "city",
+        "generator": "city"
+      },
+      {
+        "columnName": "age",
+        "generator": "age"
+      },
+      {
+        "columnName": "nick_name",
+        "generator": "nick-name",
+        "listSeparator": ";"
+      }]
+  },
+  "company": {
+    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/company.csv",
+    "sep": ",",
+    "processor": "company",
+    "attributes": [
+      {
+        "columnName": "name",
+        "generator": "name"
+      }],
+    "batchSize": 100,
+    "threads": 4
+  },
+  "contract": {
+    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/contract.csv",
+    "sep": ",",
+    "processor": "contract",
+    "players": [
+      {
+        "columnName": "company_name",
+        "generator": "provider"
+      },
+      {
+        "columnName": "person_id",
+        "generator": "customer"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  },
+  "calls": {
+    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/call.csv",
+    "sep": ",",
+    "processor": "call",
+    "players": [
+      {
+        "columnName": "caller_id",
+        "generator": "caller"
+      },
+      {
+        "columnName": "callee_id",
+        "generator": "callee"
+      }
+    ],
+    "attributes": [
+      {
+        "columnName": "started_at",
+        "generator": "started-at"
+      },
+      {
+        "columnName": "duration",
+        "generator" : "duration"
+      }],
+    "batchSize": 100,
+    "threads": 4
+  }
+}
