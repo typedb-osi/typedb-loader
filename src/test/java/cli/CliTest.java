@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 public class CliTest {
     @Test
-    public void picoTest() throws IOException {
+    public void picoTest() {
         String[] args = {
                 "-dcf", "src/test/resources/phone-calls/dataConfig.json",
                 "-pcf", "src/test/resources/phone-calls/processorConfig.json",
@@ -32,7 +32,5 @@ public class CliTest {
         int exitCode = cli.execute(args);
         assertEquals(0, exitCode);
         assertTrue(sw.toString().contains("dc: "));
-
-//        assertEquals("Your output is abc...", sw.toString());
     }
 }
