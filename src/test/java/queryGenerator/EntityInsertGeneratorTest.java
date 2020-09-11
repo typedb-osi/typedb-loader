@@ -21,7 +21,7 @@ public class EntityInsertGeneratorTest {
     private final String entity2dp = getAbsPath("src/test/resources/genericTests/entity2-test-data.tsv");
     private final String entity3dp = getAbsPath("src/test/resources/genericTests/entity3-test-data.tsv");
     private final MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getGeneratorConfig();
+    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
 
     @Test
     public void graknEntityQueryFromRowTest() {

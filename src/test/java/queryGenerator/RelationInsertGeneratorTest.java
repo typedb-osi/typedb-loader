@@ -22,7 +22,7 @@ public class RelationInsertGeneratorTest {
     private final String gcp = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
     private final String rel1dp = getAbsPath("src/test/resources/genericTests/rel1-test-data.tsv");
     private final MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> gc = migrationConfig.getGeneratorConfig();
+    private final HashMap<String, ArrayList<ProcessorConfigEntry>> gc = migrationConfig.getProcessorConfig();
 
     @Test
     public void graknRelationQueryFromRowTest() throws Exception {

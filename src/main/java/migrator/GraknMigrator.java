@@ -86,27 +86,29 @@ public class GraknMigrator {
     }
 
     private void getStatusAndMigrate(GraknClient.Session session, String conceptType) throws IOException {
-        for (String key : dataConfig.keySet()) {
-            if(isOfConceptType(key, conceptType)){
-                appLogger.info("migrating [" + key + "]...");
-                if (migrationStatus != null && migrationStatus.get(key) != null) {
-                    appLogger.info("previous migration status found for entity type: [" + key + "]");
-                    if (!migrationStatus.get(key).isCompleted()) {
-                        appLogger.info(key + " not completely migrated yet, rows already migrated: " + migrationStatus.get(key).getMigratedRows());
-                        getGeneratorAndInsert(session, key, conceptType, migrationStatus.get(key).getMigratedRows());
+        for (String dcEntryKey : dataConfig.keySet()) {
+            DataConfigEntry dce = dataConfig.get(dcEntryKey);
+            String currentProcessor = dce.getProcessor();
+            if(isOfConceptType(currentProcessor, conceptType)){
+                appLogger.info("migrating [" + dcEntryKey + "]...");
+                if (migrationStatus != null && migrationStatus.get(dcEntryKey) != null) {
+                    appLogger.info("previous migration status found for entity type: [" + dcEntryKey + "]");
+                    if (!migrationStatus.get(dcEntryKey).isCompleted()) {
+                        appLogger.info(dcEntryKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(dcEntryKey).getMigratedRows());
+                        getGeneratorAndInsert(session, dce, migrationStatus.get(dcEntryKey).getMigratedRows());
                     } else {
-                        appLogger.info(key + " is already completely migrated - moving on...");
+                        appLogger.info(dcEntryKey + " is already completely migrated - moving on...");
                     }
                 } else {
-                    appLogger.info("nothing previously migrated for [" + key + "] - starting with row 0");
-                    getGeneratorAndInsert(session,  key, conceptType, 0);
+                    appLogger.info("nothing previously migrated for [" + dcEntryKey + "] - starting with row 0");
+                    getGeneratorAndInsert(session, dce, 0);
                 }
             }
         }
     }
 
     private boolean isOfConceptType(String key, String conceptType) {
-        for (ProcessorConfigEntry gce : migrationConfig.getGeneratorConfig().get("processors")) {
+        for (ProcessorConfigEntry gce : migrationConfig.getProcessorConfig().get("processors")) {
             if (gce.getProcessor().equals(key)) {
                 if (gce.getProcessorType().equals(conceptType)) {
                     return true;
@@ -118,21 +120,16 @@ public class GraknMigrator {
         return false;
     }
 
-    private void getGeneratorAndInsert(GraknClient.Session session, String key, String conceptType, int skipRows) throws IOException {
+    private void getGeneratorAndInsert(GraknClient.Session session, DataConfigEntry dce, int skipRows) throws IOException {
         // choose insert generator
-        InsertGenerator gen = null;
-        if (conceptType.contentEquals("entity")) {
-            gen = getProcessor(key);
-        } else if (conceptType.contentEquals("relation")) {
-            gen = getProcessor(key);
-        }
+        InsertGenerator gen = getProcessor(dce);
 
-        writeThingToGrakn(key, gen, session, skipRows);
-        updateMigrationStatusIsCompleted(key);
+        writeThingToGrakn(dce, gen, session, skipRows);
+        updateMigrationStatusIsCompleted(dce);
     }
 
-    private void writeThingToGrakn(String key, InsertGenerator gen, GraknClient.Session session, int skipLines) {
-        InputStream entityStream = DataLoader.getInputStream(dataConfig.get(key).getDataPath());
+    private void writeThingToGrakn(DataConfigEntry dce, InsertGenerator gen, GraknClient.Session session, int skipLines) {
+        InputStream entityStream = DataLoader.getInputStream(dce.getDataPath());
         String header = "";
         ArrayList<String> rows = new ArrayList<>();
         String line;
@@ -156,8 +153,8 @@ public class GraknMigrator {
                     // insert Batch once chunk size is reached
                     rows.add(line);
                     batchSizeCounter++;
-                    if (batchSizeCounter == dataConfig.get(key).getBatchSize()) {
-                        writeThing(key, gen, session, rows, batchSizeCounter, header);
+                    if (batchSizeCounter == dce.getBatchSize()) {
+                        writeThing(dce, gen, session, rows, batchSizeCounter, header);
                         batchSizeCounter = 0;
                         rows.clear();
                     }
@@ -168,7 +165,7 @@ public class GraknMigrator {
                 }
                 //insert the rest when loop exits with less than batch size
                 if (!rows.isEmpty()) {
-                    writeThing(key, gen, session, rows, batchSizeCounter, header);
+                    writeThing(dce, gen, session, rows, batchSizeCounter, header);
                 }
                 appLogger.info("final # rows processed: " + totalRecordCounter);
             } catch (IOException e) {
@@ -177,10 +174,10 @@ public class GraknMigrator {
         }
     }
 
-    private void writeThing(String key, InsertGenerator gen, GraknClient.Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
-        int cores = dataConfig.get(key).getThreads();
+    private void writeThing(DataConfigEntry dce, InsertGenerator gen, GraknClient.Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
+        int cores = dce.getThreads();
         try {
-            if (isOfConceptType(key, "entity")) {
+            if (isOfConceptType(dce.getProcessor(), "entity")) {
                 ArrayList<Statement> insertStatements = gen.graknEntityInsert(rows, header);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.size());
                 if (cores > 1) {
@@ -201,7 +198,7 @@ public class GraknMigrator {
                     gm.insertRelationToGrakn(statements, session);
                 }
             }
-            updateMigrationStatusMigratedRows(key, lineCounter);
+            updateMigrationStatusMigratedRows(dce, lineCounter);
         } catch (Exception ee) {
             ee.printStackTrace();
         }
@@ -222,21 +219,22 @@ public class GraknMigrator {
         }
     }
 
-    private void updateMigrationStatusMigratedRows(String key, int lineCounter) throws IOException {
+    private void updateMigrationStatusMigratedRows(DataConfigEntry dce, int lineCounter) throws IOException {
         try {
+            ProcessorConfigEntry pce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getProcessorConfig());
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
 
             if (migrationStatus != null) {
-                if (migrationStatus.get(key) != null) { //updating an existing entry
-                    int updatedMigratedRows = migrationStatus.get(key).getMigratedRows() + lineCounter;
-                    migrationStatus.get(key).setMigratedRows(updatedMigratedRows);
+                if (migrationStatus.get(dce.getDataPath()) != null) { //updating an existing entry
+                    int updatedMigratedRows = migrationStatus.get(dce.getDataPath()).getMigratedRows() + lineCounter;
+                    migrationStatus.get(dce.getDataPath()).setMigratedRows(updatedMigratedRows);
                 } else { // writing new entry
-                    migrationStatus.put(key, new MigrationStatus(key, false, lineCounter));
+                    migrationStatus.put(dce.getDataPath(), new MigrationStatus(pce.getSchemaType(), false, lineCounter));
                 }
             } else { //writing very first entry (i.e. file was empty)
                 migrationStatus = new HashMap<>();
-                migrationStatus.put(key, new MigrationStatus(key, false, lineCounter));
+                migrationStatus.put(dce.getDataPath(), new MigrationStatus(pce.getSchemaType(), false, lineCounter));
             }
 
             // update file
@@ -248,11 +246,11 @@ public class GraknMigrator {
         }
     }
 
-    private void updateMigrationStatusIsCompleted(String key) throws IOException {
+    private void updateMigrationStatusIsCompleted(DataConfigEntry dce) throws IOException {
         try {
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
-            migrationStatus.get(key).setCompleted(true);
+            migrationStatus.get(dce.getDataPath()).setCompleted(true);
             FileWriter fw = new FileWriter(migrationStatePath);
             gson.toJson(migrationStatus, MigrationStatusMapType, fw);
             fw.flush();
@@ -261,14 +259,13 @@ public class GraknMigrator {
         }
     }
 
-    private InsertGenerator getProcessor(String key) {
-        DataConfigEntry dce = dataConfig.get(key);
-        ProcessorConfigEntry gce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getGeneratorConfig());
+    private InsertGenerator getProcessor(DataConfigEntry dce) {
+        ProcessorConfigEntry gce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getProcessorConfig());
 
-        if (gce != null && isOfConceptType(key, "entity")) {
+        if (gce != null && gce.getProcessorType().equals("entity")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new EntityInsertGenerator(dce, gce);
-        } else if (gce != null && isOfConceptType(key, "relation")) {
+        } else if (gce != null && gce.getProcessorType().equals("relation")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new RelationInsertGenerator(dce, gce);
         } else {
@@ -276,9 +273,9 @@ public class GraknMigrator {
         }
     }
 
-    private ProcessorConfigEntry getGenFromGenConfig(String generator, HashMap<String, ArrayList<ProcessorConfigEntry>> processorConfig) {
+    private ProcessorConfigEntry getGenFromGenConfig(String processor, HashMap<String, ArrayList<ProcessorConfigEntry>> processorConfig) {
         for (ProcessorConfigEntry e : processorConfig.get("processors")) {
-            if (e.getProcessor().equals(generator)) {
+            if (e.getProcessor().equals(processor)) {
                 return e;
             }
         }

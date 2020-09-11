@@ -112,6 +112,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     private StatementInstance playersInsert(ArrayList<Statement> matchStatements, int insertCounter) {
         Statement s = Graql.var("rel-" + insertCounter);
+        int playerCounter = 0;
         for (DataConfigEntry.GenSpec dataPlayer : dce.getPlayers()) {
             ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(dataPlayer.getGenerator());
             boolean insert = false;
@@ -122,8 +123,9 @@ public class RelationInsertGenerator extends InsertGenerator {
                 }
             }
             if (insert) {
-                s = s.rel(playerGenerator.getRoleType(), playerGenerator.getPlayerType() + "-" + insertCounter);
+                s = s.rel(playerGenerator.getRoleType(), playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter);
             }
+            playerCounter++;
         }
         if (s.toString().contains("(")) {
             return (StatementInstance) s;
@@ -134,17 +136,19 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     private Collection<? extends Statement> playersMatch(String[] tokens, String[] headerTokens, int insertCounter) {
         ArrayList<Statement> players = new ArrayList<>();
+        int playerCounter = 0;
         for (DataConfigEntry.GenSpec playerDataConfigEntry : dce.getPlayers()) {
             ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(playerDataConfigEntry.getGenerator());
             int playerDataIndex = idxOf(headerTokens, playerDataConfigEntry);
             if (tokens.length > playerDataIndex &&
                     !cleanToken(tokens[playerDataIndex]).isEmpty()) {
                 StatementInstance ms = Graql
-                        .var(playerGenerator.getPlayerType() + "-" + insertCounter)
+                        .var(playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter)
                         .isa(playerGenerator.getPlayerType()).has(playerGenerator.getUniquePlayerId(),
                                 cleanToken(tokens[playerDataIndex]));
                 players.add(ms);
             }
+            playerCounter++;
         }
         return players;
     }

@@ -83,7 +83,8 @@
       {
         "columnName": "duration",
         "generator" : "duration"
-      }],
+      }
+    ],
     "batchSize": 100,
     "threads": 4
   }

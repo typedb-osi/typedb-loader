@@ -13,21 +13,21 @@ import java.util.HashMap;
 public class MigrationConfig {
 
     private final String dataConfigPath;
-    private final String generatorConfigPath;
+    private final String processorConfigPath;
     private final String schemaPath;
     private final String keyspace;
     private final String graknURI;
     private HashMap<String, DataConfigEntry> dataConfig;
-    private HashMap<String, ArrayList<ProcessorConfigEntry>> generatorConfig;
+    private HashMap<String, ArrayList<ProcessorConfigEntry>> processorConfig;
 
-    public MigrationConfig(String graknURI, String keyspace, String schemaPath, String dataConfigPath, String generatorConfigPath) {
+    public MigrationConfig(String graknURI, String keyspace, String schemaPath, String dataConfigPath, String processorConfigPath) {
         this.graknURI = graknURI;
         this.keyspace = keyspace;
         this.schemaPath = schemaPath;
         this.dataConfigPath = dataConfigPath;
-        this.generatorConfigPath = generatorConfigPath;
+        this.processorConfigPath = processorConfigPath;
         initializeDataConfig();
-        initializeGeneratorConfig();
+        initializeProcessorConfig();
     }
 
     private void initializeDataConfig() {
@@ -45,18 +45,18 @@ public class MigrationConfig {
         return this.dataConfig;
     }
 
-    public void initializeGeneratorConfig() {
+    public void initializeProcessorConfig() {
         BufferedReader bufferedReader;
         try {
-            bufferedReader = new BufferedReader(new FileReader(generatorConfigPath));
+            bufferedReader = new BufferedReader(new FileReader(processorConfigPath));
             Type ConfigType = new TypeToken<HashMap<String, ArrayList<ProcessorConfigEntry>>>(){}.getType();
-            this.generatorConfig = new Gson().fromJson(bufferedReader, ConfigType);
+            this.processorConfig = new Gson().fromJson(bufferedReader, ConfigType);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, ArrayList<ProcessorConfigEntry>> getGeneratorConfig() { return this.generatorConfig; }
+    public HashMap<String, ArrayList<ProcessorConfigEntry>> getProcessorConfig() { return this.processorConfig; }
 
     public String getSchemaPath() {
         return this.schemaPath;

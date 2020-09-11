@@ -21,7 +21,7 @@
         <Logger name="com.bayer.dt.grami.data" level="WARN">
             <AppenderRef ref="AsyncData"/>
         </Logger>
-        <Logger name="com.bayer.dt.grami" level="INFO">
+        <Logger name="com.bayer.dt.grami" level="TRACE">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AsyncLog"/>
         </Logger>

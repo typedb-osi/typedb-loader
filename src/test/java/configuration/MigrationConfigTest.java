@@ -18,8 +18,8 @@ public class MigrationConfigTest {
         Assert.assertEquals(8, mg.getDataConfig().get("entity1").getBatchSize());
 
         // generatorconfig tests
-        Assert.assertEquals("entity1", mg.getGeneratorConfig().get("processors").get(0).getProcessor());
-        Assert.assertEquals("entity1-id", mg.getGeneratorConfig().get("processors").get(0).getAttributeGenerator("entity1-id").getAttributeType());
+        Assert.assertEquals("entity1", mg.getProcessorConfig().get("processors").get(0).getProcessor());
+        Assert.assertEquals("entity1-id", mg.getProcessorConfig().get("processors").get(0).getAttributeGenerator("entity1-id").getAttributeType());
 
 //        Assert.assertNotNull(mg.getGeneratorConfig().get("entity1"));
 //        Assert.assertNotNull(mg.getGeneratorConfig().get("rel1-source-1"));

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'com.bayer.dt'
@@ -22,3 +23,5 @@ dependencies {
     annotationProcessor 'info.picocli:picocli-codegen:4.5.1'
     compile 'info.picocli:picocli:4.5.1'
 }
+
+mainClassName = 'cli.Cli'
