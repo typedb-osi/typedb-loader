@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'com.bayer.rnd'
+group 'com.bayer.dt'
 version '0.1-SNAPSHOT'
 
 repositories {
@@ -19,4 +19,6 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    annotationProcessor 'info.picocli:picocli-codegen:4.5.1'
+    compile 'info.picocli:picocli:4.5.1'
 }
