@@ -212,10 +212,6 @@ For troubleshooting, it might be worth setting the troublesome data configuratio
 
 See the [full configuration file for phone-calls here](link available after publishing).
 
-### Using GraMi as a Command-Line Application:
-
-in development...
-
 ### Using GraMi in your Java Application:
 
 #### Add GraMi as dependency
@@ -321,7 +317,17 @@ For control of GraMi logging, add the following to your log4j2.xml configuration
 </Configuration>
 ```
 
-For tracking the progress of your importing, the suggested logging level for GraMi is "INFO". For more detailed output, set the level to DEBUG or TRACE at your convenience: 
+For tracking the progress of your importing, the suggested logging level for GraMi is "INFO". For more detailed output, set the level to DEBUG or TRACE at your convenience:
+
+### Using GraMi as a Command-Line Application:
+
+Download the .zip/.tar file [here](github-release-link). After unpacking, you can run it directly out of the /bin directory:
+
+```
+./bin/grami -dcf /path/to/dataConfig.json -pcf /path/to/processorConfig.json -msf /path/to/migrationStatus.json -s /path/to/schema.gql -k yourFavoriteKeyspace -cf
+```
+
+grami will create two logfile (one for the application progress/warnings/errors, one concerned with data validity) in the grami directory for your convenience. 
 
 ## Step-by-Step Tutorial
 
