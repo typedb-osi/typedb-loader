@@ -14,7 +14,7 @@ public class Cli implements Callable<Integer> {
     private String dataConfigFilePath;
 
     @CommandLine.Option(names = {"-pcf", "--processorConfigFile"}, description = "processor config file in JSON format", required = true)
-    private String generatorConfigFilePath;
+    private String processorConfigFilePath;
 
     @CommandLine.Option(names = {"-msf", "--migrationStatusFile"}, description = "file to track migration status in", required = true)
     private String migrationStatusFilePath;
@@ -44,17 +44,21 @@ public class Cli implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        spec.commandLine().getOut().println("dc: " + dataConfigFilePath);
-        spec.commandLine().getOut().println("gc: " + generatorConfigFilePath);
-        spec.commandLine().getOut().println("ms: " + migrationStatusFilePath);
-        spec.commandLine().getOut().println("s: " + schemaName);
-        spec.commandLine().getOut().println("k: " + keyspaceName);
-        spec.commandLine().getOut().println("g: " + graknURI);
-        spec.commandLine().getOut().println("cf: " + cleanFirst);
-        spec.commandLine().getOut().println("so: " + schemaOnly);
-        spec.commandLine().getOut().println("eo: " + entitiesOnly);
+        spec.commandLine().getOut().println("##############################################");
+        spec.commandLine().getOut().println("############## WELCOME TO GRAMI ##############");
+        spec.commandLine().getOut().println("##############################################");
+        spec.commandLine().getOut().println("migration started using the following parameters:");
+        spec.commandLine().getOut().println("\tdata configuration file path: " + dataConfigFilePath);
+        spec.commandLine().getOut().println("\tprocessor configuration file path: " + processorConfigFilePath);
+        spec.commandLine().getOut().println("\tmigration status file path: " + migrationStatusFilePath);
+        spec.commandLine().getOut().println("\tschema file path: " + schemaName);
+        spec.commandLine().getOut().println("\tkeyspace name: " + keyspaceName);
+        spec.commandLine().getOut().println("\tgrakn uri: " + graknURI);
+        spec.commandLine().getOut().println("\tclean keyspace first?: " + cleanFirst);
+        spec.commandLine().getOut().println("\tmigrate schema only?: " + schemaOnly);
+        spec.commandLine().getOut().println("\tmigrate entities only?: " + entitiesOnly);
 
-        final MigrationConfig migrationConfig = new MigrationConfig(graknURI, keyspaceName, schemaName, dataConfigFilePath, generatorConfigFilePath);
+        final MigrationConfig migrationConfig = new MigrationConfig(graknURI, keyspaceName, schemaName, dataConfigFilePath, processorConfigFilePath);
 
         // ensure that user cannot set flags so that relations are attempted to be migrated without migrating entities first
         if (schemaOnly) {

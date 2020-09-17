@@ -31,6 +31,6 @@ public class CliTest {
 
         int exitCode = cli.execute(args);
         assertEquals(0, exitCode);
-        assertTrue(sw.toString().contains("dc: "));
+        assertTrue(sw.toString().contains("WELCOME TO GRAMI"));
     }
 }

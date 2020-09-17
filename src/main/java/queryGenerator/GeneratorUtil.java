@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 public class GeneratorUtil {
 
-    private static final Logger LOGGER = LogManager.getLogger("GeneratorUtil");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
 
     public static String cleanToken(String token) {
         String cleaned = token.replace("\"", "");
@@ -26,7 +26,7 @@ public class GeneratorUtil {
 
     public static void malformedRow(String row, String[] rowTokens, int colNum) throws Exception {
         if (rowTokens.length > colNum) {
-            throw new Exception(String.format("malformed input row (additional separator characters found) not inserted - fix the following and restart migration: %s", row));
+            throw new Exception("malformed input row (additional separator characters found) not inserted - fix the following and restart migration: " + row);
         }
     }
 
@@ -34,14 +34,18 @@ public class GeneratorUtil {
         return Arrays.asList(headerTokens).indexOf(genSpec.getColumnName());
     }
 
-    public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GenSpec attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) {
+    public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GenSpec attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) throws Exception {
         int attDataIndex = idxOf(headerTokens, attDataConfig);
-        if ( attDataIndex < tokens.length &&
-                tokens[attDataIndex] != null &&
-                !cleanToken(tokens[attDataIndex]).isEmpty()
-        ) {
-            String listSeparator = attDataConfig.getListSeparator();
-            pattern = cleanExplodeAdd(pattern, tokens[attDataIndex], attGeneratorConfig.getAttributeType(), attGeneratorConfig.getValueType(), listSeparator);
+        if (attDataIndex == -1) {
+            dataLogger.error("Column name: <" + attDataConfig.getColumnName() + "> was not found in file being processed");
+        } else {
+            if ( attDataIndex < tokens.length &&
+                    tokens[attDataIndex] != null &&
+                    !cleanToken(tokens[attDataIndex]).isEmpty()
+            ) {
+                String listSeparator = attDataConfig.getListSeparator();
+                pattern = cleanExplodeAdd(pattern, tokens[attDataIndex], attGeneratorConfig.getAttributeType(), attGeneratorConfig.getValueType(), listSeparator);
+            }
         }
         return pattern;
     }
@@ -71,15 +75,15 @@ public class GeneratorUtil {
             try {
                 pattern = pattern.has(conceptType, Integer.parseInt(cleanedValue));
             } catch (NumberFormatException numberFormatException) {
-                LOGGER.warn("current row has column of type <long> with non-<long> value - skipping column");
-                LOGGER.warn(numberFormatException.getMessage());
+                dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
+                dataLogger.warn(numberFormatException.getMessage());
             }
         } else if (valueType.equals("double")) {
             try {
                 pattern = pattern.has(conceptType, Double.parseDouble(cleanedValue));
             } catch (NumberFormatException numberFormatException) {
-                LOGGER.warn("current row has column of type <double> with non-<double> value - skipping column");
-                LOGGER.warn(numberFormatException.getMessage());
+                dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
+                dataLogger.warn(numberFormatException.getMessage());
             }
         } else if (valueType.equals("boolean")) {
             if (cleanedValue.toLowerCase().equals("true")) {
@@ -87,7 +91,7 @@ public class GeneratorUtil {
             } else if (cleanedValue.toLowerCase().equals("false")) {
                 pattern = pattern.has(conceptType, false);
             } else {
-                LOGGER.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
+                dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
             }
         }
         else if (valueType.equals("datetime")) {
@@ -104,12 +108,12 @@ public class GeneratorUtil {
                     pattern = pattern.has(conceptType, dateTime);
                 }
             } catch (DateTimeException dateTimeException) {
-                LOGGER.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
-                LOGGER.warn(dateTimeException.getMessage());
+                dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
+                dataLogger.warn(dateTimeException.getMessage());
             }
         }
         else {
-            LOGGER.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
+            dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
         }
         return pattern;
     }
