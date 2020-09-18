@@ -10,13 +10,13 @@ import java.util.concurrent.Callable;
 public class Cli implements Callable<Integer> {
     @CommandLine.Spec CommandLine.Model.CommandSpec spec;
 
-    @CommandLine.Option(names = {"-dcf", "--dataConfigFile"}, description = "data config file in JSON format", required = true)
+    @CommandLine.Option(names = {"-d", "--dataConfigFile"}, description = "data config file in JSON format", required = true)
     private String dataConfigFilePath;
 
-    @CommandLine.Option(names = {"-pcf", "--processorConfigFile"}, description = "processor config file in JSON format", required = true)
+    @CommandLine.Option(names = {"-p", "--processorConfigFile"}, description = "processor config file in JSON format", required = true)
     private String processorConfigFilePath;
 
-    @CommandLine.Option(names = {"-msf", "--migrationStatusFile"}, description = "file to track migration status in", required = true)
+    @CommandLine.Option(names = {"-m", "--migrationStatusFile"}, description = "file to track migration status in", required = true)
     private String migrationStatusFilePath;
 
     @CommandLine.Option(names = {"-s", "--schemaFile"}, description = "your schema file as .gql", required = true)
