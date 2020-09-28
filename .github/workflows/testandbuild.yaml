@@ -23,10 +23,10 @@ jobs:
       - name: Upload libs
         uses: actions/upload-artifact@v2
         with:
-          name: grami-libs
+          name: grami-latest
           path: build/libs
       - name: Upload distributions
         uses: actions/upload-artifact@v2
         with:
-          name: grami-dist
+          name: grami-cli-latest
           path: build/distributions
