@@ -30,6 +30,7 @@ mainClassName = 'cli.Cli'
 publishing {
     publications {
         maven(MavenPublication) {
+            artifactId = 'grami'
             from components.java
         }
     }
