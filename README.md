@@ -1,3 +1,5 @@
+![GraMi Tests](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Tests/badge.svg?branch=master)
+
 # Meet GraMi
 
 Do you have a lot of data for your [grakn](https://github.com/graknlabs/grakn) use case and want to focus on modeling, inference, and queries? 

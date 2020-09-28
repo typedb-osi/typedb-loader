@@ -1,6 +1,10 @@
-name: Java CI
+name: GraMi Tests
 
-on: [push]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
