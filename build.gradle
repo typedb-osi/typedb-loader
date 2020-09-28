@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
 }
 
 group 'io.github.bayer-science-for-a-better-life'
-version '0.1'
+version '0.0.1'
 
 repositories {
     mavenCentral()
@@ -25,3 +26,22 @@ dependencies {
 }
 
 mainClassName = 'cli.Cli'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'grami'
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/bayer-science-for-a-better-life/grami"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}

@@ -408,7 +408,7 @@ GraknMigrator is tested for
 
 ## Contributions
 
-GraknMigrator was built @ [Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/graknlabs/people)
+GraknMigrator was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/graknlabs/people)
 
 ## Licensing
 
