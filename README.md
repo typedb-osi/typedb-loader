@@ -49,8 +49,10 @@ To get started, define the "processors" list in your processor configuration fil
 
 ##### Entity Processors
 
-For each entity in your schema, define a processor object that specifies 
- - each entity attribute, its value type, and whether it is required 
+For each entity in your schema, define a processor object that specifies for each entity attribute
+  - its concept name
+  - its value type
+  - whether it is required 
  
 Please note that for each entity, at least one attribute should be required to avoid inserting empty entites into grakn. All attributes declared as keys should also be required. 
 
@@ -288,7 +290,7 @@ Maven:
 ```
 <dependencies>
     <dependency>
-        <groupId>com.bayer.skgt</groupId>
+        <groupId>io.github.bayer-science-for-a-better-life</groupId>
         <artifactId>grami</artifactId>
         <version>0.0.1</version>
     </dependency>
@@ -297,7 +299,7 @@ Maven:
 
 Gradle:
 ```
-compile group: 'com.bayer.skgt', name: 'grami', version: '0.0.1'
+compile group: 'io.github.bayer-science-for-a-better-life', name: 'grami', version: '0.0.1'
 ```
 
 #### Create Migration Class
@@ -401,7 +403,7 @@ Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better
 -cf
 ```
 
-grami will create two logfile (one for the application progress/warnings/errors, one concerned with data validity) in the grami directory for your convenience. 
+grami will create two log files (one for the application progress/warnings/errors, one concerned with data validity) in the grami directory for your convenience. 
 
 ## Step-by-Step Tutorial
 
@@ -415,10 +417,10 @@ GraknMigrator is tested for
 
 ## Contributions
 
-GraknMigrator was built @ [Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @ [Grakn Labs Ltd](https://grakn.ai/) - we would like to specifically thank @jmsfltchr, @flyingsilverfin, @adammitchelldev.
+GraknMigrator was built @ [Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/graknlabs/people)
 
 ## Licensing
 
-This product includes software developed by [Bayer AG](https://www.bayer.com/).  It is released under a [GNU-3 General Public License](https://www.gnu.org/licenses/gpl-3.0.de.html).
+This repository includes software developed at [Bayer AG](https://www.bayer.com/).  It is released under a [GNU-3 General Public License](https://www.gnu.org/licenses/gpl-3.0.de.html).
  
  
