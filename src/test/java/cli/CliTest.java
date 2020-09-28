@@ -3,7 +3,6 @@ package cli;
 import org.junit.Test;
 import picocli.CommandLine;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -14,9 +13,9 @@ public class CliTest {
     @Test
     public void picoTest() {
         String[] args = {
-                "-dcf", "src/test/resources/phone-calls/dataConfig.json",
-                "-pcf", "src/test/resources/phone-calls/processorConfig.json",
-                "-msf", "src/test/resources/phone-calls/migrationStatus.json",
+                "-d", "src/test/resources/phone-calls/dataConfig.json",
+                "-p", "src/test/resources/phone-calls/processorConfig.json",
+                "-m", "src/test/resources/phone-calls/migrationStatus.json",
                 "-s", "src/test/resources/phone-calls/schema.gql",
                 "-k", "grami_cli_test",
                 "-g", "127.0.0.1:48555",

@@ -48,12 +48,12 @@ public class Cli implements Callable<Integer> {
         spec.commandLine().getOut().println("############## WELCOME TO GRAMI ##############");
         spec.commandLine().getOut().println("##############################################");
         spec.commandLine().getOut().println("migration started using the following parameters:");
-        spec.commandLine().getOut().println("\tdata configuration file path: " + dataConfigFilePath);
-        spec.commandLine().getOut().println("\tprocessor configuration file path: " + processorConfigFilePath);
-        spec.commandLine().getOut().println("\tmigration status file path: " + migrationStatusFilePath);
-        spec.commandLine().getOut().println("\tschema file path: " + schemaName);
-        spec.commandLine().getOut().println("\tkeyspace name: " + keyspaceName);
-        spec.commandLine().getOut().println("\tgrakn uri: " + graknURI);
+        spec.commandLine().getOut().println("\tusing data configuration: " + dataConfigFilePath);
+        spec.commandLine().getOut().println("\tusing processor configuration: " + processorConfigFilePath);
+        spec.commandLine().getOut().println("\ttracking migration status in: " + migrationStatusFilePath);
+        spec.commandLine().getOut().println("\tusing schema: " + schemaName);
+        spec.commandLine().getOut().println("\tmigrating to keyspace: " + keyspaceName);
+        spec.commandLine().getOut().println("\tconnecting to grakn: " + graknURI);
         spec.commandLine().getOut().println("\tclean keyspace first?: " + cleanFirst);
         spec.commandLine().getOut().println("\tmigrate schema only?: " + schemaOnly);
         spec.commandLine().getOut().println("\tmigrate entities only?: " + entitiesOnly);

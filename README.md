@@ -6,14 +6,16 @@ Use GraMi (GraknMigrator) to read your entity and relation data from tabular fil
  
 ## Features:
  - Data Input:
+    - data is streamed to reduce memory requirements
     - supports any tabular data file with your separator of choice (i.e.: csv, tsv, whatever-sv...)
     - supports gzipped files
+    - ignore unnecessary columns
  - Entity and Relation Migration:
     - migrate required/optional attributes of any grakn type (string, boolean, long, double, datetime)
-    - migrate required/optional role players of any type (entity, relation, attribute)
+    - migrate required/optional role players (entity, relation & attributes planned)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
  - Data Validation:
-    - validate relation input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
+    - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
  - Performance:
     - parallelized asynchronous writes to Grakn to make the most of your hardware configuration
  - Stop/Restart:
@@ -31,7 +33,7 @@ To illustrate how to use GraMi, we will use a slightly extended version of the "
 
 #### Processor Configuration
 
-The processor configuration file describes how you want data to be added according to your schema. There are two difference processor types - one for entities and one for relations. 
+The processor configuration file describes how you want data to be migrated according to your schema. There are two difference processor types - one for entities and one for relations. 
 
 To get started, define the "processors" list in your processor configuration file:
 
@@ -179,6 +181,23 @@ For each file that you would like to migrate, create a data config entry.
 
 For example, for the [person](link available after publishing) data file:
 
+Excerpt from person.csv:
+
+```
+first_name,last_name,phone_number,city,age,nick_name
+Melli,Winchcum,+7 171 898 0853,London,55,
+Celinda,Bonick,+370 351 224 5176,London,52,
+Chryste,Lilywhite,+81 308 988 7153,London,66,
+D'arcy,Byfford,+54 398 559 0423,London,19,D
+Xylina,D'Alesco,+7 690 597 4443,Cambridge,51,
+Roldan,Cometti,+263 498 495 0617,Oxford,59,Rolly;Rolli
+Cob,Lafflin,+63 815 962 6097,Cambridge,56,
+Olag,Heakey,+81 746 154 2598,London,45,
+...
+```
+
+The corresponding data config entry would be:
+
 ```
 "person": {
     "dataPath": "/your/absolute/path/to/person.csv",    // the absolute path to your data file
@@ -201,6 +220,53 @@ For example, for the [person](link available after publishing) data file:
             "columnName": "nick_name",                          // column name in data file
             "generator": "nick-name",                           // attribute generator in processor person to be used for the column
             "listSeparator": ";"                                // separator within column separating a list of values per data record
+        }
+    ]
+}
+```
+
+##### Relation Data Config Entries
+
+Given the data file call.csv:
+
+```
+caller_id,callee_id,started_at,duration
++54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19,122
++263 498 495 0617,+48 195 624 2025,2018-09-18T01:34:48,514
++81 308 988 7153,+33 614 339 0298,2018-09-21T20:21:17,120
++263 498 495 0617,+33 614 339 0298,2018-09-17T22:10:34,144
++54 398 559 0423,+7 552 196 4096,2018-09-25T20:24:59,556
++81 308 988 7153,+351 515 605 7915,2018-09-23T22:23:25,336
+...
+```
+
+The data config entry would be:
+
+```
+"calls": {
+    "dataPath": "/your/absolute/path/to/call.csv",      // the absolute path to your data file
+    "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "processor": "call",                                // processor from processor config file
+    "batchSize": 100,                                   // batchSize to be used for this data file
+    "threads": 4,                                       // # of threads to be used for this data file
+    "players": [                                        // player columns present in the data file
+        {
+            "columnName": "caller_id",                      // column name in data file
+        "generator": "caller"                               // player generator in processor call to be used for the column
+        },
+        {
+            "columnName": "callee_id",                      // column name in data file
+            "generator": "callee"                           // player generator in processor call to be used for the column
+        }
+    ],
+    "attributes": [                                     // attribute columns present in the data file
+        {
+            "columnName": "started_at",                     // column name in data file
+        "generator": "started-at"                           // attribute generator in processor call to be used for the column
+        },
+        {
+            "columnName": "duration",                       // column name in data file
+            "generator" : "duration"                        // attribute generator in processor call to be used for the column
         }
     ]
 }
@@ -324,7 +390,13 @@ For tracking the progress of your importing, the suggested logging level for Gra
 Download the .zip/.tar file [here](github-release-link). After unpacking, you can run it directly out of the /bin directory:
 
 ```
-./bin/grami -dcf /path/to/dataConfig.json -pcf /path/to/processorConfig.json -msf /path/to/migrationStatus.json -s /path/to/schema.gql -k yourFavoriteKeyspace -cf
+./bin/grami \
+-d /path/to/dataConfig.json \
+-p /path/to/processorConfig.json \
+-m /path/to/migrationStatus.json \
+-s /path/to/schema.gql \
+-k yourFavoriteKeyspace \
+-cf
 ```
 
 grami will create two logfile (one for the application progress/warnings/errors, one concerned with data validity) in the grami directory for your convenience. 

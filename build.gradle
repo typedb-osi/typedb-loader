@@ -3,8 +3,8 @@ plugins {
     id 'application'
 }
 
-group 'com.bayer.dt'
-version '0.1-SNAPSHOT'
+group 'io.github.bayer-science-for-a-better-life'
+version '0.1'
 
 repositories {
     mavenCentral()

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static graql.lang.Graql.parse;
 
-//TODO: add package-wide logging
 public class GraknInserter {
 
     private final String schemaPath;
