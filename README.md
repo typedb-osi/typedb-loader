@@ -42,7 +42,6 @@ To get started, define the "processors" list in your processor configuration fil
 ```JSON
 {
   "processors": [
-    < processor objects will go here >
   ]
 }
 ```
@@ -73,7 +72,7 @@ person sub entity,
 
 Add the following processor object:
 
-```JSON
+```
 {
     "processor": "person",                  // the ID of your processor
     "processorType": "entity",              // creates an entity
@@ -122,7 +121,7 @@ call sub relation,
 
 Add the following processor object:
 
-```JSON
+```
 {
     "processor": "call",                                // the ID of your processor
     "processorType": "relation",                        // creates a relation
@@ -171,17 +170,9 @@ The data configuration file maps each data file and its columns to your processo
 
 A good point to start the performance optimization is to set the number of threads equal to the number of cores on your machine and the batchsize to 500 * threads (i.e.: 4 threads => batchsize = 2000).
 
-To get started, define an empty object in your data configuration file:
-
-```JSON
-{
-    < data config entries will go here >
-}
-```
-
 ##### Entity Data Config Entries
 
-For each file that you would like to migrate, create a data config entry. 
+To get started, define an empty object in your data configuration file. Then, for each file that you would like to migrate, create a data config entry. 
 
 For example, for the [person](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/person.csv) data file:
 
@@ -202,7 +193,7 @@ Olag,Heakey,+81 746 154 2598,London,45,
 
 The corresponding data config entry would be:
 
-```JSON
+```
 "person": {
     "dataPath": "/your/absolute/path/to/person.csv",    // the absolute path to your data file
     "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
@@ -246,7 +237,7 @@ caller_id,callee_id,started_at,duration
 
 The data config entry would be:
 
-```JSON
+```
 "calls": {
     "dataPath": "/your/absolute/path/to/call.csv",      // the absolute path to your data file
     "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
