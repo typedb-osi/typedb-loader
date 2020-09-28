@@ -2,7 +2,7 @@
 
 Do you have a lot of data for your [grakn](https://github.com/graknlabs/grakn) use case and want to focus on modeling, inference, and queries? 
 
-Use GraMi (GraknMigrator) to read your entity and relation data from tabular files and migrate them into grakn **at scale**
+Use GraMi (GraknMigrator) to read your entity and relation data from tabular files and migrate them into grakn **at scale**:
  
 ## Features:
  - Data Input:
@@ -21,15 +21,15 @@ Use GraMi (GraknMigrator) to read your entity and relation data from tabular fil
  - Stop/Restart:
     - tracking of your migration status to stop/restart, or restart after failure
 
-After [creating your processor configuration](link available after publishing) and [data configuration](link available after publishing), you can use GraMi
- - as a [Command Line Application](link available after publishing) - no coding - configuration required 
- - in [your own Java project](link available after publishing) - easy API - configuration required
+After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
+ - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/packages) - no coding - configuration required 
+ - in [your own Java project](https://github.com/bayer-science-for-a-better-life/grami/packages) - easy API - configuration required
  
 Please note that the recommended way of developing your schema is still to use your favorite code editor/IDE in combination with the grakn console.
 
 ## How it works:
 
-To illustrate how to use GraMi, we will use a slightly extended version of the "phone-calls" example [dataset](link available after publishing) and [schema](link available after publishing) from Grakn:
+To illustrate how to use GraMi, we will use a slightly extended version of the "phone-calls" example [dataset](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls) and [schema](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/schema.gql) from Grakn:
 
 #### Processor Configuration
 
@@ -159,7 +159,7 @@ Add the following processor object:
 
 Do above for all relations and their players and attributes in the schema. GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes/players).
 
-See the [full configuration file for phone-calls here](link available after publishing).
+See the [full configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json).
  
 #### Data Configuration
 
@@ -179,7 +179,7 @@ To get started, define an empty object in your data configuration file:
 
 For each file that you would like to migrate, create a data config entry. 
 
-For example, for the [person](link available after publishing) data file:
+For example, for the [person](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/person.csv) data file:
 
 Excerpt from person.csv:
 
@@ -227,7 +227,7 @@ The corresponding data config entry would be:
 
 ##### Relation Data Config Entries
 
-Given the data file call.csv:
+Given the data file [call.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/call.csv):
 
 ```
 caller_id,callee_id,started_at,duration
@@ -276,7 +276,7 @@ Do above for all data files that need to be migrated.
 
 For troubleshooting, it might be worth setting the troublesome data configuration entry to a single thread, as the log messages for error from grakn are more verbose and specific that way...
 
-See the [full configuration file for phone-calls here](link available after publishing).
+See the [full configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json).
 
 ### Using GraMi in your Java Application:
 
@@ -387,7 +387,7 @@ For tracking the progress of your importing, the suggested logging level for Gra
 
 ### Using GraMi as a Command-Line Application:
 
-Download the .zip/.tar file [here](github-release-link). After unpacking, you can run it directly out of the /bin directory:
+Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better-life/grami/packages). After unpacking, you can run it directly out of the /bin directory:
 
 ```
 ./bin/grami \
@@ -403,7 +403,7 @@ grami will create two logfile (one for the application progress/warnings/errors,
 
 ## Step-by-Step Tutorial
 
-A complete tutorial can be found [here](link available after publishing).
+A complete tutorial can be found [here - soon to come](https://github.com/bayer-science-for-a-better-life/grami/).
 
 ## Compatibility
 
