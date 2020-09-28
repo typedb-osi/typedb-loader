@@ -39,7 +39,7 @@ The processor configuration file describes how you want data to be migrated acco
 
 To get started, define the "processors" list in your processor configuration file:
 
-```
+```JSON
 {
   "processors": [
     < processor objects will go here >
@@ -58,7 +58,7 @@ Please note that for each entity, at least one attribute should be required to a
 
 For example, given the following entity in your schema:
  
- ```
+ ```GraphQL
 person sub entity,
     plays customer,
     plays caller,
@@ -73,7 +73,7 @@ person sub entity,
 
 Add the following processor object:
 
-```
+```JSON
 {
     "processor": "person",                  // the ID of your processor
     "processorType": "entity",              // creates an entity
@@ -112,7 +112,7 @@ For each relation in your schema, define a processor object that specifies
 
 For example, given the following relation in your schema:
 
- ```
+ ```GraphQL
 call sub relation,
     relates caller,
     relates callee,
@@ -122,7 +122,7 @@ call sub relation,
 
 Add the following processor object:
 
-```
+```JSON
 {
     "processor": "call",                                // the ID of your processor
     "processorType": "relation",                        // creates a relation
@@ -173,7 +173,7 @@ A good point to start the performance optimization is to set the number of threa
 
 To get started, define an empty object in your data configuration file:
 
-```
+```JSON
 {
     < data config entries will go here >
 }
@@ -187,7 +187,7 @@ For example, for the [person](https://github.com/bayer-science-for-a-better-life
 
 Excerpt from person.csv:
 
-```
+```CSV
 first_name,last_name,phone_number,city,age,nick_name
 Melli,Winchcum,+7 171 898 0853,London,55,
 Celinda,Bonick,+370 351 224 5176,London,52,
@@ -202,7 +202,7 @@ Olag,Heakey,+81 746 154 2598,London,45,
 
 The corresponding data config entry would be:
 
-```
+```JSON
 "person": {
     "dataPath": "/your/absolute/path/to/person.csv",    // the absolute path to your data file
     "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
@@ -233,7 +233,7 @@ The corresponding data config entry would be:
 
 Given the data file [call.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/call.csv):
 
-```
+```CSV
 caller_id,callee_id,started_at,duration
 +54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19,122
 +263 498 495 0617,+48 195 624 2025,2018-09-18T01:34:48,514
@@ -246,7 +246,7 @@ caller_id,callee_id,started_at,duration
 
 The data config entry would be:
 
-```
+```JSON
 "calls": {
     "dataPath": "/your/absolute/path/to/call.csv",      // the absolute path to your data file
     "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
@@ -287,7 +287,7 @@ See the [full configuration file for phone-calls here](https://github.com/bayer-
 #### Add GraMi as dependency
 
 Maven:
-```
+```XML
 <dependencies>
     <dependency>
         <groupId>io.github.bayer-science-for-a-better-life</groupId>
@@ -298,7 +298,7 @@ Maven:
 ```
 
 Gradle:
-```
+```Shell
 compile group: 'io.github.bayer-science-for-a-better-life', name: 'grami', version: '0.0.1'
 ```
 
@@ -306,7 +306,7 @@ compile group: 'io.github.bayer-science-for-a-better-life', name: 'grami', versi
 
 In your favorite IDE, create a Class that will handle your migration (here: migration.Migration):
 
-```
+```Java
 package migration;
 
 import configuration.MigrationConfig;
@@ -333,7 +333,7 @@ public class Migration {
 ```
 
 The boolean flag cleanAndMigrate set to *true* as shown in:
-```
+```Java
 GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
 ```
 will, if exists, delete the schema and all data in the given keyspace.
@@ -341,7 +341,7 @@ If set to *false*, GraMi will continue migration according to the migrationStatu
 
 
 As for
-```
+```Java
 mig.migrate(true, true);
 ```
 there are four possibilities in total for the migrateEntities and migrateRelations flags, respectively:
@@ -355,7 +355,7 @@ there are four possibilities in total for the migrateEntities and migrateRelatio
 
 For control of GraMi logging, add the following to your log4j2.xml configuration:
 
-```
+```XML
 <Configuration>
     <Appenders>
         <Console name="Console">
@@ -393,7 +393,7 @@ For tracking the progress of your importing, the suggested logging level for Gra
 
 Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better-life/grami/packages). After unpacking, you can run it directly out of the /bin directory:
 
-```
+```Shell
 ./bin/grami \
 -d /path/to/dataConfig.json \
 -p /path/to/processorConfig.json \
