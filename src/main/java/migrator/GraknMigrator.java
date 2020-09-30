@@ -3,12 +3,12 @@ package migrator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
-import dataLoader.DataLoader;
+import loader.DataLoader;
 import grakn.client.GraknClient;
 import insert.GraknInserter;
 import graql.lang.statement.Statement;
-import queryGenerator.EntityInsertGenerator;
-import queryGenerator.InsertGenerator;
+import generator.EntityInsertGenerator;
+import generator.InsertGenerator;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import queryGenerator.RelationInsertGenerator;
+import generator.RelationInsertGenerator;
 
 
 public class GraknMigrator {

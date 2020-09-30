@@ -61,22 +61,22 @@ public class GraknInserter {
     }
 
     private void defineToGrakn(String insertString, GraknClient.Session session) {
-        GraknClient.Transaction write = session.transaction().write();
-        write.execute((GraqlDefine) parse(insertString));
-        write.commit();
+        GraknClient.Transaction writeTransaction = session.transaction().write();
+        writeTransaction.execute((GraqlDefine) parse(insertString));
+        writeTransaction.commit();
         appLogger.info("Successfully defined schema");
     }
 
     // Entity Operations
     public int insertEntityToGrakn(ArrayList<Statement> statements, GraknClient.Session session) {
-        GraknClient.Transaction write = session.transaction().write();
+        GraknClient.Transaction writeTransaction = session.transaction().write();
         int i = 0;
         for (Statement st : statements) {
-            write.execute(Graql.insert(st));
+            writeTransaction.execute(Graql.insert(st));
             i++;
         }
-        write.commit();
-        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", write.toString()));
+        writeTransaction.commit();
+        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", writeTransaction.toString()));
         return i;
     }
 
@@ -127,16 +127,16 @@ public class GraknInserter {
         ArrayList<ArrayList<Statement>> matchStatements = statements.get(0);
         ArrayList<ArrayList<Statement>> insertStatements = statements.get(1);
 
-        GraknClient.Transaction write = session.transaction().write();
+        GraknClient.Transaction writeTransaction = session.transaction().write();
         int i = 0;
         for (int row = 0; row < matchStatements.size(); row++) {
             ArrayList<Statement> rowMatchStatements = matchStatements.get(row);
             ArrayList<Statement> rowInsertStatements = insertStatements.get(row);
-            write.execute(Graql.match(rowMatchStatements).insert(rowInsertStatements));
+            writeTransaction.execute(Graql.match(rowMatchStatements).insert(rowInsertStatements));
             i++;
         }
-        write.commit();
-        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", write.toString()));
+        writeTransaction.commit();
+        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", writeTransaction.toString()));
         return i;
     }
 

@@ -1,4 +1,4 @@
-package dataLoader;
+package loader;
 
 import java.io.FileInputStream;
 import java.io.IOException;

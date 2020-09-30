@@ -29,7 +29,6 @@ public class ProcessorConfigEntry {
         return conceptGenerators;
     }
 
-    // TODO: Use streaming API
     public ConceptGenerator getAttributeGenerator(String key) {
         for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("attributes").entrySet()) {
             if (entry.getKey().equals(key)) {
@@ -45,7 +44,53 @@ public class ProcessorConfigEntry {
                 return entry.getValue();
             }
         }
-        return null;
+        throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
+    }
+
+    public HashMap<String,ConceptGenerator> getRelationRequiredPlayers() {
+        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
+        if (processorType.equals("relation")) {
+            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
+            for (Map.Entry<String, ConceptGenerator> pg: playerGenerators.entrySet()) {
+                if (pg.getValue().isRequired()) {
+                    relationPlayers.put(pg.getKey(), pg.getValue());
+                }
+            }
+        }
+        return relationPlayers;
+    }
+
+    public HashMap<String,ConceptGenerator> getRelationPlayers() {
+        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
+        if (processorType.equals("relation")) {
+            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
+            for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
+                relationPlayers.put(pg.getKey(), pg.getValue());
+            }
+        }
+        return relationPlayers;
+    }
+
+    public HashMap<String,ConceptGenerator> getAttributes() {
+        HashMap<String,ConceptGenerator> attributes = new HashMap<>();
+        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
+        for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
+            attributes.put(ag.getKey(), ag.getValue());
+        }
+        return attributes;
+    }
+
+    public HashMap<String,ConceptGenerator> getRequiredAttributes() {
+        HashMap<String,ConceptGenerator> requiredAttributes = new HashMap<>();
+        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
+        if (attGenerators != null) {
+            for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
+                if (ag.getValue().isRequired()) {
+                    requiredAttributes.put(ag.getKey(), ag.getValue());
+                }
+            }
+        }
+        return requiredAttributes;
     }
 
     public static class ConceptGenerator {
@@ -91,69 +136,5 @@ public class ProcessorConfigEntry {
             return idValueType;
         }
     }
-
-
-    public HashMap<String,ConceptGenerator> getRelationRequiredPlayers() {
-        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation")) {
-            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
-            for (Map.Entry<String, ConceptGenerator> pg: playerGenerators.entrySet()) {
-                if (pg.getValue().isRequired()) {
-                    relationPlayers.put(pg.getKey(), pg.getValue());
-                }
-            }
-        }
-        return relationPlayers;
-    }
-
-    public HashMap<String,ConceptGenerator> getRelationPlayers() {
-        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation")) {
-            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
-            for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
-                relationPlayers.put(pg.getKey(), pg.getValue());
-            }
-        }
-        return relationPlayers;
-    }
-
-    public HashMap<String,ConceptGenerator> getEntityRequiredAttributes() {
-        return getRequiredAttributes();
-    }
-
-    public HashMap<String,ConceptGenerator> getEntityAttributes() {
-        return getAttributes();
-    }
-
-    public HashMap<String,ConceptGenerator> getRelationRequiredAttributes() {
-        return getRequiredAttributes();
-    }
-
-    public HashMap<String,ConceptGenerator> getRelationAttributes() {
-        return getAttributes();
-    }
-
-    private HashMap<String,ConceptGenerator> getAttributes() {
-        HashMap<String,ConceptGenerator> attributes = new HashMap<>();
-        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
-        for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
-            attributes.put(ag.getKey(), ag.getValue());
-        }
-        return attributes;
-    }
-
-    private HashMap<String,ConceptGenerator> getRequiredAttributes() {
-        HashMap<String,ConceptGenerator> requiredAttributes = new HashMap<>();
-        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
-        if (attGenerators != null) {
-            for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
-                if (ag.getValue().isRequired()) {
-                    requiredAttributes.put(ag.getKey(), ag.getValue());
-                }
-            }
-        }
-        return requiredAttributes;
-    }
-
 
 }

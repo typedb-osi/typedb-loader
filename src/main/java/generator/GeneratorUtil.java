@@ -1,4 +1,4 @@
-package queryGenerator;
+package generator;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -30,11 +30,11 @@ public class GeneratorUtil {
         }
     }
 
-    public static int idxOf(String[] headerTokens, DataConfigEntry.GenSpec genSpec) {
-        return Arrays.asList(headerTokens).indexOf(genSpec.getColumnName());
+    public static int idxOf(String[] headerTokens, DataConfigEntry.GeneratorSpecification generatorSpecification) {
+        return Arrays.asList(headerTokens).indexOf(generatorSpecification.getColumnName());
     }
 
-    public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GenSpec attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) throws Exception {
+    public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GeneratorSpecification attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) throws Exception {
         int attDataIndex = idxOf(headerTokens, attDataConfig);
         if (attDataIndex == -1) {
             dataLogger.error("Column name: <" + attDataConfig.getColumnName() + "> was not found in file being processed");

@@ -1,7 +1,7 @@
 {
   "person": {
     "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/person.csv",
-    "sep": ",",
+    "separator": ",",
     "processor": "person",
     "batchSize": 2000,
     "threads": 4,
@@ -34,7 +34,7 @@
   },
   "company": {
     "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/company.csv",
-    "sep": ",",
+    "separator": ",",
     "processor": "company",
     "attributes": [
       {
@@ -46,7 +46,7 @@
   },
   "contract": {
     "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/contract.csv",
-    "sep": ",",
+    "separator": ",",
     "processor": "contract",
     "players": [
       {
@@ -63,7 +63,7 @@
   },
   "calls": {
     "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/call.csv",
-    "sep": ",",
+    "separator": ",",
     "processor": "call",
     "players": [
       {

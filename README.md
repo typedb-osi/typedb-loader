@@ -24,8 +24,8 @@ Use GraMi (GraknMigrator) to read your entity and relation data from tabular fil
     - tracking of your migration status to stop/restart, or restart after failure
 
 After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
- - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/packages) - no coding - configuration required 
- - in [your own Java project](https://github.com/bayer-science-for-a-better-life/grami/packages) - easy API - configuration required
+ - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/releases) - no coding - configuration required 
+ - in [your own Java project](https://github.com/bayer-science-for-a-better-life/grami#using-grami-in-your-java-application) - easy API - configuration required
  
 Please note that the recommended way of developing your schema is still to use your favorite code editor/IDE in combination with the grakn console.
 
@@ -196,7 +196,7 @@ The corresponding data config entry would be:
 ```
 "person": {
     "dataPath": "/your/absolute/path/to/person.csv",    // the absolute path to your data file
-    "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
     "processor": "person",                              // processor from processor config file
     "batchSize": 2000,                                  // batchSize to be used for this data file
     "threads": 4,                                       // # of threads to be used for this data file
@@ -240,7 +240,7 @@ The data config entry would be:
 ```
 "calls": {
     "dataPath": "/your/absolute/path/to/call.csv",      // the absolute path to your data file
-    "sep": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
     "processor": "call",                                // processor from processor config file
     "batchSize": 100,                                   // batchSize to be used for this data file
     "threads": 4,                                       // # of threads to be used for this data file

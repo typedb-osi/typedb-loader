@@ -1,4 +1,4 @@
-package queryGenerator;
+package generator;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;

@@ -1,7 +1,7 @@
 {
     "entity1": {
         "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity1-test-data.tsv",
-        "sep": "\t",
+        "separator": "\t",
         "processor": "entity1",
         "attributes": [
             {
@@ -23,7 +23,7 @@
     },
     "entity2": {
         "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity2-test-data.tsv",
-        "sep": "\t",
+        "separator": "\t",
         "processor": "entity2",
         "attributes": [
             {
@@ -44,7 +44,7 @@
     },
     "entity3": {
         "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity3-test-data.tsv",
-        "sep": "\t",
+        "separator": "\t",
         "processor": "entity3",
         "attributes": [
             {
@@ -61,7 +61,7 @@
     },
     "rel1": {
         "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/rel1-test-data.tsv",
-        "sep": "\t",
+        "separator": "\t",
         "processor": "rel1",
         "players": [
             {

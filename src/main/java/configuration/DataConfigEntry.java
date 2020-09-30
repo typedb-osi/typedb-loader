@@ -2,10 +2,10 @@ package configuration;
 
 public class DataConfigEntry {
     private String dataPath;
-    private String sep;
+    private String separator;
     private String processor;
-    private GenSpec[] attributes;
-    private GenSpec[] players;
+    private GeneratorSpecification[] attributes;
+    private GeneratorSpecification[] players;
     private int batchSize;
     private int threads;
 
@@ -13,19 +13,19 @@ public class DataConfigEntry {
         return dataPath;
     }
 
-    public String getSep() {
-        return sep;
+    public String getSeparator() {
+        return separator;
     }
 
     public String getProcessor() {
         return processor;
     }
 
-    public GenSpec[] getAttributes() {
+    public GeneratorSpecification[] getAttributes() {
         return attributes;
     }
 
-    public GenSpec[] getPlayers() {
+    public GeneratorSpecification[] getPlayers() {
         return players;
     }
 
@@ -37,7 +37,7 @@ public class DataConfigEntry {
         return threads;
     }
 
-    public static class GenSpec {
+    public static class GeneratorSpecification {
         private String columnName;
         private String generator;
         private String listSeparator;

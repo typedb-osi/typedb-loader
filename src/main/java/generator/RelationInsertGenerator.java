@@ -1,8 +1,8 @@
-package queryGenerator;
+package generator;
 
-import static queryGenerator.GeneratorUtil.idxOf;
-import static queryGenerator.GeneratorUtil.cleanToken;
-import static queryGenerator.GeneratorUtil.addAttribute;
+import static generator.GeneratorUtil.idxOf;
+import static generator.GeneratorUtil.cleanToken;
+import static generator.GeneratorUtil.addAttribute;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -57,8 +57,8 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     public ArrayList<ArrayList<Statement>> graknRelationshipQueryFromRow(String row, String header, int insertCounter) throws Exception {
 
-        String[] tokens = row.split(dce.getSep());
-        String[] headerTokens = header.split(dce.getSep());
+        String[] tokens = row.split(dce.getSeparator());
+        String[] headerTokens = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(tokens));
         GeneratorUtil.malformedRow(row, tokens, headerTokens.length);
 
@@ -69,7 +69,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             StatementInstance insert = playersInsert(matchStatements, insertCounter);
             insert = relationInsert(insert);
             if (dce.getAttributes() != null) {
-                for (DataConfigEntry.GenSpec attDataConfigEntry : dce.getAttributes()) {
+                for (DataConfigEntry.GeneratorSpecification attDataConfigEntry : dce.getAttributes()) {
                     insert = addAttribute(tokens, insert, headerTokens, attDataConfigEntry, gce.getAttributeGenerator(attDataConfigEntry.getGenerator()));
                 }
             }
@@ -113,7 +113,7 @@ public class RelationInsertGenerator extends InsertGenerator {
     private StatementInstance playersInsert(ArrayList<Statement> matchStatements, int insertCounter) {
         Statement s = Graql.var("rel-" + insertCounter);
         int playerCounter = 0;
-        for (DataConfigEntry.GenSpec dataPlayer : dce.getPlayers()) {
+        for (DataConfigEntry.GeneratorSpecification dataPlayer : dce.getPlayers()) {
             ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(dataPlayer.getGenerator());
             boolean insert = false;
             for (Statement st :matchStatements) {
@@ -137,7 +137,7 @@ public class RelationInsertGenerator extends InsertGenerator {
     private Collection<? extends Statement> playersMatch(String[] tokens, String[] headerTokens, int insertCounter) {
         ArrayList<Statement> players = new ArrayList<>();
         int playerCounter = 0;
-        for (DataConfigEntry.GenSpec playerDataConfigEntry : dce.getPlayers()) {
+        for (DataConfigEntry.GeneratorSpecification playerDataConfigEntry : dce.getPlayers()) {
             ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(playerDataConfigEntry.getGenerator());
             int playerDataIndex = idxOf(headerTokens, playerDataConfigEntry);
             if (tokens.length > playerDataIndex &&
@@ -168,7 +168,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             }
         }
         // missing required attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRelationRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRequiredAttributes().entrySet()) {
             if (!insertStatement.contains("has " + generatorEntry.getValue().getAttributeType())) {
                 return false;
             }

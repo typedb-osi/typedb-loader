@@ -1,6 +1,6 @@
 package test;
 
-import dataLoader.DataLoader;
+import loader.DataLoader;
 import graql.lang.statement.Statement;
 
 import java.io.*;

@@ -1,6 +1,5 @@
-package queryGenerator;
+package generator;
 
-import configuration.DataConfigEntry;
 import graql.lang.statement.Statement;
 
 import java.util.ArrayList;

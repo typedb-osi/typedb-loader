@@ -1,7 +1,7 @@
-package queryGenerator;
+package generator;
 
-import static queryGenerator.GeneratorUtil.malformedRow;
-import static queryGenerator.GeneratorUtil.addAttribute;
+import static generator.GeneratorUtil.malformedRow;
+import static generator.GeneratorUtil.addAttribute;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -47,14 +47,14 @@ public class EntityInsertGenerator extends InsertGenerator {
     }
 
     public StatementInstance graknEntityQueryFromRow(String row, String header, int insertCounter) throws Exception {
-        String[] tokens = row.split(dce.getSep());
-        String[] headerTokens = header.split(dce.getSep());
+        String[] tokens = row.split(dce.getSeparator());
+        String[] headerTokens = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(tokens));
         malformedRow(row, tokens, headerTokens.length);
 
         StatementInstance pattern = addEntity(insertCounter);
 
-        for (DataConfigEntry.GenSpec dataAttribute : dce.getAttributes()) {
+        for (DataConfigEntry.GeneratorSpecification dataAttribute : dce.getAttributes()) {
             pattern = addAttribute(tokens, pattern, headerTokens, dataAttribute, gce.getAttributeGenerator(dataAttribute.getGenerator()));
         }
 
@@ -80,7 +80,7 @@ public class EntityInsertGenerator extends InsertGenerator {
         if (!statement.contains("isa " + gce.getSchemaType())) {
             return false;
         }
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> con : gce.getEntityRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> con : gce.getRequiredAttributes().entrySet()) {
             if (!statement.contains("has " + con.getValue().getAttributeType())) {
                 return false;
             }
