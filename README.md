@@ -278,19 +278,48 @@ See the [full configuration file for phone-calls here](https://github.com/bayer-
 #### Add GraMi as dependency
 
 Maven:
+
+Add jitpack and grakn as repositories:
+
 ```XML
-<dependencies>
-    <dependency>
-        <groupId>io.github.bayer-science-for-a-better-life</groupId>
-        <artifactId>grami</artifactId>
-        <version>0.0.1</version>
-    </dependency>
-</dependencies>
+<repositories>
+    <repository>
+        <id>grakn.ai</id>
+        <url>https://repo.grakn.ai/repository/maven/</url>
+    </repository>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+Add GraMi as dependency:
+```XML
+<dependency>
+    <groupId>io.github.bayer-science-for-a-better-life</groupId>
+    <artifactId>grami</artifactId>
+    <version>0.0.1</version>
+</dependency>
 ```
 
 Gradle:
-```Shell
-compile group: 'io.github.bayer-science-for-a-better-life', name: 'grami', version: '0.0.1'
+
+Add jitpack and grakn as repositories:
+```
+repositories {
+    ...
+    maven { url 'https://repo.grakn.ai/repository/maven/'}
+    maven { url 'https://jitpack.io' }
+}
+```
+
+Add GraMi as dependency:
+```
+dependencies {
+    ...
+    implementation 'com.github.bayer-science-for-a-better-life:grami:0.0.1'
+}
 ```
 
 #### Create Migration Class
@@ -382,7 +411,7 @@ For tracking the progress of your importing, the suggested logging level for Gra
 
 ### Using GraMi as a Command-Line Application:
 
-Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better-life/grami/packages). After unpacking, you can run it directly out of the /bin directory:
+Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better-life/grami/releases). After unpacking, you can run it directly out of the /bin directory:
 
 ```Shell
 ./bin/grami \
