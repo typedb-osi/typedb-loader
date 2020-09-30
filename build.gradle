@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
-group 'io.github.bayer-science-for-a-better-life'
+group 'com.github.bayer-science-for-a-better-life'
 version '0.0.1-SNAPSHOT'
 
 repositories {
