@@ -443,4 +443,6 @@ GraknMigrator was built @[Bayer AG](https://www.bayer.com/) in the Semantic and 
 
 This repository includes software developed at [Bayer AG](https://www.bayer.com/).  It is released under a [GNU-3 General Public License](https://www.gnu.org/licenses/gpl-3.0.de.html).
  
- 
+## Credits
+
+Icon in banner by [Smashicons](https://www.flaticon.com/de/autoren/smashicons) from [Flaticon](https://www.flaticon.com/)
