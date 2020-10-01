@@ -4,8 +4,8 @@
 ---
 ---
 ### 
-![GraMi Tests](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Tests/badge.svg?branch=master)
-![GraMi Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/Publish%20package%20to%20GitHub%20Packages/badge.svg?branch=master)
+![GraMi Test](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Test/badge.svg?branch=master)
+![GraMi Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Build/badge.svg?branch=master)
 ###
 
 ---
