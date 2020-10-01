@@ -1,4 +1,4 @@
-name: Publish package to GitHub Packages
+name: GraMi Build
 on:
   release:
     types: [published]
