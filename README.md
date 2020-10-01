@@ -1,12 +1,20 @@
-![GraMi Tests](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Tests/badge.svg?branch=master)
+
 
 ![grami_icon](https://github.com/bayer-science-for-a-better-life/grami/blob/master/grami_banner.png?raw=true)
 ---
 ---
+### 
+![GraMi Tests](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Tests/badge.svg?branch=master)
+![GraMi Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/Publish%20package%20to%20GitHub%20Packages/badge.svg?branch=master)
+###
 
-Do you have a lot of data for your [Grakn.ai](https://github.com/graknlabs/grakn) use case and want to focus on modeling, inference, and queries? 
+---
 
-Use GraMi (**Gra**kn**Mi**grator) to read your entity and relation data from tabular files and migrate them into grakn **at scale**:
+If your [Grakn.ai](https://github.com/graknlabs/grakn) project
+ - has a lot of data
+ - and you want/need to focus on schema design, inference, and querying
+
+Use GraMi (**Gra**kn**Mi**grator) to take care of your data loading for you. GraMi streams data from files and migrates them into grakn **at scale**!
  
 ## Features:
  - Data Input:
