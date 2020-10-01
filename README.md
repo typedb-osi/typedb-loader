@@ -1,10 +1,12 @@
 ![GraMi Tests](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Tests/badge.svg?branch=master)
 
 ![grami_icon](https://github.com/bayer-science-for-a-better-life/grami/blob/master/grami_banner.png?raw=true)
+---
+---
 
-Do you have a lot of data for your [grakn](https://github.com/graknlabs/grakn) use case and want to focus on modeling, inference, and queries? 
+Do you have a lot of data for your [Grakn.ai](https://github.com/graknlabs/grakn) use case and want to focus on modeling, inference, and queries? 
 
-Use GraMi (GraknMigrator) to read your entity and relation data from tabular files and migrate them into grakn **at scale**:
+Use GraMi (**Gra**kn**Mi**grator) to read your entity and relation data from tabular files and migrate them into grakn **at scale**:
  
 ## Features:
  - Data Input:
@@ -443,4 +445,6 @@ GraknMigrator was built @[Bayer AG](https://www.bayer.com/) in the Semantic and 
 
 This repository includes software developed at [Bayer AG](https://www.bayer.com/).  It is released under a [GNU-3 General Public License](https://www.gnu.org/licenses/gpl-3.0.de.html).
  
- 
+## Credits
+
+Icon in banner by [Smashicons](https://www.flaticon.com/de/autoren/smashicons) from [Flaticon](https://www.flaticon.com/)
