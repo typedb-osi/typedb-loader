@@ -437,7 +437,7 @@ grami will create two log files (one for the application progress/warnings/error
 
 ## Step-by-Step Tutorial
 
-A complete tutorial can be found [here - soon to come](https://github.com/bayer-science-for-a-better-life/grami/).
+A complete tutorial can be found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
 
 ## Compatibility
 
