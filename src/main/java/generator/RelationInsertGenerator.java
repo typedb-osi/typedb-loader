@@ -118,7 +118,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             boolean insert = false;
             for (Statement st :matchStatements) {
                 //need to have player in match statement or cannot insert as player in relation
-                if (st.toString().contains(playerGenerator.getPlayerType())) {
+                if (st.toString().contains(playerGenerator.getUniquePlayerId())) {
                     insert = true;
                 }
             }
@@ -140,6 +140,9 @@ public class RelationInsertGenerator extends InsertGenerator {
         for (DataConfigEntry.GeneratorSpecification playerDataConfigEntry : dce.getPlayers()) {
             ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(playerDataConfigEntry.getGenerator());
             int playerDataIndex = idxOf(headerTokens, playerDataConfigEntry);
+            if(playerDataIndex == -1) {
+                appLogger.error("The column header in your dataconfig mapping to the uniquePlayerId [" + playerGenerator.getUniquePlayerId() + "] cannot be found in the file you specified.");
+            }
             if (tokens.length > playerDataIndex &&
                     !cleanToken(tokens[playerDataIndex]).isEmpty()) {
                 StatementInstance ms = Graql

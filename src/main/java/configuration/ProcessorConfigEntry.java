@@ -1,8 +1,13 @@
 package configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProcessorConfigEntry {
+
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
     private String processor;
     private String processorType;
@@ -30,6 +35,9 @@ public class ProcessorConfigEntry {
     }
 
     public ConceptGenerator getAttributeGenerator(String key) {
+        if(getConceptGenerators().get("attributes") == null) {
+            throw new RuntimeException("You have specified the attribute [" + key + "] in your dataConfig file - but there are no attributeGenerators specified in the corresponding processor.");
+        }
         for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("attributes").entrySet()) {
             if (entry.getKey().equals(key)) {
                 return entry.getValue();
