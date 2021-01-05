@@ -70,6 +70,7 @@ public class GraknMigrator {
 
         session.close();
         client.close();
+        appLogger.info("GraMi is finished!");
     }
 
     private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations) throws IOException {
@@ -91,11 +92,11 @@ public class GraknMigrator {
             String currentProcessor = dce.getProcessor();
             if(isOfConceptType(currentProcessor, conceptType)){
                 appLogger.info("migrating [" + dcEntryKey + "]...");
-                if (migrationStatus != null && migrationStatus.get(dcEntryKey) != null) {
+                if (migrationStatus != null && migrationStatus.get(dce.getDataPath()) != null) {
                     appLogger.info("previous migration status found for entity type: [" + dcEntryKey + "]");
-                    if (!migrationStatus.get(dcEntryKey).isCompleted()) {
-                        appLogger.info(dcEntryKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(dcEntryKey).getMigratedRows());
-                        getGeneratorAndInsert(session, dce, migrationStatus.get(dcEntryKey).getMigratedRows());
+                    if (!migrationStatus.get(dce.getDataPath()).isCompleted()) {
+                        appLogger.info(dcEntryKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(dce.getDataPath()).getMigratedRows());
+                        getGeneratorAndInsert(session, dce, migrationStatus.get(dce.getDataPath()).getMigratedRows());
                     } else {
                         appLogger.info(dcEntryKey + " is already completely migrated - moving on...");
                     }
@@ -166,8 +167,8 @@ public class GraknMigrator {
                 //insert the rest when loop exits with less than batch size
                 if (!rows.isEmpty()) {
                     writeThing(dce, gen, session, rows, batchSizeCounter, header);
+                    appLogger.info("final # rows processed: " + totalRecordCounter);
                 }
-                appLogger.info("final # rows processed: " + totalRecordCounter);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -250,6 +251,7 @@ public class GraknMigrator {
         try {
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
+            System.out.println("data path: " + dce.getDataPath() + " and thing: " + dce.getProcessor());
             migrationStatus.get(dce.getDataPath()).setCompleted(true);
             FileWriter fw = new FileWriter(migrationStatePath);
             gson.toJson(migrationStatus, MigrationStatusMapType, fw);
