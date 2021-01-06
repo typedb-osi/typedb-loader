@@ -117,7 +117,7 @@ Do above for all entities and their attributes in the schema. GraMi will ensure 
 
 For each relation in your schema, define a processor object that specifies
   - each relation attribute, its value type, and whether it is required
-  - each relation player entity type, role, identifying attribute in the data file and its value type, as well as whether the player is required
+  - each relation player of type entity, its role, identifying attribute in the data file and value type, as well as whether the player is required
 
 For example, given the following relation in your schema:
 
@@ -126,7 +126,8 @@ call sub relation,
     relates caller,
     relates callee,
     has started-at,
-    has duration;
+    has duration,
+    plays past-call;
  ```
 
 Add the following processor object:
@@ -143,8 +144,7 @@ Add the following processor object:
                 "uniquePlayerId": "phone-number",                   // using attribute phone-number as unique identifier for type person
                 "idValueType": "string",                            // of value type string
                 "roleType": "caller",                               // inserts person as player the role caller
-                "required": true                                    // which is a required role for each data record
-                
+                "required": true                                    // which is a required role for each data record                
             },
             "callee": {                                         // ID of player generator
                 "playerType": "person",                             // matches entity of type person
@@ -171,6 +171,64 @@ Add the following processor object:
 ```
 
 Do above for all relations and their players and attributes in the schema. GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes/players).
+
+##### Relation-Of-Relation Processors
+
+Grakn comes with the powerful feature of using relations as players in other relations.
+
+For each relation-of-relation in your schema, define a processor object that specifies
+  - each relation attribute, its value type, and whether it is required
+  - each relation player of type entity, its role, identifying attribute in the data file and its value type, as well as whether the player is required
+  - each relation player of type relation, its role, identifying attribute in the data file and its value type, as well as whether the player is required
+
+For example, given the following relation in your schema:
+
+```GraphQL
+person sub entity,
+    ...,
+    plays peer;
+
+call sub relation,
+    relates caller,
+    relates callee,
+    has started-at,
+    has duration,
+    plays past-call;
+
+communication-channel sub relation,
+    relates peer,
+    relates past-call;
+```
+
+Add the following processor object:
+
+```
+{
+    "processor": "communication-channel",                    // the ID of your processor
+    "processorType": "relation-of-relation",                 // creates a relation
+    "schemaType": "communication-channel",                   // of type communication-channel
+    "conceptGenerators": {
+        "players": {                                        // with the following players according to schema
+            "peer": {                                         // ID of player generator
+                "playerType": "person",                             // matches entity of type person
+                "uniquePlayerId": "phone-number",                   // using attribute phone-number as unique identifier for type person
+                "idValueType": "string",                            // of value type string
+                "roleType": "peer",                               // inserts person as player the role caller
+                "required": true                                    // which is a required role for each data record                
+            }
+            "past-call": {                                          // ID of player generator
+                "playerType": "call",                               // matches entity of type person
+                "uniquePlayerId": "started-at",                     // using attribute phone-number as unique identifier for type person
+                "idValueType": "date",                            // of value type string
+                "roleType": "past-call",                            // inserts person as player the role callee
+                "required": true                                    // which is a required role for each data record                
+            },
+        }
+    }
+}
+```
+
+Just remember that these relations of relation must be added AFTER the relations that will act as players in the relation have been migrated. GraMi will migrate all relation-of-relations after having migrated entities and relations - but keep this in mind as you are building your graph - relations are only inserted as expected when all its players are already present.
 
 See the [full configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json).
  
@@ -257,7 +315,7 @@ The data config entry would be:
     "players": [                                        // player columns present in the data file
         {
             "columnName": "caller_id",                      // column name in data file
-        "generator": "caller"                               // player generator in processor call to be used for the column
+            "generator": "caller"                           // player generator in processor call to be used for the column
         },
         {
             "columnName": "callee_id",                      // column name in data file
@@ -267,11 +325,87 @@ The data config entry would be:
     "attributes": [                                     // attribute columns present in the data file
         {
             "columnName": "started_at",                     // column name in data file
-        "generator": "started-at"                           // attribute generator in processor call to be used for the column
+            "generator": "started-at"                       // attribute generator in processor call to be used for the column
         },
         {
             "columnName": "duration",                       // column name in data file
             "generator" : "duration"                        // attribute generator in processor call to be used for the column
+        }
+    ]
+}
+```
+
+Do above for all data files that need to be migrated.
+
+Please note that you can also add a listSeparator for players that are in a list in a column:
+
+Your data might look like:
+
+```
+company_name,person_id
+Unity,+62 999 888 7777###+62 999 888 7778
+```
+
+```
+"contract": {
+    "dataPath": "src/test/resources/phone-calls/contract.csv",
+    "separator": ",",
+    "processor": "contract",
+    "players": [
+      {
+        "columnName": "company_name",
+        "generator": "provider"
+      },
+      {
+        "columnName": "person_id",
+        "generator": "customer",
+        "listSeparator": "###"       // like this!
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  }
+```
+
+For troubleshooting, it might be worth setting the troublesome data configuration entry to a single thread, as the log messages for error from grakn are more verbose and specific that way...
+
+##### Relation-of-Relation Data Config Entries
+
+Given the data file [communication-channel.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/communication-channel.csv):
+
+```CSV
+peer_1,peer_2,call_started_at
++54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19
++54 398 559 0423,+48 195 624 2025,2018-09-17T22:24:19
++54 398 559 0423,+48 195 624 2025,2018-09-18T22:24:19
++54 398 559 0423,+48 195 624 2025,2018-09-19T22:24:19
++54 398 559 0423,+48 195 624 2025,2018-09-20T22:24:19
++263 498 495 0617,+33 614 339 0298,2018-09-11T22:10:34###2018-09-12T22:10:34###2018-09-13T22:10:34###2018-09-14T22:10:34###2018-09-15T22:10:34###2018-09-16T22:10:34
++54 398 559 0423,+7 552 196 4096,2018-09-25T20:24:59
+...
+```
+
+The data config entry would be:
+
+```
+"communication-channel": {
+    "dataPath": "/your/absolute/path/to/communication-channel.csv",      // the absolute path to your data file
+    "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "processor": "communication-channel",                     // processor from processor config file
+    "batchSize": 100,                                   // batchSize to be used for this data file
+    "threads": 4,                                       // # of threads to be used for this data file
+    "players": [                                        // player columns present in the data file
+        {
+            "columnName": "peer_1",                      // column name in data file
+            "generator": "peer"                          // player generator in processor call to be used for the column
+        },
+        {
+            "columnName": "peer_2",                      // column name in data file
+            "generator": "peer"                          // player generator in processor call to be used for the column
+        },
+        {
+            "columnName": "call_started_at",             // column name in data file
+            "generator": "past-call"                     // player generator in processor call to be used for the column
         }
     ]
 }
