@@ -1,6 +1,6 @@
 {
     "entity1": {
-        "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity1-test-data.tsv",
+        "dataPath": "src/test/resources/genericTests/entity1-test-data.tsv",
         "separator": "\t",
         "processor": "entity1",
         "attributes": [
@@ -22,7 +22,7 @@
         "threads": 4
     },
     "entity2": {
-        "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity2-test-data.tsv",
+        "dataPath": "src/test/resources/genericTests/entity2-test-data.tsv",
         "separator": "\t",
         "processor": "entity2",
         "attributes": [
@@ -43,7 +43,7 @@
         "threads": 4
     },
     "entity3": {
-        "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/entity3-test-data.tsv",
+        "dataPath": "src/test/resources/genericTests/entity3-test-data.tsv",
         "separator": "\t",
         "processor": "entity3",
         "attributes": [
@@ -60,13 +60,14 @@
         "threads": 1
     },
     "rel1": {
-        "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/genericTests/rel1-test-data.tsv",
+        "dataPath": "src/test/resources/genericTests/rel1-test-data.tsv",
         "separator": "\t",
         "processor": "rel1",
         "players": [
             {
                 "columnName": "entity1-id",
-                "generator": "player-one"
+                "generator": "player-one",
+                "listSeparator": "###"
             },
             {
                 "columnName": "entity2-id",
