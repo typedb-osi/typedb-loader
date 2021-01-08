@@ -405,7 +405,8 @@ The data config entry would be:
         },
         {
             "columnName": "call_started_at",             // column name in data file
-            "generator": "past-call"                     // player generator in processor call to be used for the column
+            "generator": "past-call",                     // player generator in processor call to be used for the column
+            "listSeparator": "###"
         }
     ]
 }
