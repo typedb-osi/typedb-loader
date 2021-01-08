@@ -68,7 +68,7 @@ public class GeneratorUtil {
         }
     }
 
-    private static StatementInstance addAttributeOfColumnType(StatementInstance pattern, String conceptType, String valueType, String cleanedValue) {
+    public static StatementInstance addAttributeOfColumnType(StatementInstance pattern, String conceptType, String valueType, String cleanedValue) {
         if (valueType.equals("string")) {
             pattern = pattern.has(conceptType, cleanedValue);
         } else if (valueType.equals("long")) {

@@ -3,6 +3,7 @@ package generator;
 import static generator.GeneratorUtil.idxOf;
 import static generator.GeneratorUtil.cleanToken;
 import static generator.GeneratorUtil.addAttribute;
+import static generator.GeneratorUtil.addAttributeOfColumnType;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -139,8 +140,9 @@ public class RelationInsertGenerator extends InsertGenerator {
         String cleanedValue = cleanToken(token);
         StatementInstance ms = Graql
                 .var(playerVariable)
-                .isa(playerGenerator.getPlayerType())
-                .has(playerGenerator.getUniquePlayerId(), cleanedValue);
+                .isa(playerGenerator.getPlayerType());
+        ms = addAttributeOfColumnType(ms, playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedValue);
+                //.has(playerGenerator.getUniquePlayerId(), cleanedValue);
         return ms;
     }
 
