@@ -3,6 +3,7 @@ package migrator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
+import generator.RelationOfRelationInsertGenerator;
 import loader.DataLoader;
 import grakn.client.GraknClient;
 import insert.GraknInserter;
@@ -256,7 +257,6 @@ public class GraknMigrator {
         try {
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
-            System.out.println("data path: " + dce.getDataPath() + " and thing: " + dce.getProcessor());
             migrationStatus.get(dce.getDataPath()).setCompleted(true);
             FileWriter fw = new FileWriter(migrationStatePath);
             gson.toJson(migrationStatus, MigrationStatusMapType, fw);
@@ -275,7 +275,10 @@ public class GraknMigrator {
         } else if (gce != null && gce.getProcessorType().equals("relation")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new RelationInsertGenerator(dce, gce);
-        } else {
+        } else if (gce != null && gce.getProcessorType().equals("relation-of-relation")) {
+            appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
+            return new RelationOfRelationInsertGenerator(dce, gce);
+        }else {
             throw new IllegalArgumentException(String.format("Invalid/No generator provided for: %s", dce.getProcessor()));
         }
     }

@@ -19,7 +19,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true);
+        mig.migrate(true, true, true);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true);
+        mig.migrate(true, true, true);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true);
+        mig.migrate(true, true, true);
 
         //TODO
     }
@@ -63,7 +63,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true);
+        mig.migrate(true, true, true);
 
     }
 }

@@ -17,8 +17,8 @@ import java.util.*;
 
 public class RelationInsertGenerator extends InsertGenerator {
 
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry gce;
+    public final DataConfigEntry dce;
+    public final ProcessorConfigEntry gce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
 
