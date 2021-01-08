@@ -28,14 +28,11 @@ public class Cli implements Callable<Integer> {
     @CommandLine.Option(names = {"-g", "--grakn"}, description = "optional - grakn DB in format: server:port (default: localhost:48555)", defaultValue = "localhost:48555")
     private String graknURI;
 
-    @CommandLine.Option(names = {"-cf", "--cleanFirst"}, description = "optional - delete current schema and all data before loading schema and migrating entities/relations; default: continue migration using current keyspace schema")
-    private boolean cleanFirst;
+    @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists")
+    private boolean cleanMigration;
 
-    @CommandLine.Option(names = {"-so", "--schemaOnly"}, description = "optional - only load schema and skip migration of entities/relations; default: load schema and migrate")
-    private boolean schemaOnly;
-
-    @CommandLine.Option(names = {"-eo", "--entitiesOnly"}, description = "optional - migrate entities only; default: migrate entities and relations")
-    private boolean entitiesOnly;
+    @CommandLine.Option(names = {"-sc", "--scope"}, description = "optional - set migration scope: 0 - apply schema only (Note: this has no effect unless you also set the cleanMigration flag to true. Non-breaking schema updates (without previous clean) are coming in GraMi Version 0.0.3); 1 - apply schema and migrate entities; 2 - apply schema, migrate entities and relations; everything else defaults to 3 - apply schema and migrate all")
+    private int scope = 3;
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new Cli()).execute(args);
@@ -54,19 +51,23 @@ public class Cli implements Callable<Integer> {
         spec.commandLine().getOut().println("\tusing schema: " + schemaName);
         spec.commandLine().getOut().println("\tmigrating to keyspace: " + keyspaceName);
         spec.commandLine().getOut().println("\tconnecting to grakn: " + graknURI);
-        spec.commandLine().getOut().println("\tclean keyspace first?: " + cleanFirst);
-        spec.commandLine().getOut().println("\tmigrate schema only?: " + schemaOnly);
-        spec.commandLine().getOut().println("\tmigrate entities only?: " + entitiesOnly);
+        spec.commandLine().getOut().println("\tdelete keyspace and all data in it for a clean new migration?: " + cleanMigration);
+        spec.commandLine().getOut().println("\tmigration scope: " + scope);
 
         final MigrationConfig migrationConfig = new MigrationConfig(graknURI, keyspaceName, schemaName, dataConfigFilePath, processorConfigFilePath);
+        GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatusFilePath, cleanMigration);
 
-        // ensure that user cannot set flags so that relations are attempted to be migrated without migrating entities first
-        if (schemaOnly) {
-            entitiesOnly = true;
+        if (scope != 0 && scope != 1 && scope != 2) {
+            scope = 3;
         }
 
-        GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatusFilePath, cleanFirst);
-        mig.migrate(!schemaOnly, !entitiesOnly);
+        switch (scope) {
+            case 0: mig.migrate(false, false, false); break;
+            case 1: mig.migrate(true, false, false); break;
+            case 2: mig.migrate(true, true, false); break;
+            case 3: mig.migrate(true, true, true); break;
+        }
+
         return 0;
     }
 }

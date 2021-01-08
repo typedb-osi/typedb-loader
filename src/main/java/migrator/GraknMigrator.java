@@ -52,7 +52,7 @@ public class GraknMigrator {
         }
     }
 
-    public void migrate(boolean migrateEntities, boolean migrateRelations) throws IOException {
+    public void migrate(boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations) throws IOException {
 
         GraknClient client = gm.getClient();
         GraknClient.Session session = gm.getSession(client);
@@ -66,26 +66,28 @@ public class GraknMigrator {
             appLogger.info("continuing previous migration...");
         }
 
-        migrateThingsInOrder(session, migrateEntities, migrateRelations);
+        migrateThingsInOrder(session, migrateEntities, migrateRelations, migrateRelationRelations);
 
         session.close();
         client.close();
-        appLogger.info("GraMi is finished!");
+        appLogger.info("GraMi is finished migrating your stuff!");
     }
 
-    private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations) throws IOException {
-        if(!migrateEntities && migrateRelations) {
-            migrateEntities = true;
-        }
+    private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations) throws IOException {
         if (migrateEntities) {
             appLogger.info("migrating entities...");
             getStatusAndMigrate(session, "entity");
             appLogger.info("migration of entities completed");
         }
-        if (migrateRelations && migrateEntities) {
+        if (migrateRelations) {
             appLogger.info("migrating relations...");
             getStatusAndMigrate(session, "relation");
             appLogger.info("migration of relations completed");
+        }
+        if (migrateRelationRelations) {
+            appLogger.info("migrating relation-of-relations...");
+            getStatusAndMigrate(session, "relation-of-relation");
+            appLogger.info("migration of relation-of-relations completed");
         }
     }
 
@@ -96,7 +98,7 @@ public class GraknMigrator {
             if(isOfConceptType(currentProcessor, conceptType)){
                 appLogger.info("migrating [" + dcEntryKey + "]...");
                 if (migrationStatus != null && migrationStatus.get(dce.getDataPath()) != null) {
-                    appLogger.info("previous migration status found for entity type: [" + dcEntryKey + "]");
+                    appLogger.info("previous migration status found for schema type: [" + dcEntryKey + "]");
                     if (!migrationStatus.get(dce.getDataPath()).isCompleted()) {
                         appLogger.info(dcEntryKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(dce.getDataPath()).getMigratedRows());
                         getGeneratorAndInsert(session, dce, migrationStatus.get(dce.getDataPath()).getMigratedRows());
