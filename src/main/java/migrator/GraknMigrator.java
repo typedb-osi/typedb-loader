@@ -74,6 +74,9 @@ public class GraknMigrator {
     }
 
     private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations) throws IOException {
+        if(!migrateEntities && migrateRelations) {
+            migrateEntities = true;
+        }
         if (migrateEntities) {
             appLogger.info("migrating entities...");
             getStatusAndMigrate(session, "entity");

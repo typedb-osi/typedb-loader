@@ -1,6 +1,6 @@
 {
   "person": {
-    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/person.csv",
+    "dataPath": "src/test/resources/phone-calls/person.csv",
     "separator": ",",
     "processor": "person",
     "batchSize": 2000,
@@ -33,7 +33,7 @@
       }]
   },
   "company": {
-    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/company.csv",
+    "dataPath": "src/test/resources/phone-calls/company.csv",
     "separator": ",",
     "processor": "company",
     "attributes": [
@@ -45,7 +45,7 @@
     "threads": 4
   },
   "contract": {
-    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/contract.csv",
+    "dataPath": "src/test/resources/phone-calls/contract.csv",
     "separator": ",",
     "processor": "contract",
     "players": [
@@ -55,14 +55,15 @@
       },
       {
         "columnName": "person_id",
-        "generator": "customer"
+        "generator": "customer",
+        "listSeparator": "###"
       }
     ],
     "batchSize": 100,
     "threads": 4
   },
   "calls": {
-    "dataPath": "/Users/henning.kuich@bayer.com/IdeaProjects/GraMi/src/test/resources/phone-calls/call.csv",
+    "dataPath": "src/test/resources/phone-calls/call.csv",
     "separator": ",",
     "processor": "call",
     "players": [
@@ -87,5 +88,27 @@
     ],
     "batchSize": 100,
     "threads": 4
+  },
+  "communication-channel": {
+    "dataPath": "src/test/resources/phone-calls/communication-channel.csv",
+    "separator": ",",
+    "processor": "communication-channel",
+    "batchSize": 100,
+    "threads": 4,
+    "players": [
+      {
+        "columnName": "peer_1",
+        "generator": "peer"
+      },
+      {
+        "columnName": "peer_2",
+        "generator": "peer"
+      },
+      {
+        "columnName": "call_started_at",
+        "generator": "past-call",
+        "listSeparator": "###"
+      }
+    ]
   }
 }

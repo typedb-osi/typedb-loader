@@ -38,3 +38,8 @@ entity1id1	entity2id1	entity3id1
 entity1id1		entity3id1	att37	opt36
 entity1id1	 	entity3id1	att38	opt37
 entity1id1	 	entity3id1	att39	opt38
+entity1id1###entity1id2	entity2id1	entity3id1	att39	opt39
+entity1id1###entity1id2	entity2id1		att40
+###	entity2id1	entity3id1	att41	opt41
+ ###	entity2id1	entity3id1	att42	opt42
+ ### 	entity2id1	entity3id1	att43	opt43

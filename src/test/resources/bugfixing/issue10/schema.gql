@@ -1,0 +1,15 @@
+define
+
+text sub entity,
+    key uid,
+    plays tagged;
+uid sub attribute, value long;
+
+label sub entity,
+    key name,
+    plays tagger;
+name sub attribute, value string;
+
+tag sub relation,
+    relates tagger,
+    relates tagged;

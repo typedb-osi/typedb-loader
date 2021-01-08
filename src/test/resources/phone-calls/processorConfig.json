@@ -110,6 +110,29 @@
           }
         }
       }
+    },
+    {
+      "processor": "communication-channel",
+      "processorType": "relation-of-relation",
+      "schemaType": "communication-channel",
+      "conceptGenerators": {
+        "players": {
+          "peer": {
+            "playerType": "person",
+            "uniquePlayerId": "phone-number",
+            "idValueType": "string",
+            "roleType": "peer",
+            "required": true
+          },
+          "past-call": {
+            "playerType": "call",
+            "uniquePlayerId": "started-at",
+            "idValueType": "datetime",
+            "roleType": "past-call",
+            "required": true
+          }
+        }
+      }
     }
   ]
 }

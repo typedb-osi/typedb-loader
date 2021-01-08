@@ -1,0 +1,43 @@
+{
+  "text": {
+    "dataPath": "src/test/resources/bugfixing/issue10/text.csv",
+    "separator": ",",
+    "processor": "text",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "uid",
+        "generator": "uid"
+      }]
+  },
+  "label": {
+    "dataPath": "src/test/resources/bugfixing/issue10/label.csv",
+    "separator": ",",
+    "processor": "label",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "name",
+        "generator": "name"
+      }]
+  },
+  "tag": {
+    "dataPath": "src/test/resources/bugfixing/issue10/tag.csv",
+    "separator": ",",
+    "processor": "tag",
+    "batchSize": 50,
+    "threads": 4,
+    "players": [
+      {
+        "columnName": "label_name",
+        "generator": "tagger"
+      },
+      {
+        "columnName": "text_id",
+        "generator": "tagged"
+      }
+    ]
+  }
+}
