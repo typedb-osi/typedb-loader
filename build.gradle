@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.github.bayer-science-for-a-better-life'
-version '0.0.2'
+version '0.0.2-hotfix-1'
 
 repositories {
     mavenCentral()
