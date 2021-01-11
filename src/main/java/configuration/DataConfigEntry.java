@@ -44,13 +44,18 @@ public class DataConfigEntry {
 
     public static class GeneratorSpecification {
         private String columnName;
+        private String[] columnNames;
         private String generator;
         private String listSeparator;
         private String matchByAttribute;
-        private String matchByPlayer;
+        private String[] matchByPlayers;
 
         public String getColumnName() {
             return columnName;
+        }
+
+        public String[] getColumnNames() {
+            return columnNames;
         }
 
         public String getGenerator() {
@@ -61,7 +66,7 @@ public class DataConfigEntry {
             return listSeparator;
         }
 
-        public String getMatchByPlayer() { return matchByPlayer; }
+        public String[] getMatchByPlayers() { return matchByPlayers; }
 
         public String getMatchByAttribute() { return matchByAttribute; }
     }

@@ -113,5 +113,29 @@
         "listSeparator": "###"
       }
     ]
+  },
+  "communication-channel-pm": {
+    "dataPath": "src/test/resources/phone-calls/communication-channel-pm.csv",
+    "separator": ",",
+    "processor": "communication-channel",
+    "batchSize": 100,
+    "threads": 4,
+    "players": [
+      {
+        "columnName": "peer_1",
+        "generator": "peer"
+      },
+      {
+        "columnName": "peer_2",
+        "generator": "peer"
+      }
+    ],
+    "relationPlayers": [
+      {
+        "columnNames": ["peer_1", "peer_2"],
+        "generator": "past-call",
+        "matchByPlayers": ["caller", "callee"]
+      }
+    ]
   }
 }

@@ -49,7 +49,7 @@ public class MigrationTest {
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
         mig.migrate(true, true, true);
 
-        //TODO
+        //TODO - make sure that relation-of-relation has the correct number, and doesn't insert faulty rows, etc...
     }
 
     @Test

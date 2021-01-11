@@ -34,6 +34,16 @@ public class GeneratorUtil {
         return Arrays.asList(headerTokens).indexOf(generatorSpecification.getColumnName());
     }
 
+    public static int[] indicesOf(String[] headerTokens, DataConfigEntry.GeneratorSpecification generatorSpecification) {
+        int[] indices = new int[generatorSpecification.getColumnNames().length];
+        int i = 0;
+        for (String column : generatorSpecification.getColumnNames()) {
+            indices[i] = Arrays.asList(headerTokens).indexOf(column);
+            i++;
+        }
+        return indices;
+    }
+
     public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GeneratorSpecification attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) throws Exception {
         int attDataIndex = idxOf(headerTokens, attDataConfig);
         if (attDataIndex == -1) {
