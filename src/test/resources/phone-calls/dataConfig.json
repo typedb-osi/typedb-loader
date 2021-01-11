@@ -103,10 +103,13 @@
       {
         "columnName": "peer_2",
         "generator": "peer"
-      },
+      }
+    ],
+    "relationPlayers": [
       {
         "columnName": "call_started_at",
         "generator": "past-call",
+        "matchByAttribute": "started-at",
         "listSeparator": "###"
       }
     ]

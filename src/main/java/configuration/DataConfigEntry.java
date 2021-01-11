@@ -6,6 +6,7 @@ public class DataConfigEntry {
     private String processor;
     private GeneratorSpecification[] attributes;
     private GeneratorSpecification[] players;
+    private GeneratorSpecification[] relationPlayers;
     private int batchSize;
     private int threads;
 
@@ -29,6 +30,10 @@ public class DataConfigEntry {
         return players;
     }
 
+    public GeneratorSpecification[] getRelationPlayers() {
+        return relationPlayers;
+    }
+
     public int getBatchSize() {
         return batchSize;
     }
@@ -41,6 +46,8 @@ public class DataConfigEntry {
         private String columnName;
         private String generator;
         private String listSeparator;
+        private String matchByAttribute;
+        private String matchByPlayer;
 
         public String getColumnName() {
             return columnName;
@@ -53,5 +60,9 @@ public class DataConfigEntry {
         public String getListSeparator() {
             return listSeparator;
         }
+
+        public String getMatchByPlayer() { return matchByPlayer; }
+
+        public String getMatchByAttribute() { return matchByAttribute; }
     }
 }

@@ -123,13 +123,35 @@
             "idValueType": "string",
             "roleType": "peer",
             "required": true
-          },
+          }
+        },
+        "relationPlayers": {
           "past-call": {
             "playerType": "call",
-            "uniquePlayerId": "started-at",
-            "idValueType": "datetime",
             "roleType": "past-call",
-            "required": true
+            "required": true,
+            "matchByAttribute": {
+              "started-at": {
+                "attributeType": "started-at",
+                "valueType": "datetime"
+              }
+            },
+            "matchByPlayer": {
+              "caller": {
+                "playerType": "person",
+                "uniquePlayerId": "phone-number",
+                "idValueType": "string",
+                "roleType": "caller",
+                "required": true
+              },
+              "callee": {
+                "playerType": "person",
+                "uniquePlayerId": "phone-number",
+                "idValueType": "string",
+                "roleType": "callee",
+                "required": true
+              }
+            }
           }
         }
       }

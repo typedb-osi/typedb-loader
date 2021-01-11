@@ -101,6 +101,11 @@ public class RelationInsertGenerator extends InsertGenerator {
     }
 
     private Collection<? extends Statement> createPlayerMatchAndInsert(String[] tokens, String[] headerTokens, int insertCounter) {
+//        if (dce.getRelationPlayers() != null) {
+//            for (DataConfigEntry.GeneratorSpecification relplayer: dce.getRelationPlayers()) {
+//                System.out.println(relplayer.getMatchByAttribute());
+//            }
+//        }
         ArrayList<Statement> players = new ArrayList<>();
         Statement playersInsertStatement = Graql.var("rel-" + insertCounter);
         int playerCounter = 0;
@@ -132,6 +137,37 @@ public class RelationInsertGenerator extends InsertGenerator {
                 }
             }
         }
+        if (dce.getRelationPlayers() != null) {
+            for (DataConfigEntry.GeneratorSpecification playerDataConfigEntry : dce.getRelationPlayers()) {
+                ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getRelationPlayerGenerator(playerDataConfigEntry.getGenerator());
+                int playerDataIndex = idxOf(headerTokens, playerDataConfigEntry);
+
+                if(playerDataIndex == -1) {
+                    appLogger.error("The column header in your dataconfig mapping to the uniquePlayerId [" + playerGenerator.getUniquePlayerId() + "] cannot be found in the file you specified.");
+                }
+
+                if (tokens.length > playerDataIndex && // make sure that there are enough tokens in the row for your column of interest
+                        !cleanToken(tokens[playerDataIndex]).isEmpty()) { // make sure that after cleaning, there is more than an empty string
+                    String listSeparator = playerDataConfigEntry.getListSeparator();
+                    if(listSeparator != null) {
+                        for (String exploded: tokens[playerDataIndex].split(listSeparator)) {
+                            if(!cleanToken(exploded).isEmpty()) {
+                                String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
+                                players.add(createRelationPlayerMatchStatement(exploded, playerGenerator, playerDataConfigEntry, playerVariable));
+                                playersInsertStatement = playersInsertStatement.rel(playerGenerator.getRoleType(), playerVariable);
+                                playerCounter++;
+                            }
+                        }
+                    } else { // single player, no listSeparator
+                        String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
+                        players.add(createRelationPlayerMatchStatement(cleanToken(tokens[playerDataIndex]), playerGenerator, playerDataConfigEntry, playerVariable));
+                        playersInsertStatement = playersInsertStatement.rel(playerGenerator.getRoleType(), playerVariable);
+                        playerCounter++;
+                    }
+                }
+            }
+        }
+
         players.add(playersInsertStatement);
         return players;
     }
@@ -143,6 +179,17 @@ public class RelationInsertGenerator extends InsertGenerator {
                 .isa(playerGenerator.getPlayerType());
         ms = addAttributeOfColumnType(ms, playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedValue);
                 //.has(playerGenerator.getUniquePlayerId(), cleanedValue);
+        return ms;
+    }
+
+    private StatementInstance createRelationPlayerMatchStatement(String token, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.GeneratorSpecification dce, String playerVariable) {
+        String cleanedValue = cleanToken(token);
+        StatementInstance ms = Graql
+                .var(playerVariable)
+                .isa(playerGenerator.getPlayerType());
+        String atttype = playerGenerator.getMatchByAttribute().get(dce.getMatchByAttribute()).getAttributeType();
+        String vtype = playerGenerator.getMatchByAttribute().get(dce.getMatchByAttribute()).getValueType();
+        ms = addAttributeOfColumnType(ms, atttype, vtype, cleanedValue);
         return ms;
     }
 
@@ -168,6 +215,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             if (!matchStatement.toString().contains("isa " + generatorEntry.getValue().getPlayerType())) {
                 return false;
             }
+            System.out.println(generatorEntry.getValue().getRoleType());
             if (!insertStatement.contains(generatorEntry.getValue().getRoleType())) {
                 return false;
             }
