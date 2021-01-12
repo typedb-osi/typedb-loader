@@ -176,12 +176,12 @@ Do above for all relations and their players and attributes in the schema. GraMi
 
 Grakn comes with the powerful feature of using relations as players in other relations.
 
-For each relation-of-relation in your schema, define a processor object that specifies
-  - each relation attribute, its value type, and whether it is required
-  - each relation player of type entity, its role, identifying attribute in the data file and its value type, as well as whether the player is required
-  - each relation player of type relation, its role, identifying attribute in the data file and its value type, as well as whether the player is required
+There are two ways to add relations into other relations:
 
-For example, given the following relation in your schema:
+1. Either by an identifying attribute (similar to adding an entity as described above)
+2. By providing players that are used to match the relation that will be added to the relation
+
+For example, given the following additions to our example schema:
 
 ```GraphQL
 person sub entity,
@@ -189,10 +189,7 @@ person sub entity,
     plays peer;
 
 call sub relation,
-    relates caller,
-    relates callee,
-    has started-at,
-    has duration,
+    ...,
     plays past-call;
 
 communication-channel sub relation,
@@ -200,32 +197,54 @@ communication-channel sub relation,
     relates past-call;
 ```
 
-Add the following processor object:
+Let's define the following processor object that will allow for adding a relation both by an identifying attribute and matching via its players:
 
 ```
 {
-    "processor": "communication-channel",                    // the ID of your processor
-    "processorType": "relation-of-relation",                 // creates a relation
-    "schemaType": "communication-channel",                   // of type communication-channel
-    "conceptGenerators": {
-        "players": {                                        // with the following players according to schema
-            "peer": {                                         // ID of player generator
-                "playerType": "person",                             // matches entity of type person
-                "uniquePlayerId": "phone-number",                   // using attribute phone-number as unique identifier for type person
-                "idValueType": "string",                            // of value type string
-                "roleType": "peer",                               // inserts person as player the role caller
-                "required": true                                    // which is a required role for each data record                
-            }
-            "past-call": {                                          // ID of player generator
-                "playerType": "call",                               // matches entity of type person
-                "uniquePlayerId": "started-at",                     // using attribute phone-number as unique identifier for type person
-                "idValueType": "date",                            // of value type string
-                "roleType": "past-call",                            // inserts person as player the role callee
-                "required": true                                    // which is a required role for each data record                
+      "processor": "communication-channel",
+      "processorType": "relation-of-relation",
+      "schemaType": "communication-channel",
+      "conceptGenerators": {
+        "players": {
+          "peer": {
+            "playerType": "person",
+            "uniquePlayerId": "phone-number",
+            "idValueType": "string",
+            "roleType": "peer",
+            "required": true
+          }
+        },
+        "relationPlayers": {                        // this is new!
+          "past-call": {                            // past-call will be the relation in the communication-channel relation
+            "playerType": "call",                   // it is of relation type "call"
+            "roleType": "past-call",                // and plays the role of past-call in communication-channel
+            "required": true,                       // it is required
+            "matchByAttribute": {                       // we can identify a past-call via its attribute
+              "started-at": {                           // this is the name of the attribute processor
+                "attributeType": "started-at",              // we identify by "started-at" attribute of a call
+                "valueType": "datetime"                     // which is of type datetime
+              }
             },
+            "matchByPlayer": {                          // we can also identify a past-call via its players
+              "caller": {                                   // the name of the player processor
+                "playerType": "person",                         // the player is of type person
+                "uniquePlayerId": "phone-number",               // is identified by a phone number
+                "idValueType": "string",                        // which is of type string
+                "roleType": "caller",                           // the person is a caller in the call
+                "required": true                                // and its required
+              },
+              "callee": {                                   // the name of the player processor
+                "playerType": "person",                         // the player is of type person
+                "uniquePlayerId": "phone-number",               // is identified by a phone number
+                "idValueType": "string",                        // which is of type string
+                "roleType": "callee",                           // the person is a callee in the call
+                "required": true                                // and its required
+              }
+            }
+          }
         }
+      }
     }
-}
 ```
 
 Just remember that these relations of relation must be added AFTER the relations that will act as players in the relation have been migrated. GraMi will migrate all relation-of-relations after having migrated entities and relations - but keep this in mind as you are building your graph - relations are only inserted as expected when all its players are already present.
@@ -371,17 +390,15 @@ For troubleshooting, it might be worth setting the troublesome data configuratio
 
 ##### Relation-of-Relation Data Config Entries
 
+1. This is how you can add a relation based on an identifying attribute:
+
 Given the data file [communication-channel.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/communication-channel.csv):
 
 ```CSV
 peer_1,peer_2,call_started_at
 +54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19
-+54 398 559 0423,+48 195 624 2025,2018-09-17T22:24:19
-+54 398 559 0423,+48 195 624 2025,2018-09-18T22:24:19
-+54 398 559 0423,+48 195 624 2025,2018-09-19T22:24:19
-+54 398 559 0423,+48 195 624 2025,2018-09-20T22:24:19
-+263 498 495 0617,+33 614 339 0298,2018-09-11T22:10:34###2018-09-12T22:10:34###2018-09-13T22:10:34###2018-09-14T22:10:34###2018-09-15T22:10:34###2018-09-16T22:10:34
-+54 398 559 0423,+7 552 196 4096,2018-09-25T20:24:59
++263 498 495 0617,+33 614 339 0298,2018-09-11T22:10:34### 2018-09-12T22:10:34###2018-09-13T22:10:34 ###2018-09-14T22:10:34###2018-09-15T22:10:34###2018-09-16T22:10:34
++370 351 224 5176,+62 533 266 3426,2018-09-15T12:12:59
 ...
 ```
 
@@ -402,17 +419,44 @@ The data config entry would be:
         {
             "columnName": "peer_2",                      // column name in data file
             "generator": "peer"                          // player generator in processor call to be used for the column
-        },
-        {
-            "columnName": "call_started_at",             // column name in data file
-            "generator": "past-call",                     // player generator in processor call to be used for the column
-            "listSeparator": "###"
         }
+    ],
+    "relationPlayers": [
+      {
+        "columnName": "call_started_at",                // this is the column in your data file containing the "matchByAttribute"
+        "generator": "past-call",                       // it will use the past-call generator in your processor config
+        "matchByAttribute": "started-at",               // it will use the started-at matchByAttribute processor
+        "listSeparator": "###"                          // it is a list-like column with "###" as a separator
+      }
     ]
 }
 ```
 
-Do above for all data files that need to be migrated.
+2. This is how you can add a relation based on player matching:
+
+Given the data file [communication-channel-pm.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/communication-channel-pm.csv):
+
+```CSV
+peer_1,peer_2
++81 308 988 7153,+351 515 605 7915
++7 171 898 0853,+57 629 420 5680
+...
+```
+
+The data config entry would be identical to the one above, except for:
+
+```
+"communication-channel": {
+    ...
+    "relationPlayers": [                            // each list entry is a relationPlayer
+      {
+        "columnNames": ["peer_1", "peer_2"],        // two players will be used to identify the relation - these are the column names containing the attribute specified in the matchByPlayer object in the processor generator "past-call" 
+        "generator": "past-call",                   // the generator in the processor configuration file to be used is "past-call"
+        "matchByPlayers": ["caller", "callee"]      // the two player generators specified in the matchByPlayer object in the processor generator "past-call"
+      }
+    ]
+}
+```
 
 For troubleshooting, it might be worth setting the troublesome data configuration entry to a single thread, as the log messages for error from grakn are more verbose and specific that way...
 
