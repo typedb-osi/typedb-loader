@@ -33,6 +33,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - parallelized asynchronous writes to Grakn to make the most of your hardware configuration
  - Stop/Restart:
     - tracking of your migration status to stop/restart, or restart after failure
+ - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami#schema-updating) for non-breaking changes (i.e. when you have already migrated for 5 days and then realize you would like to extend your schema without deleting everything)
 
 After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
  - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/releases) - no coding - configuration required 
@@ -447,6 +448,39 @@ For troubleshooting, it might be worth setting the troublesome data configuratio
 See the [full processor configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json).
 See the [full data configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json).
 
+### Schema Updating
+
+When using it in your own application:
+```Java
+package migration;
+
+import configuration.MigrationConfig;
+import migrator.GraknMigrator;
+import java.io.*;
+
+public class Migration {
+
+    private static final String schema = "/path/to/your/updated-schema.gql";
+    private static final String graknURI = "127.0.0.1:48555";               // defines which grakn server to migrate into
+    private static final String keyspaceName = "yourFavoriteKeyspace";      // defines which keyspace to migrate into
+
+    private static final SchemaUpdateConfig suConfig = new SchemaUpdateConfig(graknURI, keyspaceName, schema);
+
+    public static void main(String[] args) throws IOException {        
+        SchemaUpdater su = new SchemaUpdater(suConfig);
+        su.updateSchema();
+    }
+}
+```
+
+or using the CLI:
+
+```Shell
+./bin/grami schema-update\
+-s /path/to/schema.gql \
+-k yourFavoriteKeyspace \
+```
+
 ### Using GraMi in your Java Application:
 
 #### Add GraMi as dependency
@@ -588,7 +622,7 @@ For tracking the progress of your importing, the suggested logging level for Gra
 Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better-life/grami/releases). After unpacking, you can run it directly out of the /bin directory:
 
 ```Shell
-./bin/grami \
+./bin/grami migrate \
 -d /path/to/dataConfig.json \
 -p /path/to/processorConfig.json \
 -m /path/to/migrationStatus.json \
