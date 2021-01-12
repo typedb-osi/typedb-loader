@@ -113,7 +113,7 @@
     },
     {
       "processor": "communication-channel",
-      "processorType": "relation-of-relation",
+      "processorType": "relation-with-relation",
       "schemaType": "communication-channel",
       "conceptGenerators": {
         "players": {

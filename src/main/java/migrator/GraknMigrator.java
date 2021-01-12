@@ -3,7 +3,7 @@ package migrator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
-import generator.RelationOfRelationInsertGenerator;
+import generator.RelationWithRelationInsertGenerator;
 import loader.DataLoader;
 import grakn.client.GraknClient;
 import insert.GraknInserter;
@@ -86,9 +86,9 @@ public class GraknMigrator {
             appLogger.info("migration of relations completed");
         }
         if (migrateRelationRelations) {
-            appLogger.info("migrating relation-of-relations...");
-            getStatusAndMigrate(session, "relation-of-relation");
-            appLogger.info("migration of relation-of-relations completed");
+            appLogger.info("migrating relation-with-relations...");
+            getStatusAndMigrate(session, "relation-with-relation");
+            appLogger.info("migration of relation-with-relations completed");
         }
     }
 
@@ -275,9 +275,9 @@ public class GraknMigrator {
         } else if (gce != null && gce.getProcessorType().equals("relation")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new RelationInsertGenerator(dce, gce);
-        } else if (gce != null && gce.getProcessorType().equals("relation-of-relation")) {
+        } else if (gce != null && gce.getProcessorType().equals("relation-with-relation")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-            return new RelationOfRelationInsertGenerator(dce, gce);
+            return new RelationWithRelationInsertGenerator(dce, gce);
         }else {
             throw new IllegalArgumentException(String.format("Invalid/No generator provided for: %s", dce.getProcessor()));
         }

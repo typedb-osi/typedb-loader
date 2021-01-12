@@ -14,18 +14,19 @@ If your [Grakn.ai](https://github.com/graknlabs/grakn) project
  - has a lot of data
  - and you want/need to focus on schema design, inference, and querying
 
-Use GraMi (**Gra**kn**Mi**grator) to take care of your data loading for you. GraMi streams data from files and migrates them into grakn **at scale**!
+Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. GraMi streams data from files and migrates them into grakn **at scale**!
  
 ## Features:
  - Data Input:
     - data is streamed to reduce memory requirements
     - supports any tabular data file with your separator of choice (i.e.: csv, tsv, whatever-sv...)
     - supports gzipped files
-    - ignore unnecessary columns
- - Entity and Relation Migration:
+    - ignores unnecessary columns
+ - Entity, Relation, and Relation-with-Relations Migration:
     - migrate required/optional attributes of any grakn type (string, boolean, long, double, datetime)
-    - migrate required/optional role players (entity, relation & attributes planned)
+    - migrate required/optional role players (entity & relations)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
+    - migrate list-like player columns as n players
  - Data Validation:
     - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
  - Performance:
@@ -43,7 +44,7 @@ Please note that the recommended way of developing your schema is still to use y
 
 To illustrate how to use GraMi, we will use a slightly extended version of the "phone-calls" example [dataset](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls) and [schema](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/schema.gql) from Grakn:
 
-#### Processor Configuration
+### Processor Configuration
 
 The processor configuration file describes how you want data to be migrated according to your schema. There are two difference processor types - one for entities and one for relations. 
 
@@ -56,16 +57,22 @@ To get started, define the "processors" list in your processor configuration fil
 }
 ```
 
-##### Entity Processors
+### Data Configuration
+
+The data configuration file maps each data file and its columns to your processor configurations and specifies whether a column contains single/a list of values. In addition, you can specify the size of processing batches and the number of threads (the number of cores on your machine) to be used for the migration to fine-tune the performance (where a greater number of threads up to 8 is always better while batchsize depends on the complexity of your concept (# of attributes per entity record and/or # of players per relation record)). 
+
+A good point to start the performance optimization is to set the number of threads equal to the number of cores on your machine and the batchsize to 500 * threads (i.e.: 4 threads => batchsize = 2000).
+
+### Migrating Entities
 
 For each entity in your schema, define a processor object that specifies for each entity attribute
   - its concept name
   - its value type
   - whether it is required 
  
-Please note that for each entity, at least one attribute should be required to avoid inserting empty entites into grakn. All attributes declared as keys should also be required. 
+Please note that for each entity, at least one attribute should be required to avoid inserting empty entites into grakn. All attributes declared as keys need also be required or you will get many error messages in your logs. 
 
-For example, given the following entity in your schema:
+We will use the "person" entity from the phone-calls example to illustrate:
  
  ```GraphQL
 person sub entity,
@@ -80,7 +87,7 @@ person sub entity,
     has nick-name;
  ```
 
-Add the following processor object:
+Add the following processor object in your processor configuration file:
 
 ```
 {
@@ -111,15 +118,54 @@ Add the following processor object:
 }
 ```
 
-Do above for all entities and their attributes in the schema. GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes).
+GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes).
 
-##### Relation Processors
+Next, you need to add a data configuration entry into your data configuration file. For example, for the [person](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/person.csv) data file, which looks like this:
+
+```CSV
+first_name,last_name,phone_number,city,age,nick_name
+Melli,Winchcum,+7 171 898 0853,London,55,
+Celinda,Bonick,+370 351 224 5176,London,52,
+Chryste,Lilywhite,+81 308 988 7153,London,66,
+...
+```
+
+The corresponding data config entry would be:
+
+```
+"person": {
+    "dataPath": "path/to/person.csv",                   // the absolute path to your data file
+    "separator": ",",                                   // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "processor": "person",                              // processor from processor config file
+    "batchSize": 2000,                                  // batchSize to be used for this data file
+    "threads": 4,                                       // # of threads to be used for this data file
+    "attributes": [                                     // attribute columns present in the data file
+        {
+            "columnName": "first_name",                         // column name in data file
+            "generator": "first-name"                           // attribute generator in processor person to be used for the column
+        },
+        < lines omitted >
+        {
+            "columnName": "phone_number",                       // column name in data file
+            "generator": "phone-number"                         // attribute generator in processor person to be used for the column
+        },
+        < lines omitted >
+        {
+            "columnName": "nick_name",                          // column name in data file
+            "generator": "nick-name",                           // attribute generator in processor person to be used for the column
+            "listSeparator": ";"                                // separator within column separating a list of values per data record
+        }
+    ]
+}
+```
+
+### Migrating Relations
 
 For each relation in your schema, define a processor object that specifies
   - each relation attribute, its value type, and whether it is required
   - each relation player of type entity, its role, identifying attribute in the data file and value type, as well as whether the player is required
 
-For example, given the following relation in your schema:
+We will use the call relation from the phone-calls example to illustrate. Given the schema:
 
  ```GraphQL
 call sub relation,
@@ -170,16 +216,95 @@ Add the following processor object:
 }
 ```
 
-Do above for all relations and their players and attributes in the schema. GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes/players).
+Just as in the case for entities, GraMi will ensure that all values in your data files adhere to the value type specified or try to cast them. GraMi will also ensure that no data records enter grakn that are incomplete (missing required attributes/players).
 
-##### Relation-Of-Relation Processors
+We then create a mapping of the data file [call.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/call.csv) to the processor configuration:
 
-Grakn comes with the powerful feature of using relations as players in other relations.
+Here is an excerpt of the data file:
+
+```CSV
+caller_id,callee_id,started_at,duration
++54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19,122
++263 498 495 0617,+48 195 624 2025,2018-09-18T01:34:48,514
++81 308 988 7153,+33 614 339 0298,2018-09-21T20:21:17,120
++263 498 495 0617,+33 614 339 0298,2018-09-17T22:10:34,144
++54 398 559 0423,+7 552 196 4096,2018-09-25T20:24:59,556
++81 308 988 7153,+351 515 605 7915,2018-09-23T22:23:25,336
+...
+```
+
+The data config entry would be:
+
+```
+"calls": {
+    "dataPath": "path/to/call.csv",             // the absolute path to your data file
+    "separator": ",",                                   // the separation character used in your data file (alternatives: "\t", ";", etc...)
+    "processor": "call",                                // processor from processor config file
+    "batchSize": 100,                                   // batchSize to be used for this data file
+    "threads": 4,                                       // # of threads to be used for this data file
+    "players": [                                        // player columns present in the data file
+        {
+            "columnName": "caller_id",                      // column name in data file
+            "generator": "caller"                           // player generator in processor call to be used for the column
+        },
+        {
+            "columnName": "callee_id",                      // column name in data file
+            "generator": "callee"                           // player generator in processor call to be used for the column
+        }
+    ],
+    "attributes": [                                     // attribute columns present in the data file
+        {
+            "columnName": "started_at",                     // column name in data file
+            "generator": "started-at"                       // attribute generator in processor call to be used for the column
+        },
+        {
+            "columnName": "duration",                       // column name in data file
+            "generator" : "duration"                        // attribute generator in processor call to be used for the column
+        }
+    ]
+}
+```
+
+Let's not forget about a great design pattern in Grakn (adding multiple players of the same type to a single relation). To achieve this, you can also add a listSeparator for players that are in a list in a column:
+
+Your data might look like:
+
+```
+company_name,person_id
+Unity,+62 999 888 7777###+62 999 888 7778
+```
+
+```
+"contract": {
+    "dataPath": "src/test/resources/phone-calls/contract.csv",
+    "separator": ",",
+    "processor": "contract",
+    "players": [
+      {
+        "columnName": "company_name",
+        "generator": "provider"
+      },
+      {
+        "columnName": "person_id",
+        "generator": "customer",
+        "listSeparator": "###"       // like this!
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  }
+```
+
+##### Relation-with-Relation Processors
+
+Grakn comes with the powerful feature of using relations as players in other relations. Just remember that a relation-with-relation/s must be added AFTER the relations that will act as players in the relation have been migrated. GraMi will migrate all relation-with-relations after having migrated entities and relations - but keep this in mind as you are building your graph - relations are only inserted as expected when all its players are already present.
 
 There are two ways to add relations into other relations:
 
 1. Either by an identifying attribute (similar to adding an entity as described above)
 2. By providing players that are used to match the relation that will be added to the relation
+
+Be aware of unintended side-effects! Should your attribute be non-unique or your two players be part of more than one relation, you will add a relation-with-relation to each matching player relation!
 
 For example, given the following additions to our example schema:
 
@@ -192,17 +317,18 @@ call sub relation,
     ...,
     plays past-call;
 
+# This is the new relation-with-relation:
 communication-channel sub relation,
     relates peer,
-    relates past-call;
+    relates past-call; # this is a call relation playing past-call
 ```
 
-Let's define the following processor object that will allow for adding a relation both by an identifying attribute and matching via its players:
+We define the following processor object that will allow for adding a call as a past-call either by an identifying attribute or matching via its players (caller and callee):
 
 ```
 {
       "processor": "communication-channel",
-      "processorType": "relation-of-relation",
+      "processorType": "Relation-with-Relation",
       "schemaType": "communication-channel",
       "conceptGenerators": {
         "players": {
@@ -247,149 +373,6 @@ Let's define the following processor object that will allow for adding a relatio
     }
 ```
 
-Just remember that these relations of relation must be added AFTER the relations that will act as players in the relation have been migrated. GraMi will migrate all relation-of-relations after having migrated entities and relations - but keep this in mind as you are building your graph - relations are only inserted as expected when all its players are already present.
-
-See the [full configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json).
- 
-#### Data Configuration
-
-The data configuration file maps each data file and its columns to your processor configurations and specifies whether a column contains single/a list of values. In addition, you can specify the size of processing batches and the number of threads (the number of cores on your machine) to be used for the migration to fine-tune the performance (where a greater number of threads up to 8 is always better while batchsize depends on the complexity of your concept (# of attributes per entity record and/or # of players per relation record)). 
-
-A good point to start the performance optimization is to set the number of threads equal to the number of cores on your machine and the batchsize to 500 * threads (i.e.: 4 threads => batchsize = 2000).
-
-##### Entity Data Config Entries
-
-To get started, define an empty object in your data configuration file. Then, for each file that you would like to migrate, create a data config entry. 
-
-For example, for the [person](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/person.csv) data file:
-
-Excerpt from person.csv:
-
-```CSV
-first_name,last_name,phone_number,city,age,nick_name
-Melli,Winchcum,+7 171 898 0853,London,55,
-Celinda,Bonick,+370 351 224 5176,London,52,
-Chryste,Lilywhite,+81 308 988 7153,London,66,
-D'arcy,Byfford,+54 398 559 0423,London,19,D
-Xylina,D'Alesco,+7 690 597 4443,Cambridge,51,
-Roldan,Cometti,+263 498 495 0617,Oxford,59,Rolly;Rolli
-Cob,Lafflin,+63 815 962 6097,Cambridge,56,
-Olag,Heakey,+81 746 154 2598,London,45,
-...
-```
-
-The corresponding data config entry would be:
-
-```
-"person": {
-    "dataPath": "/your/absolute/path/to/person.csv",    // the absolute path to your data file
-    "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
-    "processor": "person",                              // processor from processor config file
-    "batchSize": 2000,                                  // batchSize to be used for this data file
-    "threads": 4,                                       // # of threads to be used for this data file
-    "attributes": [                                     // attribute columns present in the data file
-        {
-            "columnName": "first_name",                         // column name in data file
-            "generator": "first-name"                           // attribute generator in processor person to be used for the column
-        },
-        < lines omitted >
-        {
-            "columnName": "phone_number",                       // column name in data file
-            "generator": "phone-number"                         // attribute generator in processor person to be used for the column
-        },
-        < lines omitted >
-        {
-            "columnName": "nick_name",                          // column name in data file
-            "generator": "nick-name",                           // attribute generator in processor person to be used for the column
-            "listSeparator": ";"                                // separator within column separating a list of values per data record
-        }
-    ]
-}
-```
-
-##### Relation Data Config Entries
-
-Given the data file [call.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/call.csv):
-
-```CSV
-caller_id,callee_id,started_at,duration
-+54 398 559 0423,+48 195 624 2025,2018-09-16T22:24:19,122
-+263 498 495 0617,+48 195 624 2025,2018-09-18T01:34:48,514
-+81 308 988 7153,+33 614 339 0298,2018-09-21T20:21:17,120
-+263 498 495 0617,+33 614 339 0298,2018-09-17T22:10:34,144
-+54 398 559 0423,+7 552 196 4096,2018-09-25T20:24:59,556
-+81 308 988 7153,+351 515 605 7915,2018-09-23T22:23:25,336
-...
-```
-
-The data config entry would be:
-
-```
-"calls": {
-    "dataPath": "/your/absolute/path/to/call.csv",      // the absolute path to your data file
-    "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
-    "processor": "call",                                // processor from processor config file
-    "batchSize": 100,                                   // batchSize to be used for this data file
-    "threads": 4,                                       // # of threads to be used for this data file
-    "players": [                                        // player columns present in the data file
-        {
-            "columnName": "caller_id",                      // column name in data file
-            "generator": "caller"                           // player generator in processor call to be used for the column
-        },
-        {
-            "columnName": "callee_id",                      // column name in data file
-            "generator": "callee"                           // player generator in processor call to be used for the column
-        }
-    ],
-    "attributes": [                                     // attribute columns present in the data file
-        {
-            "columnName": "started_at",                     // column name in data file
-            "generator": "started-at"                       // attribute generator in processor call to be used for the column
-        },
-        {
-            "columnName": "duration",                       // column name in data file
-            "generator" : "duration"                        // attribute generator in processor call to be used for the column
-        }
-    ]
-}
-```
-
-Do above for all data files that need to be migrated.
-
-Please note that you can also add a listSeparator for players that are in a list in a column:
-
-Your data might look like:
-
-```
-company_name,person_id
-Unity,+62 999 888 7777###+62 999 888 7778
-```
-
-```
-"contract": {
-    "dataPath": "src/test/resources/phone-calls/contract.csv",
-    "separator": ",",
-    "processor": "contract",
-    "players": [
-      {
-        "columnName": "company_name",
-        "generator": "provider"
-      },
-      {
-        "columnName": "person_id",
-        "generator": "customer",
-        "listSeparator": "###"       // like this!
-      }
-    ],
-    "batchSize": 100,
-    "threads": 4
-  }
-```
-
-For troubleshooting, it might be worth setting the troublesome data configuration entry to a single thread, as the log messages for error from grakn are more verbose and specific that way...
-
-##### Relation-of-Relation Data Config Entries
-
 1. This is how you can add a relation based on an identifying attribute:
 
 Given the data file [communication-channel.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/communication-channel.csv):
@@ -406,7 +389,7 @@ The data config entry would be:
 
 ```
 "communication-channel": {
-    "dataPath": "/your/absolute/path/to/communication-channel.csv",      // the absolute path to your data file
+    "dataPath": "path/to/communication-channel.csv",      // the absolute path to your data file
     "separator": ",",                                         // the separation character used in your data file (alternatives: "\t", ";", etc...)
     "processor": "communication-channel",                     // processor from processor config file
     "batchSize": 100,                                   // batchSize to be used for this data file
@@ -446,7 +429,8 @@ peer_1,peer_2
 The data config entry would be identical to the one above, except for:
 
 ```
-"communication-channel": {
+"communication-channel-pm": {
+    "dataPath": "path/to/communication-channel-pm.csv",
     ...
     "relationPlayers": [                            // each list entry is a relationPlayer
       {
@@ -460,7 +444,8 @@ The data config entry would be identical to the one above, except for:
 
 For troubleshooting, it might be worth setting the troublesome data configuration entry to a single thread, as the log messages for error from grakn are more verbose and specific that way...
 
-See the [full configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json).
+See the [full processor configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json).
+See the [full data configuration file for phone-calls here](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json).
 
 ### Using GraMi in your Java Application:
 
@@ -536,7 +521,7 @@ public class Migration {
 
     public static void main(String[] args) throws IOException {
         GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
-        mig.migrate(true, true);
+        mig.migrate(true, true, true);
     }
 }
 ```
@@ -546,19 +531,19 @@ The boolean flag cleanAndMigrate set to *true* as shown in:
 GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
 ```
 will, if exists, delete the schema and all data in the given keyspace.
-If set to *false*, GraMi will continue migration according to the migrationStatus file - meaning it will continue where it left off previously.
+If set to *false*, GraMi will continue migration according to the migrationStatus file - meaning it will continue where it left off previously and leave the schema as it is.
 
 
 As for
 ```Java
-mig.migrate(true, true);
+mig.migrate(true, true, true);
 ```
-there are four possibilities in total for the migrateEntities and migrateRelations flags, respectively:
-
- - (*true*, *true*) - migrate everything in dataConfig
- - (*true*, *false*) - migrate only entities (can be useful for debugging)
- - (*false*, *false*) - do not migrate data, only write schema (note: cleanAndMigrate flag as desribed above must also be *true*)
- - (*false*, *true*) - set to (*false*, *false*)
+ - setting all to false will only reapply the schema if cleanAndMigration is set to true - otherwise it will do nothing
+ - setting the first flag to true will migrate entities
+ - setting the second flag to true in addition will migrate the relations in addition to entities
+ - setting the third flag to true in further addition will migrate the relation-with-relations in addition to relations and entities
+ 
+These flags exist because it is sometimes convenient for debugging during early development of the database model to migrate the three different classes one after the other. 
 
 #### Configure Logging
 
@@ -609,7 +594,7 @@ Download the .zip/.tar file [here](https://github.com/bayer-science-for-a-better
 -m /path/to/migrationStatus.json \
 -s /path/to/schema.gql \
 -k yourFavoriteKeyspace \
--cf
+-cm
 ```
 
 grami will create two log files (one for the application progress/warnings/errors, one concerned with data validity) in the grami directory for your convenience. 
