@@ -54,7 +54,7 @@ public class EntityInsertGenerator extends InsertGenerator {
 
         StatementInstance pattern = addEntity(insertCounter);
 
-        for (DataConfigEntry.GeneratorSpecification dataAttribute : dce.getAttributes()) {
+        for (DataConfigEntry.dataConfigGeneratorMapping dataAttribute : dce.getAttributes()) {
             pattern = addAttribute(tokens, pattern, headerTokens, dataAttribute, gce.getAttributeGenerator(dataAttribute.getGenerator()));
         }
 

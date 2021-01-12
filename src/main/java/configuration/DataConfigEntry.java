@@ -4,9 +4,9 @@ public class DataConfigEntry {
     private String dataPath;
     private String separator;
     private String processor;
-    private GeneratorSpecification[] attributes;
-    private GeneratorSpecification[] players;
-    private GeneratorSpecification[] relationPlayers;
+    private dataConfigGeneratorMapping[] attributes;
+    private dataConfigGeneratorMapping[] players;
+    private dataConfigGeneratorMapping[] relationPlayers;
     private int batchSize;
     private int threads;
 
@@ -22,15 +22,15 @@ public class DataConfigEntry {
         return processor;
     }
 
-    public GeneratorSpecification[] getAttributes() {
+    public dataConfigGeneratorMapping[] getAttributes() {
         return attributes;
     }
 
-    public GeneratorSpecification[] getPlayers() {
+    public dataConfigGeneratorMapping[] getPlayers() {
         return players;
     }
 
-    public GeneratorSpecification[] getRelationPlayers() {
+    public dataConfigGeneratorMapping[] getRelationPlayers() {
         return relationPlayers;
     }
 
@@ -42,7 +42,7 @@ public class DataConfigEntry {
         return threads;
     }
 
-    public static class GeneratorSpecification {
+    public static class dataConfigGeneratorMapping {
         private String columnName;
         private String[] columnNames;
         private String generator;

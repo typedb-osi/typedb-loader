@@ -30,34 +30,34 @@ public class GeneratorUtil {
         }
     }
 
-    public static int idxOf(String[] headerTokens, DataConfigEntry.GeneratorSpecification generatorSpecification) {
-        return Arrays.asList(headerTokens).indexOf(generatorSpecification.getColumnName());
+    public static int idxOf(String[] headerTokens, DataConfigEntry.dataConfigGeneratorMapping dataConfigGeneratorMapping) {
+        return Arrays.asList(headerTokens).indexOf(dataConfigGeneratorMapping.getColumnName());
     }
 
-    public static int[] indicesOf(String[] headerTokens, DataConfigEntry.GeneratorSpecification generatorSpecification) {
-        int[] indices = new int[generatorSpecification.getColumnNames().length];
+    public static int[] indicesOf(String[] headerTokens, DataConfigEntry.dataConfigGeneratorMapping dataConfigGeneratorMapping) {
+        int[] indices = new int[dataConfigGeneratorMapping.getColumnNames().length];
         int i = 0;
-        for (String column : generatorSpecification.getColumnNames()) {
+        for (String column : dataConfigGeneratorMapping.getColumnNames()) {
             indices[i] = Arrays.asList(headerTokens).indexOf(column);
             i++;
         }
         return indices;
     }
 
-    public static StatementInstance addAttribute(String[] tokens, StatementInstance pattern, String[] headerTokens, DataConfigEntry.GeneratorSpecification attDataConfig, ProcessorConfigEntry.ConceptGenerator attGeneratorConfig) throws Exception {
-        int attDataIndex = idxOf(headerTokens, attDataConfig);
+    public static StatementInstance addAttribute(String[] tokens, StatementInstance statement, String[] columnNames, DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute, ProcessorConfigEntry.ConceptGenerator attributeGenerator) throws Exception {
+        int attDataIndex = idxOf(columnNames, generatorMappingForAttribute);
         if (attDataIndex == -1) {
-            dataLogger.error("Column name: <" + attDataConfig.getColumnName() + "> was not found in file being processed");
+            dataLogger.error("Column name: <" + generatorMappingForAttribute.getColumnName() + "> was not found in file being processed");
         } else {
             if ( attDataIndex < tokens.length &&
                     tokens[attDataIndex] != null &&
                     !cleanToken(tokens[attDataIndex]).isEmpty()
             ) {
-                String listSeparator = attDataConfig.getListSeparator();
-                pattern = cleanExplodeAdd(pattern, tokens[attDataIndex], attGeneratorConfig.getAttributeType(), attGeneratorConfig.getValueType(), listSeparator);
+                String listSeparator = generatorMappingForAttribute.getListSeparator();
+                statement = cleanExplodeAdd(statement, tokens[attDataIndex], attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), listSeparator);
             }
         }
-        return pattern;
+        return statement;
     }
 
     public static StatementInstance cleanExplodeAdd(StatementInstance pattern, String value, String conceptType, String valueType, String listSeparator) {
@@ -78,28 +78,28 @@ public class GeneratorUtil {
         }
     }
 
-    public static StatementInstance addAttributeOfColumnType(StatementInstance pattern, String conceptType, String valueType, String cleanedValue) {
+    public static StatementInstance addAttributeOfColumnType(StatementInstance statement, String conceptType, String valueType, String cleanedValue) {
         if (valueType.equals("string")) {
-            pattern = pattern.has(conceptType, cleanedValue);
+            statement = statement.has(conceptType, cleanedValue);
         } else if (valueType.equals("long")) {
             try {
-                pattern = pattern.has(conceptType, Integer.parseInt(cleanedValue));
+                statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
             } catch (NumberFormatException numberFormatException) {
                 dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
                 dataLogger.warn(numberFormatException.getMessage());
             }
         } else if (valueType.equals("double")) {
             try {
-                pattern = pattern.has(conceptType, Double.parseDouble(cleanedValue));
+                statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
             } catch (NumberFormatException numberFormatException) {
                 dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
                 dataLogger.warn(numberFormatException.getMessage());
             }
         } else if (valueType.equals("boolean")) {
             if (cleanedValue.toLowerCase().equals("true")) {
-                pattern = pattern.has(conceptType, true);
+                statement = statement.has(conceptType, true);
             } else if (cleanedValue.toLowerCase().equals("false")) {
-                pattern = pattern.has(conceptType, false);
+                statement = statement.has(conceptType, false);
             } else {
                 dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
             }
@@ -112,10 +112,10 @@ public class GeneratorUtil {
                 if (dt.length > 1) {
                     LocalTime time = LocalTime.parse(dt[1], DateTimeFormatter.ISO_TIME);
                     LocalDateTime dateTime = date.atTime(time);
-                    pattern = pattern.has(conceptType, dateTime);
+                    statement = statement.has(conceptType, dateTime);
                 } else {
                     LocalDateTime dateTime = date.atStartOfDay();
-                    pattern = pattern.has(conceptType, dateTime);
+                    statement = statement.has(conceptType, dateTime);
                 }
             } catch (DateTimeException dateTimeException) {
                 dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
@@ -125,6 +125,6 @@ public class GeneratorUtil {
         else {
             dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
         }
-        return pattern;
+        return statement;
     }
 }

@@ -19,7 +19,7 @@ public class CliTest {
                 "-s", "src/test/resources/phone-calls/schema.gql",
                 "-k", "grami_cli_test",
                 "-g", "127.0.0.1:48555",
-                "-cf"
+                "-cm"
         };
 
         Cli pico = new Cli();
