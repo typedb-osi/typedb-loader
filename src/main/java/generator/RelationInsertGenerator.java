@@ -19,15 +19,15 @@ import java.util.*;
 public class RelationInsertGenerator extends InsertGenerator {
 
     public final DataConfigEntry dce;
-    public final ProcessorConfigEntry gce;
+    public final ProcessorConfigEntry pce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
 
     public RelationInsertGenerator(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry) {
         super();
         this.dce = dce;
-        this.gce = processorConfigEntry;
-        appLogger.debug("Creating RelationInsertGenerator for " + gce.getProcessor() + " of type " + gce.getProcessorType());
+        this.pce = processorConfigEntry;
+        appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
     public ArrayList<ArrayList<ArrayList<Statement>>> graknRelationInsert(ArrayList<String> rows, String header) throws Exception {
@@ -71,9 +71,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
             if (dce.getAttributes() != null) {
                 for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-                    String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
-                    ProcessorConfigEntry.ConceptGenerator attributeGenerator = gce.getAttributeGenerator(attributeGeneratorKey);
-                    assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, attributeGenerator);
+                    assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, pce);
                 }
             }
             insertStatements.add(assembledInsertStatement);
@@ -112,8 +110,9 @@ public class RelationInsertGenerator extends InsertGenerator {
         // add Entity Players:
         for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForPlayer : dce.getPlayers()) {
             String generatorKey = generatorMappingForPlayer.getGenerator();
-            ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(generatorKey);
-            int columnNameIndex = idxOf(columnNames, generatorMappingForPlayer);
+            ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getPlayerGenerator(generatorKey);
+            String columnName = generatorMappingForPlayer.getColumnName();
+            int columnNameIndex = idxOf(columnNames, columnName);
 
             if(columnNameIndex == -1) {
                 appLogger.error("The column header " + generatorMappingForPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
@@ -147,11 +146,12 @@ public class RelationInsertGenerator extends InsertGenerator {
         if (dce.getRelationPlayers() != null) {
             for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForRelationPlayer : dce.getRelationPlayers()) {
                 String generatorKey = generatorMappingForRelationPlayer.getGenerator();
-                ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getRelationPlayerGenerator(generatorKey);
+                ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
 
                 // if matching RelationPlayer by Attribute:
                 if (generatorMappingForRelationPlayer.getMatchByAttribute() != null) {
-                    int columnNameIndex = idxOf(columnNames, generatorMappingForRelationPlayer);
+                    String columnName = generatorMappingForRelationPlayer.getColumnName();
+                    int columnNameIndex = idxOf(columnNames, columnName);
 
                     if(columnNameIndex == -1) {
                         appLogger.error("The column header " + generatorMappingForRelationPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
@@ -182,7 +182,7 @@ public class RelationInsertGenerator extends InsertGenerator {
                     }
                 // if matching the relation player by players in that relation:
                 } else if (generatorMappingForRelationPlayer.getMatchByPlayers().length > 0) {
-                    int[] columnNameIndices = indicesOf(columnNames, generatorMappingForRelationPlayer);
+                    int[] columnNameIndices = indicesOf(columnNames, generatorMappingForRelationPlayer.getColumnNames());
 
                     for (int i : columnNameIndices) {
                         if(i == -1) {
@@ -272,7 +272,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     private StatementInstance relationInsert(StatementInstance si) {
         if (si != null) {
-            si = si.isa(gce.getSchemaType());
+            si = si.isa(pce.getSchemaType());
             return si;
         } else {
             return null;
@@ -288,7 +288,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         }
         String insertStatement = insertStatements.get(0).toString();
         // missing required players
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRelationRequiredPlayers().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: pce.getRelationRequiredPlayers().entrySet()) {
             if (!matchStatement.toString().contains("isa " + generatorEntry.getValue().getPlayerType())) {
                 return false;
             }
@@ -297,7 +297,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             }
         }
         // missing required attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: pce.getRequiredAttributes().entrySet()) {
             if (!insertStatement.contains("has " + generatorEntry.getValue().getAttributeType())) {
                 return false;
             }

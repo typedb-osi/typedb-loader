@@ -18,14 +18,14 @@ import java.util.Map;
 public class EntityInsertGenerator extends InsertGenerator {
 
     private final DataConfigEntry dce;
-    private final ProcessorConfigEntry gce;
+    private final ProcessorConfigEntry pce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
 
     public EntityInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry) {
         super();
         this.dce = dataConfigEntry;
-        this.gce = processorConfigEntry;
+        this.pce = processorConfigEntry;
         appLogger.debug("Creating EntityInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
@@ -47,40 +47,41 @@ public class EntityInsertGenerator extends InsertGenerator {
     }
 
     public StatementInstance graknEntityQueryFromRow(String row, String header, int insertCounter) throws Exception {
-        String[] tokens = row.split(dce.getSeparator());
-        String[] headerTokens = header.split(dce.getSeparator());
-        appLogger.debug("processing tokenized row: " + Arrays.toString(tokens));
-        malformedRow(row, tokens, headerTokens.length);
+        String fileSeparator = dce.getSeparator();
+        String[] rowTokens = row.split(fileSeparator);
+        String[] columnNames = header.split(fileSeparator);
+        appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
+        malformedRow(row, rowTokens, columnNames.length);
 
-        StatementInstance pattern = addEntity(insertCounter);
+        StatementInstance entityInsertStatement = addEntityToStatement(insertCounter);
 
-        for (DataConfigEntry.dataConfigGeneratorMapping dataAttribute : dce.getAttributes()) {
-            pattern = addAttribute(tokens, pattern, headerTokens, dataAttribute, gce.getAttributeGenerator(dataAttribute.getGenerator()));
+        for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, generatorMappingForAttribute, pce);
         }
 
-        if (isValid(pattern)) {
-            appLogger.debug("valid query: <" + pattern.toString() + ">");
-            return pattern;
+        if (isValid(entityInsertStatement)) {
+            appLogger.debug("valid query: <" + entityInsertStatement.toString() + ">");
+            return entityInsertStatement;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(tokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }
 
-    private StatementInstance addEntity(int insertCounter) {
-        if (gce.getSchemaType() != null) {
-            return Graql.var("e-" + insertCounter).isa(gce.getSchemaType());
+    private StatementInstance addEntityToStatement(int insertCounter) {
+        if (pce.getSchemaType() != null) {
+            return Graql.var("e-" + insertCounter).isa(pce.getSchemaType());
         } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + gce.getProcessor());
+            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
         }
     }
 
     private boolean isValid(StatementInstance si) {
         String statement = si.toString();
-        if (!statement.contains("isa " + gce.getSchemaType())) {
+        if (!statement.contains("isa " + pce.getSchemaType())) {
             return false;
         }
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> con : gce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> con : pce.getRequiredAttributes().entrySet()) {
             if (!statement.contains("has " + con.getValue().getAttributeType())) {
                 return false;
             }
