@@ -34,11 +34,17 @@ public class GraknInserter {
 
     // Schema Operations
     public GraknClient.Session setKeyspaceToSchema(GraknClient client, GraknClient.Session session) {
-        if (client.keyspaces().retrieve().contains(this.keyspaceName)) {
-            this.deleteKeyspace(client);
+        if (client.keyspaces().retrieve().contains(keyspaceName)) {
+            deleteKeyspace(client);
             session = getSession(client);
         }
-        String schema = this.loadSchemaFromFile();
+        String schema = loadSchemaFromFile();
+        defineToGrakn(schema, session);
+        return session;
+    }
+
+    public GraknClient.Session updateCurrentSchema(GraknClient client, GraknClient.Session session) {
+        String schema = loadSchemaFromFile();
         defineToGrakn(schema, session);
         return session;
     }

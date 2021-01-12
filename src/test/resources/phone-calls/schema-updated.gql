@@ -1,0 +1,60 @@
+define
+
+    name sub attribute,
+      value string;
+    started-at sub attribute,
+      value datetime;
+    duration sub attribute,
+      value long;
+    first-name sub attribute,
+      value string;
+    last-name sub attribute,
+      value string;
+    phone-number sub attribute,
+      value string;
+    city sub attribute,
+      value string;
+    age sub attribute,
+      value long;
+    nick-name sub attribute,
+      value string;
+    added-attribute sub attribute,
+        value string;
+
+    contract sub relation,
+        relates provider,
+        relates customer;
+
+    call sub relation,
+        relates caller,
+        relates callee,
+        has started-at,
+        has duration,
+        plays past-call;
+
+    communication-channel sub relation,
+        relates peer,
+        relates past-call;
+
+    company sub entity,
+        plays provider,
+        has name;
+
+    person sub entity,
+        plays customer,
+        plays caller,
+        plays callee,
+        has first-name,
+        has last-name,
+        has phone-number,
+        has city,
+        has age,
+        has nick-name,
+        plays peer;
+
+    added-entity sub entity,
+        has added-attribute,
+        plays added-role;
+
+    added-relation sub relation,
+        relates added-role;
