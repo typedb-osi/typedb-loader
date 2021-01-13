@@ -2,6 +2,8 @@ package migrator;
 
 import configuration.MigrationConfig;
 import grakn.client.GraknClient;
+import grakn.client.answer.ConceptMap;
+import grakn.protocol.session.AnswerProto;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 import graql.lang.statement.Statement;
@@ -11,14 +13,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static graql.lang.Graql.var;
+import static test.TestUtil.getDT;
 import static util.Util.getAbsPath;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class MigrationTest {
 
@@ -33,7 +33,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true);
+        mig.migrate(true, true, true,true);
     }
 
     @Test
@@ -47,15 +47,16 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true);
+        mig.migrate(true, true, true,true);
 
         GraknInserter gi = new GraknInserter("localhost", "48555", asp, keyspaceName);
-        testNumberOfResponsesEntities(gi, keyspaceName);
-        testNumberOfResponsesRelations(gi, keyspaceName);
-        testNumberOfResponsesRelationOfRelations(gi, keyspaceName);
+        testEntities(gi, keyspaceName);
+        testRelations(gi, keyspaceName);
+        testRelationWithRelations(gi, keyspaceName);
+        testAppendAttribute(gi, keyspaceName);
     }
 
-    public void testNumberOfResponsesEntities(GraknInserter gi, String keyspace) {
+    public void testEntities(GraknInserter gi, String keyspace) {
         GraknClient client = gi.getClient();
         GraknClient.Session session = client.session(keyspace);
 
@@ -63,28 +64,28 @@ public class MigrationTest {
         GraknClient.Transaction read = session.transaction().read();
         GraqlGet getQuery = Graql.match(var("p").isa("person").has("phone-number", "+261 860 539 4754")).get().limit(1000);
         Assert.assertEquals(1, read.stream(getQuery).get().count());
-        read.close();
 
         // query person by last name
         read = session.transaction().read();
         getQuery = Graql.match(var("p").isa("person").has("last-name", "Smith")).get().limit(1000);
         Assert.assertEquals(2, read.stream(getQuery).get().count());
-        read.close();
 
         // query all entities of type person
         read = session.transaction().read();
         getQuery = Graql.match(var("c").isa("person")).get().limit(1000);
         Assert.assertEquals(32, read.stream(getQuery).get().count());
-        read.close();
 
         // query all entites of type company
         read = session.transaction().read();
         getQuery = Graql.match(var("e").isa("company")).get().limit(1000);
         Assert.assertEquals(2, read.stream(getQuery).get().count());
+
         read.close();
+        session.close();
+        client.close();
     }
 
-    public void testNumberOfResponsesRelations(GraknInserter gi, String keyspace) {
+    public void testRelations(GraknInserter gi, String keyspace) {
         GraknClient client = gi.getClient();
         GraknClient.Session session = client.session(keyspace);
 
@@ -92,23 +93,11 @@ public class MigrationTest {
         GraknClient.Transaction read = session.transaction().read();
         GraqlGet getQuery = Graql.match(var("c").isa("call").has("duration", 2851)).get().limit(1000);
         Assert.assertEquals(1, read.stream(getQuery).get().count());
-        read.close();
 
         // query call by date
         read = session.transaction().read();
-        DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_DATE;
-        String[] dt = "2018-09-17T18:43:42".split("T");
-        LocalDate date = LocalDate.parse(dt[0], isoDateFormatter);
-        if (dt.length > 1) {
-            LocalTime time = LocalTime.parse(dt[1], DateTimeFormatter.ISO_TIME);
-            LocalDateTime dateTime = date.atTime(time);
-            getQuery = Graql.match(var("c").isa("call").has("started-at", dateTime)).get().limit(1000);
-        } else {
-            LocalDateTime dateTime = date.atStartOfDay();
-            getQuery = Graql.match(var("c").isa("call").has("started-at", dateTime)).get().limit(1000);
-        }
+        getQuery = Graql.match(var("c").isa("call").has("started-at", getDT("2018-09-17T18:43:42"))).get().limit(1000);
         Assert.assertEquals(1, read.stream(getQuery).get().count());
-        read.close();
 
         // query call by caller
         read = session.transaction().read();
@@ -119,7 +108,6 @@ public class MigrationTest {
         statements.add(relation);
         getQuery = Graql.match(statements).get().limit(1000);
         Assert.assertEquals(14, read.stream(getQuery).get().count());
-        read.close();
 
         // query call by callee
         read = session.transaction().read();
@@ -130,7 +118,6 @@ public class MigrationTest {
         statements.add(relation);
         getQuery = Graql.match(statements).get().limit(1000);
         Assert.assertEquals(4, read.stream(getQuery).get().count());
-        read.close();
 
         // query call by caller & callee
         read = session.transaction().read();
@@ -143,10 +130,13 @@ public class MigrationTest {
         statements.add(relation);
         getQuery = Graql.match(statements).get().limit(1000);
         Assert.assertEquals(4, read.stream(getQuery).get().count());
+
         read.close();
+        session.close();
+        client.close();
     }
 
-    public void testNumberOfResponsesRelationOfRelations(GraknInserter gi, String keyspace) {
+    public void testRelationWithRelations(GraknInserter gi, String keyspace) {
         GraknClient client = gi.getClient();
         GraknClient.Session session = client.session(keyspace);
 
@@ -159,11 +149,10 @@ public class MigrationTest {
         statements.add(playerOne);
         statements.add(playerTwo);
         statements.add(relation);
-        GraqlGet getQuery = Graql.match(statements).get("c", "x").limit(1000);
+        GraqlGet getQuery = Graql.match(statements).get("c").limit(1000);
         Assert.assertEquals(1, read.stream(getQuery).get().count());
         getQuery = Graql.match(statements).get("x").limit(1000);
         Assert.assertEquals(1, read.stream(getQuery).get().count());
-        read.close();
 
         // query specific communication-channel and count the number of past calls (listSeparated past-calls:
         read = session.transaction().read();
@@ -232,6 +221,37 @@ public class MigrationTest {
         Assert.assertEquals(0, read.stream(getQuery).get().count());
         getQuery = Graql.match(statements).get("x").limit(1000);
         Assert.assertEquals(0, read.stream(getQuery).get().count());
+
+        read.close();
+        session.close();
+        client.close();
+    }
+
+    public void testAppendAttribute(GraknInserter gi, String keyspace) {
+        GraknClient client = gi.getClient();
+        GraknClient.Session session = client.session(keyspace);
+
+        // Count number of total inserts
+        GraknClient.Transaction read = session.transaction().read();
+        GraqlGet getQuery = Graql.match(var("p").isa("person").has("twitter-username", var("x"))).get("p").limit(1000);
+        Assert.assertEquals(6, read.stream(getQuery).get().count());
+
+        // Count multi-insert using listSeparator
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+263 498 495 0617").has("twitter-username", var("x"))).get("x").limit(1000);
+        Assert.assertEquals(2, read.stream(getQuery).get().count());
+
+        //test relation total inserts
+        getQuery = Graql.match(var("c").isa("call").has("call-rating", var("cr"))).get("c").limit(1000);
+        Assert.assertEquals(5, read.stream(getQuery).get().count());
+
+        // specific relation insert
+        getQuery = Graql.match(var("c").isa("call").has("started-at", getDT("2018-09-24T03:16:48")).has("call-rating", var("cr"))).get("cr").limit(1000);
+        Stream<ConceptMap> answers = read.stream(getQuery).get();
+        answers.forEach(answer -> Assert.assertEquals(5L, answer.get("cr").asAttribute().value()));
+
+        read.close();
+        session.close();
+        client.close();
     }
 
     @Test
@@ -245,7 +265,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true);
+        mig.migrate(true, true, true,true);
 
     }
 }

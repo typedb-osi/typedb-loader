@@ -55,9 +55,9 @@ public class RelationInsertGenerator extends InsertGenerator {
     }
 
     public ArrayList<ArrayList<Statement>> graknRelationshipQueryFromRow(String row, String header, int insertCounter) throws Exception {
-
-        String[] rowTokens = row.split(dce.getSeparator());
-        String[] columnNames = header.split(dce.getSeparator());
+        String fileSeparator = dce.getSeparator();
+        String[] rowTokens = row.split(fileSeparator);
+        String[] columnNames = header.split(fileSeparator);
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         GeneratorUtil.malformedRow(row, rowTokens, columnNames.length);
 
@@ -70,7 +70,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             StatementInstance assembledInsertStatement = relationInsert(playersInsertStatement);
 
             if (dce.getAttributes() != null) {
-                for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+                for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
                     assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, pce);
                 }
             }
@@ -108,7 +108,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         int playerCounter = 0;
 
         // add Entity Players:
-        for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForPlayer : dce.getPlayers()) {
+        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForPlayer : dce.getPlayers()) {
             String generatorKey = generatorMappingForPlayer.getGenerator();
             ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getPlayerGenerator(generatorKey);
             String columnName = generatorMappingForPlayer.getColumnName();
@@ -144,7 +144,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         }
         // add Relation Players
         if (dce.getRelationPlayers() != null) {
-            for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForRelationPlayer : dce.getRelationPlayers()) {
+            for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForRelationPlayer : dce.getRelationPlayers()) {
                 String generatorKey = generatorMappingForRelationPlayer.getGenerator();
                 ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
 
@@ -218,7 +218,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         return ms;
     }
 
-    private StatementInstance createRelationPlayerMatchStatementByAttribute(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.dataConfigGeneratorMapping dataConfigMapping, String playerVariable) {
+    private StatementInstance createRelationPlayerMatchStatementByAttribute(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dataConfigMapping, String playerVariable) {
         StatementInstance ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
@@ -228,7 +228,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         return ms;
     }
 
-    private ArrayList<Statement> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.dataConfigGeneratorMapping dce, String playerVariable, int insertCounter) {
+    private ArrayList<Statement> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dce, String playerVariable, int insertCounter) {
         ArrayList<Statement> assembledMatchStatements = new ArrayList<>();
 
         Statement relationPlayerMatchStatement = Graql.var(playerVariable);

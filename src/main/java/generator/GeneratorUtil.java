@@ -45,7 +45,7 @@ public class GeneratorUtil {
         return indices;
     }
 
-    public static StatementInstance addAttribute(String[] tokens, StatementInstance statement, String[] columnNames, DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute, ProcessorConfigEntry pce) {
+    public static StatementInstance addAttribute(String[] tokens, StatementInstance statement, String[] columnNames, DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute, ProcessorConfigEntry pce) {
         String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String columnListSeparator = generatorMappingForAttribute.getListSeparator();

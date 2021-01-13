@@ -3,13 +3,11 @@ package migrator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
-import generator.RelationWithRelationInsertGenerator;
+import generator.*;
 import loader.DataLoader;
 import grakn.client.GraknClient;
 import insert.GraknInserter;
 import graql.lang.statement.Statement;
-import generator.EntityInsertGenerator;
-import generator.InsertGenerator;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -18,7 +16,6 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import generator.RelationInsertGenerator;
 
 
 public class GraknMigrator {
@@ -53,7 +50,7 @@ public class GraknMigrator {
         }
     }
 
-    public void migrate(boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations) throws IOException {
+    public void migrate(boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
 
         GraknClient client = gm.getClient();
         GraknClient.Session session = gm.getSession(client);
@@ -67,36 +64,41 @@ public class GraknMigrator {
             appLogger.info("continuing previous migration...");
         }
 
-        migrateThingsInOrder(session, migrateEntities, migrateRelations, migrateRelationRelations);
+        migrateThingsInOrder(session, migrateEntities, migrateRelations, migrateRelationRelations, migrateAppendAttributes);
 
         session.close();
         client.close();
         appLogger.info("GraMi is finished migrating your stuff!");
     }
 
-    private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations) throws IOException {
+    private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
         if (migrateEntities) {
             appLogger.info("migrating entities...");
             getStatusAndMigrate(session, "entity");
             appLogger.info("migration of entities completed");
         }
-        if (migrateRelations) {
+        if (migrateEntities && migrateRelations) {
             appLogger.info("migrating relations...");
             getStatusAndMigrate(session, "relation");
             appLogger.info("migration of relations completed");
         }
-        if (migrateRelationRelations) {
+        if (migrateEntities && migrateRelations && migrateRelationRelations) {
             appLogger.info("migrating relation-with-relations...");
             getStatusAndMigrate(session, "relation-with-relation");
             appLogger.info("migration of relation-with-relations completed");
         }
+        if (migrateEntities && migrateRelations && migrateRelationRelations && migrateAppendAttributes) {
+            appLogger.info("migrating append-attribute...");
+            getStatusAndMigrate(session, "append-attribute");
+            appLogger.info("migration of append-attribute completed");
+        }
     }
 
-    private void getStatusAndMigrate(GraknClient.Session session, String conceptType) throws IOException {
+    private void getStatusAndMigrate(GraknClient.Session session, String processorType) throws IOException {
         for (String dcEntryKey : dataConfig.keySet()) {
             DataConfigEntry dce = dataConfig.get(dcEntryKey);
             String currentProcessor = dce.getProcessor();
-            if(isOfConceptType(currentProcessor, conceptType)){
+            if(isOfProcessorType(currentProcessor, processorType)){
                 appLogger.info("migrating [" + dcEntryKey + "]...");
                 if (migrationStatus != null && migrationStatus.get(dce.getDataPath()) != null) {
                     appLogger.info("previous migration status found for schema type: [" + dcEntryKey + "]");
@@ -114,14 +116,10 @@ public class GraknMigrator {
         }
     }
 
-    private boolean isOfConceptType(String key, String conceptType) {
+    private boolean isOfProcessorType(String key, String conceptType) {
         for (ProcessorConfigEntry gce : migrationConfig.getProcessorConfig().get("processors")) {
             if (gce.getProcessor().equals(key)) {
-                if (gce.getProcessorType().equals(conceptType)) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return gce.getProcessorType().equals(conceptType);
             }
         }
         return false;
@@ -184,7 +182,7 @@ public class GraknMigrator {
     private void writeThing(DataConfigEntry dce, InsertGenerator gen, GraknClient.Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
         int cores = dce.getThreads();
         try {
-            if (isOfConceptType(dce.getProcessor(), "entity")) {
+            if (isOfProcessorType(dce.getProcessor(), "entity")) {
                 ArrayList<Statement> insertStatements = gen.graknEntityInsert(rows, header);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.size());
                 if (cores > 1) {
@@ -194,16 +192,29 @@ public class GraknMigrator {
                     appLogger.debug("inserting using 1 thread");
                     gm.insertEntityToGrakn(insertStatements, session);
                 }
-            } else {
+            } else if (isOfProcessorType(dce.getProcessor(), "relation") ||
+                    isOfProcessorType(dce.getProcessor(), "relation-with-relation")) {
                 ArrayList<ArrayList<ArrayList<Statement>>> statements = gen.graknRelationInsert(rows, header);
                 appLogger.trace("number of generated insert Statements: " + statements.get(0).size());
                 if (cores > 1) {
                     appLogger.debug("inserting using " + cores + " threads");
-                    gm.futuresParallelInsertRelation(statements, session, cores);
+                    gm.futuresParallelInsertMatchInsert(statements, session, cores);
                 } else {
                     appLogger.debug("inserting using 1 thread");
-                    gm.insertRelationToGrakn(statements, session);
+                    gm.insertMatchInsertToGrakn(statements, session);
                 }
+            } else if (isOfProcessorType(dce.getProcessor(), "append-attribute")) {
+                ArrayList<ArrayList<ArrayList<Statement>>> statements = gen.graknAppendAttributeInsert(rows, header);
+                appLogger.trace("number of generated insert Statements: " + statements.get(0).size());
+                if (cores > 1) {
+                    appLogger.debug("inserting using " + cores + " threads");
+                    gm.futuresParallelInsertMatchInsert(statements, session, cores);
+                } else {
+                    appLogger.debug("inserting using 1 thread");
+                    gm.insertMatchInsertToGrakn(statements, session);
+                }
+            } else {
+                throw new IllegalArgumentException("the processor <" + dce.getProcessor() + "> is not known");
             }
             updateMigrationStatusMigratedRows(dce, lineCounter);
         } catch (Exception ee) {
@@ -278,7 +289,10 @@ public class GraknMigrator {
         } else if (gce != null && gce.getProcessorType().equals("relation-with-relation")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new RelationWithRelationInsertGenerator(dce, gce);
-        }else {
+        } else if (gce != null && gce.getProcessorType().equals("append-attribute")) {
+            appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
+            return new AppendAttributeGenerator(dce, gce);
+        } else {
             throw new IllegalArgumentException(String.format("Invalid/No generator provided for: %s", dce.getProcessor()));
         }
     }

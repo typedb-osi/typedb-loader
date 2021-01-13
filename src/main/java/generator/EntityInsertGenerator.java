@@ -55,7 +55,7 @@ public class EntityInsertGenerator extends InsertGenerator {
 
         StatementInstance entityInsertStatement = addEntityToStatement(insertCounter);
 
-        for (DataConfigEntry.dataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
             entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, generatorMappingForAttribute, pce);
         }
 

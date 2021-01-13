@@ -35,7 +35,7 @@ public class SchemaUpdaterTest {
 
         MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true);
+        mig.migrate(true, true, true,true);
 
         GraknInserter gi = new GraknInserter("localhost", "48555", asp, keyspaceName);
 

@@ -33,7 +33,8 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - parallelized asynchronous writes to Grakn to make the most of your hardware configuration
  - Stop/Restart:
     - tracking of your migration status to stop/restart, or restart after failure
- - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami#schema-updating) for non-breaking changes (i.e. when you have already migrated for 5 days and then realize you would like to extend your schema without deleting everything)
+ - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami#schema-updating) for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
+ - [Appending Attributes](https://github.com/bayer-science-for-a-better-life/grami#attribute-appending) to existing entities/relations
 
 After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
  - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/releases) - no coding - configuration required 
@@ -481,6 +482,81 @@ or using the CLI:
 -k yourFavoriteKeyspace \
 ```
 
+### Attribute Appending
+
+It is often convenient to be able to append attributes to existing entities/relations that have already been inserted.
+
+Given [append-twitter.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/append-twitter.csv):
+
+```CSV
+phone_number,twitter
++7 171 898 0853,@jojo
++263 498 495 0617,@hui###@bui
++370 351 224 5176,@lalulix
++81 308 988 7153,@go34
+...
+```
+
+We can match a person entity on the phone-number attribute, and then insert the twitter-username as an additional attribute.
+
+Given the following in our schema:
+
+```GraphQL
+twitter-username sub attribute,
+      value string;
+
+person sub entity,
+        ...
+        has twitter-username;
+```
+
+We create an append-attribute processor, which should look very familiar:
+
+```
+{
+  "processor": "append-twitter-to-person",
+  "processorType": "append-attribute",      // the append-attribute processor type must be set
+  "schemaType": "person",                   // concept to which the attributes will be appended
+  "conceptGenerators": {
+    "attributes": {
+    "phone-number": {                           // the attribute generator for the attribute used for identifying the entity/relation
+        "attributeType": "phone-number",
+        "valueType": "string"
+      },
+      "twitter-username": {                     // the attribute generator for the attribute to be migrated
+        "attributeType": "twitter-username",
+        "valueType": "string",
+        "required": true
+      }
+    }
+  }
+}
+```
+
+The data config entry would look like:
+
+```
+"append-twitter": {
+    "dataPath": "src/test/resources/phone-calls/append-twitter.csv",
+    "separator": ",",
+    "processor": "append-twitter-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true                       // the identifying attribute must contain the match flag
+      },
+      {
+        "columnName": "twitter",
+        "generator": "twitter-username",
+        "listSeparator": "###"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  }
+```
+
 ### Using GraMi in your Java Application:
 
 #### Add GraMi as dependency
@@ -555,7 +631,7 @@ public class Migration {
 
     public static void main(String[] args) throws IOException {
         GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
-        mig.migrate(true, true, true);
+        mig.migrate(true, true, true, true);
     }
 }
 ```
@@ -570,12 +646,13 @@ If set to *false*, GraMi will continue migration according to the migrationStatu
 
 As for
 ```Java
-mig.migrate(true, true, true);
+mig.migrate(true, true, true, true);
 ```
  - setting all to false will only reapply the schema if cleanAndMigration is set to true - otherwise it will do nothing
  - setting the first flag to true will migrate entities
- - setting the second flag to true in addition will migrate the relations in addition to entities
- - setting the third flag to true in further addition will migrate the relation-with-relations in addition to relations and entities
+ - setting the second flag to true will migrate the relations in addition
+ - setting the third flag to true will migrate the relation-with-relations in addition
+ - setting the fourth flag to true will migrate the append-attributes in addition
  
 These flags exist because it is sometimes convenient for debugging during early development of the database model to migrate the three different classes one after the other. 
 

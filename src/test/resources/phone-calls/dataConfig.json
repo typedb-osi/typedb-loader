@@ -137,5 +137,42 @@
         "matchByPlayers": ["caller", "callee"]
       }
     ]
+  },
+  "append-twitter": {
+    "dataPath": "src/test/resources/phone-calls/append-twitter.csv",
+    "separator": ",",
+    "processor": "append-twitter-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true
+      },
+      {
+        "columnName": "twitter",
+        "generator": "twitter-username",
+        "listSeparator": "###"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  },
+  "append-call-rating": {
+    "dataPath": "src/test/resources/phone-calls/append-call-rating.csv",
+    "separator": ",",
+    "processor": "append-call-rating-to-call",
+    "attributes": [
+      {
+        "columnName": "started_at",
+        "generator": "started-at",
+        "match": true
+      },
+      {
+        "columnName": "call_rating",
+        "generator": "call-rating"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
   }
 }

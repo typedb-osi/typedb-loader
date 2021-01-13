@@ -18,6 +18,10 @@ define
       value long;
     nick-name sub attribute,
       value string;
+    twitter-username sub attribute,
+      value string;
+    call-rating sub attribute,
+      value long;
 
     contract sub relation,
         relates provider,
@@ -28,6 +32,7 @@ define
         relates callee,
         has started-at,
         has duration,
+        has call-rating,
         plays past-call;
 
     communication-channel sub relation,
@@ -48,4 +53,5 @@ define
         has city,
         has age,
         has nick-name,
+        has twitter-username,
         plays peer;

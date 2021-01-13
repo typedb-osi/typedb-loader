@@ -1,12 +1,16 @@
 package configuration;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 public class DataConfigEntry {
     private String dataPath;
     private String separator;
     private String processor;
-    private dataConfigGeneratorMapping[] attributes;
-    private dataConfigGeneratorMapping[] players;
-    private dataConfigGeneratorMapping[] relationPlayers;
+    private DataConfigGeneratorMapping[] attributes;
+    private DataConfigGeneratorMapping[] players;
+    private DataConfigGeneratorMapping[] relationPlayers;
     private int batchSize;
     private int threads;
 
@@ -22,15 +26,15 @@ public class DataConfigEntry {
         return processor;
     }
 
-    public dataConfigGeneratorMapping[] getAttributes() {
+    public DataConfigGeneratorMapping[] getAttributes() {
         return attributes;
     }
 
-    public dataConfigGeneratorMapping[] getPlayers() {
+    public DataConfigGeneratorMapping[] getPlayers() {
         return players;
     }
 
-    public dataConfigGeneratorMapping[] getRelationPlayers() {
+    public DataConfigGeneratorMapping[] getRelationPlayers() {
         return relationPlayers;
     }
 
@@ -42,13 +46,24 @@ public class DataConfigEntry {
         return threads;
     }
 
-    public static class dataConfigGeneratorMapping {
+    public ArrayList<DataConfigEntry.DataConfigGeneratorMapping> getMatchAttributes() {
+        ArrayList<DataConfigEntry.DataConfigGeneratorMapping> matchAttributes = new ArrayList<>();
+        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping: getAttributes()) {
+            if (attributeMapping.isMatch()) {
+                matchAttributes.add(attributeMapping);
+            }
+        }
+        return matchAttributes;
+    }
+
+    public static class DataConfigGeneratorMapping {
         private String columnName;
         private String[] columnNames;
         private String generator;
         private String listSeparator;
         private String matchByAttribute;
         private String[] matchByPlayers;
+        private boolean match;
 
         public String getColumnName() {
             return columnName;
@@ -69,5 +84,8 @@ public class DataConfigEntry {
         public String[] getMatchByPlayers() { return matchByPlayers; }
 
         public String getMatchByAttribute() { return matchByAttribute; }
+
+        public boolean isMatch() { return match; }
+
     }
 }
