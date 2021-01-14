@@ -478,7 +478,7 @@ public class Migration {
 or using the CLI:
 
 ```Shell
-./bin/grami schema-update\
+./bin/grami schema-update \
 -s /path/to/schema.gql \
 -k yourFavoriteKeyspace \
 ```
