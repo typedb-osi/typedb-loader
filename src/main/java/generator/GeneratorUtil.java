@@ -5,6 +5,7 @@ import configuration.ProcessorConfigEntry;
 import graql.lang.statement.StatementInstance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import preprocessor.RegexPreprocessor;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -45,7 +46,7 @@ public class GeneratorUtil {
         return indices;
     }
 
-    public static StatementInstance addAttribute(String[] tokens, StatementInstance statement, String[] columnNames, DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute, ProcessorConfigEntry pce) {
+    public static StatementInstance addAttribute(String[] tokens, StatementInstance statement, String[] columnNames, DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute, ProcessorConfigEntry pce, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String columnListSeparator = generatorMappingForAttribute.getListSeparator();
@@ -57,32 +58,35 @@ public class GeneratorUtil {
         } else {
             if ( columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
-                    !cleanToken(tokens[columnNameIndex]).isEmpty()
-            ) {
+                    !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator);
+                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, preprocessorConfig);
             }
         }
         return statement;
     }
 
-    public static StatementInstance cleanExplodeAdd(StatementInstance statement, String cleanedToken, String conceptType, String valueType, String listSeparator) {
+    public static StatementInstance cleanExplodeAdd(StatementInstance statement, String cleanedToken, String conceptType, String valueType, String listSeparator, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (listSeparator != null) {
             for (String exploded: cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
-                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken);
+                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, preprocessorConfig);
                 }
             }
             return statement;
         } else {
-            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken);
+            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, preprocessorConfig);
         }
     }
 
-    public static StatementInstance addAttributeOfColumnType(StatementInstance statement, String conceptType, String valueType, String cleanedValue) {
+    public static StatementInstance addAttributeOfColumnType(StatementInstance statement, String conceptType, String valueType, String cleanedValue, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+        if (preprocessorConfig != null) {
+            cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
+        }
+
         switch (valueType) {
             case "string":
                 statement = statement.has(conceptType, cleanedValue);
@@ -135,5 +139,21 @@ public class GeneratorUtil {
                 break;
         }
         return statement;
+    }
+
+    private static String applyPreprocessor(String cleanedValue, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+        DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig.PreprocessorParams params = preprocessorConfig.getParams();
+        String processorType = preprocessorConfig.getType();
+        switch (processorType) {
+            case "regex":
+                return applyRegexPreprocessor(cleanedValue, params.getRegexMatch(), params.getRegexReplace());
+            default:
+                throw new IllegalArgumentException("Preprocessor of type: <" + processorType + "> as specified in data config does not exist");
+        }
+    }
+
+    private static String applyRegexPreprocessor(String stringToProcess, String matchString, String replaceString) {
+        RegexPreprocessor rpp = new RegexPreprocessor(matchString, replaceString);
+        return rpp.applyProcessor(stringToProcess);
     }
 }

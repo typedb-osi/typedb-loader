@@ -35,6 +35,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - tracking of your migration status to stop/restart, or restart after failure
  - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami#schema-updating) for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
  - [Appending Attributes](https://github.com/bayer-science-for-a-better-life/grami#attribute-appending) to existing entities/relations
+ - [Basic Column Preprocessing using RegEx's](https://github.com/bayer-science-for-a-better-life/grami#preprocessors)
 
 After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
  - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/releases) - no coding - configuration required 
@@ -556,6 +557,83 @@ The data config entry would look like:
     "threads": 4
   }
 ```
+
+### Preprocessors
+
+Sometimes your data comes in an almost useful format. GraMi allows you to pre-process attribute columns using a regex preprocessor (any other ideas welcome!). It works like so:
+
+After slightly extending our example schema by another attribute:
+```GraphQL
+fakebook-link sub attribute,
+      value string;
+
+person sub entity,
+        ...
+        has fakebook-link;
+```
+
+```
+"append-pp-fakebook": {
+    "dataPath": "src/test/resources/phone-calls/append-fb-preprocessed.csv",
+    "separator": ",",
+    "processor": "append-pp-fb-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true
+      },
+      {
+        "columnName": "fb",
+        "generator": "fakebook-link",
+        "listSeparator": "###",
+        "preprocessor": {                               // add a preprocessor to an attribute
+          "type": "regex",                              // there is currently only this type available
+          "params": {                                   // the parameters the preprocessor requires
+            "regexMatch" : "^.*(fakebook\\.com.*)/$",   // the regex to match on
+            "regexReplace": "$1"                        // the regex to replace with
+          }
+        }
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  }
+```
+
+The processor config does not have to be modified in order to use the preprocessor:
+
+```
+{
+"processor": "append-pp-fb-to-person",
+  "processorType": "append-attribute",
+  "schemaType": "person",
+  "conceptGenerators": {
+    "attributes": {
+      "phone-number": {
+        "attributeType": "phone-number",
+        "valueType": "string"
+      },
+      "fakebook-link": {
+        "attributeType": "fakebook-link",
+        "valueType": "string",
+        "required": true
+      }
+    }
+  }
+}
+```
+
+This will turn the following [append-fb-preprocessed.csv](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/append-fb-preprocessed.csv):
+
+```
+phone_number,fb
++36 318 105 5629,https://www.fakebook.com/personOne/
++63 808 497 1769,https://www.fakebook.com/person-Two/
++62 533 266 3426,https://www.fakebook.com/person_three/
+```
+
+Using the first line as an example: it will insert only <fakebook.com/personOne> as the fakebook-link attribute.
 
 ### Using GraMi in your Java Application:
 

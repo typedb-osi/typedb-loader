@@ -71,7 +71,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
             if (dce.getAttributes() != null) {
                 for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-                    assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, pce);
+                    assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
                 }
             }
             insertStatements.add(assembledInsertStatement);
@@ -128,7 +128,7 @@ public class RelationInsertGenerator extends InsertGenerator {
                             String currentExplodedCleanedToken = cleanToken(exploded);
                             String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
                             String playerRole = playerGenerator.getRoleType();
-                            players.add(createPlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable));
+                            players.add(createPlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
                             playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
                             playerCounter++;
                         }
@@ -136,7 +136,7 @@ public class RelationInsertGenerator extends InsertGenerator {
                 } else { // single player, no columnListSeparator
                     String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
                     String playerRole = playerGenerator.getRoleType();
-                    players.add(createPlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable));
+                    players.add(createPlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
                     playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
                     playerCounter++;
                 }
@@ -208,27 +208,27 @@ public class RelationInsertGenerator extends InsertGenerator {
         return players;
     }
 
-    private StatementInstance createPlayerMatchStatement(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, String playerVariable) {
+    private StatementInstance createPlayerMatchStatement(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, String playerVariable, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         StatementInstance ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getUniquePlayerId();
         String attributeValueType = playerGenerator.getIdValueType();
-        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken);
+        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, preprocessorConfig);
         return ms;
     }
 
-    private StatementInstance createRelationPlayerMatchStatementByAttribute(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dataConfigMapping, String playerVariable) {
+    private StatementInstance createRelationPlayerMatchStatementByAttribute(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dcm, String playerVariable) {
         StatementInstance ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
-        String attributeType = playerGenerator.getMatchByAttribute().get(dataConfigMapping.getMatchByAttribute()).getAttributeType();
-        String attributeValueType = playerGenerator.getMatchByAttribute().get(dataConfigMapping.getMatchByAttribute()).getValueType();
-        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken);
+        String attributeType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getAttributeType();
+        String attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
+        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, dcm.getPreprocessor());
         return ms;
     }
 
-    private ArrayList<Statement> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dce, String playerVariable, int insertCounter) {
+    private ArrayList<Statement> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dcm, String playerVariable, int insertCounter) {
         ArrayList<Statement> assembledMatchStatements = new ArrayList<>();
 
         Statement relationPlayerMatchStatement = Graql.var(playerVariable);
@@ -239,21 +239,21 @@ public class RelationInsertGenerator extends InsertGenerator {
             if (!cleanToken(rowTokens[columnNameIndex]).isEmpty()) {
                 String cleanedToken = cleanToken(rowTokens[columnNameIndex]);
                 String relationPlayerPlayerVariable = "relplayer-player-" + insertCounter + "-" + i;
-                String relationPlayerPlayerType = playerGenerator.getMatchByPlayer().get(dce.getMatchByPlayers()[i]).getPlayerType();
-                String relationPlayerPlayerAttributeType = playerGenerator.getMatchByPlayer().get(dce.getMatchByPlayers()[i]).getUniquePlayerId();
-                String relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dce.getMatchByPlayers()[i]).getIdValueType();
+                String relationPlayerPlayerType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getPlayerType();
+                String relationPlayerPlayerAttributeType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getUniquePlayerId();
+                String relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
 
                 StatementInstance relationPlayerCurrentPlayerMatchStatement = Graql.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
-                relationPlayerCurrentPlayerMatchStatement = addAttributeOfColumnType(relationPlayerCurrentPlayerMatchStatement, relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken);
+                relationPlayerCurrentPlayerMatchStatement = addAttributeOfColumnType(relationPlayerCurrentPlayerMatchStatement, relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, dcm.getPreprocessor());
                 assembledMatchStatements.add(relationPlayerCurrentPlayerMatchStatement);
 
                 // here add the matched player to the relation statement (i.e.: (role: $variable)):
-                String relationPlayerPlayerRole = playerGenerator.getMatchByPlayer().get(dce.getMatchByPlayers()[i]).getRoleType();
+                String relationPlayerPlayerRole = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getRoleType();
                 relationPlayerMatchStatement = relationPlayerMatchStatement.rel(relationPlayerPlayerRole, relationPlayerPlayerVariable);
                 i++;
             } else {
                 // this ensures that only relations in which all required players are present actually enter the match statement - empty list = skip of insert
-                boolean requiredButNotPresent = playerGenerator.getMatchByPlayer().get(dce.getMatchByPlayers()[i]).isRequired();
+                boolean requiredButNotPresent = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).isRequired();
                 if (requiredButNotPresent) {
                     return new ArrayList<>();
                 }

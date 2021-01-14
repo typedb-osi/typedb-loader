@@ -20,8 +20,12 @@ define
       value string;
     twitter-username sub attribute,
       value string;
+    fakebook-link sub attribute,
+      value string;
+    call-rating sub attribute,
+      value long;
     added-attribute sub attribute,
-        value string;
+      value string;
 
     contract sub relation,
         relates provider,
@@ -32,6 +36,7 @@ define
         relates callee,
         has started-at,
         has duration,
+        has call-rating,
         plays past-call;
 
     communication-channel sub relation,
@@ -53,6 +58,7 @@ define
         has age,
         has nick-name,
         has twitter-username,
+        has fakebook-link,
         plays peer;
 
     added-entity sub entity,

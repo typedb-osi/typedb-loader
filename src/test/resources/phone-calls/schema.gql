@@ -20,6 +20,8 @@ define
       value string;
     twitter-username sub attribute,
       value string;
+    fakebook-link sub attribute,
+      value string;
     call-rating sub attribute,
       value long;
 
@@ -54,4 +56,5 @@ define
         has age,
         has nick-name,
         has twitter-username,
+        has fakebook-link,
         plays peer;

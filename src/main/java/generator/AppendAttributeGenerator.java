@@ -70,7 +70,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         StatementInstance appendAttributeMatchStatement = addEntityToMatchStatement(insertCounter);
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()){
-                appendAttributeMatchStatement = addAttribute(rowTokens, appendAttributeMatchStatement, columnNames, generatorMappingForMatchAttribute, pce);
+                appendAttributeMatchStatement = addAttribute(rowTokens, appendAttributeMatchStatement, columnNames, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
             }
         }
         matchStatements.add(appendAttributeMatchStatement);
@@ -79,7 +79,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         Statement appendAttributeInsertStatement = addEntityToInsertStatement(insertCounter);
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()){
-                appendAttributeInsertStatement = addAttribute(rowTokens, appendAttributeMatchStatement, columnNames, generatorMappingForAppendAttribute, pce);
+                appendAttributeInsertStatement = addAttribute(rowTokens, appendAttributeMatchStatement, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
             }
         }
         insertStatements.add((StatementInstance) appendAttributeInsertStatement);

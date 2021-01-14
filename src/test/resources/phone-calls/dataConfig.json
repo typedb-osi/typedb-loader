@@ -174,5 +174,31 @@
     ],
     "batchSize": 100,
     "threads": 4
+  },
+  "append-pp-fakebook": {
+    "dataPath": "src/test/resources/phone-calls/append-fb-preprocessed.csv",
+    "separator": ",",
+    "processor": "append-pp-fb-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true
+      },
+      {
+        "columnName": "fb",
+        "generator": "fakebook-link",
+        "listSeparator": "###",
+        "preprocessor": {
+          "type": "regex",
+          "params": {
+            "regexMatch" : "^.*(fakebook\\.com.*)/$",
+            "regexReplace": "$1"
+          }
+        }
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
   }
 }

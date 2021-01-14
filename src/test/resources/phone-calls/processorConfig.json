@@ -191,6 +191,24 @@
           }
         }
       }
+    },
+    {
+      "processor": "append-pp-fb-to-person",
+      "processorType": "append-attribute",
+      "schemaType": "person",
+      "conceptGenerators": {
+        "attributes": {
+          "phone-number": {
+            "attributeType": "phone-number",
+            "valueType": "string"
+          },
+          "fakebook-link": {
+            "attributeType": "fakebook-link",
+            "valueType": "string",
+            "required": true
+          }
+        }
+      }
     }
   ]
 }
