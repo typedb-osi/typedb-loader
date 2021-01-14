@@ -3,7 +3,6 @@ package migrator;
 import configuration.MigrationConfig;
 import grakn.client.GraknClient;
 import grakn.client.answer.ConceptMap;
-import grakn.protocol.session.AnswerProto;
 import graql.lang.Graql;
 import graql.lang.query.GraqlGet;
 import graql.lang.statement.Statement;
