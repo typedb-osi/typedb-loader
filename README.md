@@ -22,7 +22,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - supports any tabular data file with your separator of choice (i.e.: csv, tsv, whatever-sv...)
     - supports gzipped files
     - ignores unnecessary columns
- - Entity, Relation, and Relation-with-Relations Migration:
+ - [Entity](https://github.com/bayer-science-for-a-better-life/grami#migrating-entities), [Relation](https://github.com/bayer-science-for-a-better-life/grami#migrating-relations), and [Relation-with-Relation](https://github.com/bayer-science-for-a-better-life/grami#migrating-relation-with-relations) Migration:
     - migrate required/optional attributes of any grakn type (string, boolean, long, double, datetime)
     - migrate required/optional role players (entity & relations)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
@@ -298,7 +298,7 @@ Unity,+62 999 888 7777###+62 999 888 7778
   }
 ```
 
-##### Relation-with-Relation Processors
+### Migrating Relation-with-Relations
 
 Grakn comes with the powerful feature of using relations as players in other relations. Just remember that a relation-with-relation/s must be added AFTER the relations that will act as players in the relation have been migrated. GraMi will migrate all relation-with-relations after having migrated entities and relations - but keep this in mind as you are building your graph - relations are only inserted as expected when all its players are already present.
 
