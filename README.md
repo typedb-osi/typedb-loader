@@ -38,7 +38,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
  - [Basic Column Preprocessing using RegEx's](https://github.com/bayer-science-for-a-better-life/grami#preprocessors)
 
 After [creating your processor configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json) and [data configuration](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json), you can use GraMi
- - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami/releases) - no coding - configuration required 
+ - as a [Command Line Application](https://github.com/bayer-science-for-a-better-life/grami#using-grami-as-a-command-line-application) - no coding - configuration required 
  - in [your own Java project](https://github.com/bayer-science-for-a-better-life/grami#using-grami-in-your-java-application) - easy API - configuration required
  
 Please note that the recommended way of developing your schema is still to use your favorite code editor/IDE in combination with the grakn console.
