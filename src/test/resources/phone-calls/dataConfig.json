@@ -103,12 +103,102 @@
       {
         "columnName": "peer_2",
         "generator": "peer"
-      },
+      }
+    ],
+    "relationPlayers": [
       {
         "columnName": "call_started_at",
         "generator": "past-call",
+        "matchByAttribute": "started-at",
         "listSeparator": "###"
       }
     ]
+  },
+  "communication-channel-pm": {
+    "dataPath": "src/test/resources/phone-calls/communication-channel-pm.csv",
+    "separator": ",",
+    "processor": "communication-channel",
+    "batchSize": 100,
+    "threads": 4,
+    "players": [
+      {
+        "columnName": "peer_1",
+        "generator": "peer"
+      },
+      {
+        "columnName": "peer_2",
+        "generator": "peer"
+      }
+    ],
+    "relationPlayers": [
+      {
+        "columnNames": ["peer_1", "peer_2"],
+        "generator": "past-call",
+        "matchByPlayers": ["caller", "callee"]
+      }
+    ]
+  },
+  "append-twitter": {
+    "dataPath": "src/test/resources/phone-calls/append-twitter.csv",
+    "separator": ",",
+    "processor": "append-twitter-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true
+      },
+      {
+        "columnName": "twitter",
+        "generator": "twitter-username",
+        "listSeparator": "###"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  },
+  "append-call-rating": {
+    "dataPath": "src/test/resources/phone-calls/append-call-rating.csv",
+    "separator": ",",
+    "processor": "append-call-rating-to-call",
+    "attributes": [
+      {
+        "columnName": "started_at",
+        "generator": "started-at",
+        "match": true
+      },
+      {
+        "columnName": "call_rating",
+        "generator": "call-rating"
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
+  },
+  "append-pp-fakebook": {
+    "dataPath": "src/test/resources/phone-calls/append-fb-preprocessed.csv",
+    "separator": ",",
+    "processor": "append-pp-fb-to-person",
+    "attributes": [
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number",
+        "match": true
+      },
+      {
+        "columnName": "fb",
+        "generator": "fakebook-link",
+        "listSeparator": "###",
+        "preprocessor": {
+          "type": "regex",
+          "params": {
+            "regexMatch" : "^.*(fakebook\\.com.*)/$",
+            "regexReplace": "$1"
+          }
+        }
+      }
+    ],
+    "batchSize": 100,
+    "threads": 4
   }
 }

@@ -34,11 +34,17 @@ public class GraknInserter {
 
     // Schema Operations
     public GraknClient.Session setKeyspaceToSchema(GraknClient client, GraknClient.Session session) {
-        if (client.keyspaces().retrieve().contains(this.keyspaceName)) {
-            this.deleteKeyspace(client);
+        if (client.keyspaces().retrieve().contains(keyspaceName)) {
+            deleteKeyspace(client);
             session = getSession(client);
         }
-        String schema = this.loadSchemaFromFile();
+        String schema = loadSchemaFromFile();
+        defineToGrakn(schema, session);
+        return session;
+    }
+
+    public GraknClient.Session updateCurrentSchema(GraknClient client, GraknClient.Session session) {
+        String schema = loadSchemaFromFile();
         defineToGrakn(schema, session);
         return session;
     }
@@ -122,7 +128,7 @@ public class GraknInserter {
     }
 
     // Relation Operations
-    public int insertRelationToGrakn(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session) {
+    public int insertMatchInsertToGrakn(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session) {
 
         ArrayList<ArrayList<Statement>> matchStatements = statements.get(0);
         ArrayList<ArrayList<Statement>> insertStatements = statements.get(1);
@@ -140,13 +146,13 @@ public class GraknInserter {
         return i;
     }
 
-    public void futuresParallelInsertRelation(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session, int cores) throws ExecutionException, InterruptedException {
-        ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> batches = createEvenRelationBatches(statements, cores);
+    public void futuresParallelInsertMatchInsert(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session, int cores) throws ExecutionException, InterruptedException {
+        ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> batches = createEvenMatchInsertBatches(statements, cores);
 
         List<CompletableFuture<Integer>> futures = new ArrayList<>();
         for (ArrayList<ArrayList<ArrayList<Statement>>> batch : batches) {
             if (!batch.isEmpty()) {
-                CompletableFuture<Integer> inserted = CompletableFuture.supplyAsync(() -> insertRelationToGrakn(batch, session));
+                CompletableFuture<Integer> inserted = CompletableFuture.supplyAsync(() -> insertMatchInsertToGrakn(batch, session));
                 futures.add(inserted);
             }
         }
@@ -155,7 +161,7 @@ public class GraknInserter {
         }
     }
 
-    private static ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> createEvenRelationBatches(ArrayList<ArrayList<ArrayList<Statement>>> statements, int cores) {
+    private static ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> createEvenMatchInsertBatches(ArrayList<ArrayList<ArrayList<Statement>>> statements, int cores) {
 
         ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> batches = new ArrayList<>();
         ArrayList<String> batchStrings = new ArrayList<>();

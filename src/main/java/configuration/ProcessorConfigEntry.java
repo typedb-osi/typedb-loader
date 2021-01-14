@@ -55,13 +55,30 @@ public class ProcessorConfigEntry {
         throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
     }
 
+    public ConceptGenerator getRelationPlayerGenerator(String key) {
+        for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("relationPlayers").entrySet()) {
+            if (entry.getKey().equals(key)) {
+                return entry.getValue();
+            }
+        }
+        throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
+    }
+
     public HashMap<String,ConceptGenerator> getRelationRequiredPlayers() {
         HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation")) {
+        if (processorType.equals("relation") || processorType.equals("relation-with-relation")) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
             for (Map.Entry<String, ConceptGenerator> pg: playerGenerators.entrySet()) {
                 if (pg.getValue().isRequired()) {
                     relationPlayers.put(pg.getKey(), pg.getValue());
+                }
+            }
+            if (getConceptGenerators().get("relationPlayers") != null) {
+                HashMap<String, ConceptGenerator> relationPlayerGenerators = getConceptGenerators().get("relationPlayers");
+                for (Map.Entry<String, ConceptGenerator> pg: relationPlayerGenerators.entrySet()) {
+                    if (pg.getValue().isRequired()) {
+                        relationPlayers.put(pg.getKey(), pg.getValue());
+                    }
                 }
             }
         }
@@ -116,6 +133,10 @@ public class ProcessorConfigEntry {
         private String uniquePlayerId;
         private String idValueType;
 
+        // for relationPlayers
+        private HashMap<String, MatchBy> matchByPlayer;
+        private HashMap<String, MatchBy> matchByAttribute;
+
         public boolean isRequired() {
             return required;
         }
@@ -142,6 +163,55 @@ public class ProcessorConfigEntry {
 
         public String getIdValueType() {
             return idValueType;
+        }
+
+        public HashMap<String, MatchBy> getMatchByPlayer() { return matchByPlayer; }
+
+        public HashMap<String, MatchBy> getMatchByAttribute() {
+            return matchByAttribute;
+        }
+
+        public static class MatchBy {
+            // for attributes and players:
+            private boolean required;
+
+            // for attributes
+            private String attributeType;
+            private String valueType;
+
+            // for players
+            private String playerType;
+            private String roleType;
+            private String uniquePlayerId;
+            private String idValueType;
+
+            public boolean isRequired() {
+                return required;
+            }
+
+            public String getAttributeType() {
+                return attributeType;
+            }
+
+            public String getValueType() {
+                return valueType;
+            }
+
+            public String getPlayerType() {
+                return playerType;
+            }
+
+            public String getRoleType() {
+                return roleType;
+            }
+
+            public String getUniquePlayerId() {
+                return uniquePlayerId;
+            }
+
+            public String getIdValueType() {
+                return idValueType;
+            }
         }
     }
 

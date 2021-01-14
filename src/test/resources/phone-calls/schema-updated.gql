@@ -24,6 +24,8 @@ define
       value string;
     call-rating sub attribute,
       value long;
+    added-attribute sub attribute,
+      value string;
 
     contract sub relation,
         relates provider,
@@ -58,3 +60,10 @@ define
         has twitter-username,
         has fakebook-link,
         plays peer;
+
+    added-entity sub entity,
+        has added-attribute,
+        plays added-role;
+
+    added-relation sub relation,
+        relates added-role;

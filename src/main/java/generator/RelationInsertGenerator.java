@@ -1,6 +1,7 @@
 package generator;
 
 import static generator.GeneratorUtil.idxOf;
+import static generator.GeneratorUtil.indicesOf;
 import static generator.GeneratorUtil.cleanToken;
 import static generator.GeneratorUtil.addAttribute;
 import static generator.GeneratorUtil.addAttributeOfColumnType;
@@ -17,16 +18,16 @@ import java.util.*;
 
 public class RelationInsertGenerator extends InsertGenerator {
 
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry gce;
+    public final DataConfigEntry dce;
+    public final ProcessorConfigEntry pce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
 
     public RelationInsertGenerator(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry) {
         super();
         this.dce = dce;
-        this.gce = processorConfigEntry;
-        appLogger.debug("Creating RelationInsertGenerator for " + gce.getProcessor() + " of type " + gce.getProcessorType());
+        this.pce = processorConfigEntry;
+        appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
     public ArrayList<ArrayList<ArrayList<Statement>>> graknRelationInsert(ArrayList<String> rows, String header) throws Exception {
@@ -54,39 +55,40 @@ public class RelationInsertGenerator extends InsertGenerator {
     }
 
     public ArrayList<ArrayList<Statement>> graknRelationshipQueryFromRow(String row, String header, int insertCounter) throws Exception {
+        String fileSeparator = dce.getSeparator();
+        String[] rowTokens = row.split(fileSeparator);
+        String[] columnNames = header.split(fileSeparator);
+        appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
+        GeneratorUtil.malformedRow(row, rowTokens, columnNames.length);
 
-        String[] tokens = row.split(dce.getSeparator());
-        String[] headerTokens = header.split(dce.getSeparator());
-        appLogger.debug("processing tokenized row: " + Arrays.toString(tokens));
-        GeneratorUtil.malformedRow(row, tokens, headerTokens.length);
-
-        ArrayList<Statement> miStatements = new ArrayList<>(createPlayerMatchAndInsert(tokens, headerTokens, insertCounter));
+        ArrayList<Statement> miStatements = new ArrayList<>(createPlayerMatchAndInsert(rowTokens, columnNames, insertCounter));
         ArrayList<Statement> matchStatements = new ArrayList<>(miStatements.subList(0, miStatements.size() - 1));
         ArrayList<Statement> insertStatements = new ArrayList<>();
 
         if (!matchStatements.isEmpty()) {
-            StatementInstance playerInsert = (StatementInstance) miStatements.subList(miStatements.size() - 1, miStatements.size()).get(0);
-            StatementInstance insert = relationInsert(playerInsert);
+            StatementInstance playersInsertStatement = (StatementInstance) miStatements.subList(miStatements.size() - 1, miStatements.size()).get(0);
+            StatementInstance assembledInsertStatement = relationInsert(playersInsertStatement);
+
             if (dce.getAttributes() != null) {
-                for (DataConfigEntry.GeneratorSpecification attDataConfigEntry : dce.getAttributes()) {
-                    insert = addAttribute(tokens, insert, headerTokens, attDataConfigEntry, gce.getAttributeGenerator(attDataConfigEntry.getGenerator()));
+                for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+                    assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
                 }
             }
-            insertStatements.add(insert);
+            insertStatements.add(assembledInsertStatement);
 
-            ArrayList<ArrayList<Statement>> queries = new ArrayList<>();
-            queries.add(matchStatements);
-            queries.add(insertStatements);
+            ArrayList<ArrayList<Statement>> assembledStatements = new ArrayList<>();
+            assembledStatements.add(matchStatements);
+            assembledStatements.add(insertStatements);
 
-            if (isValid(queries)) {
-                appLogger.debug("valid query: <" + assembleQuery(queries) + ">");
-                return queries;
+            if (isValid(assembledStatements)) {
+                appLogger.debug("valid query: <" + assembleQuery(assembledStatements) + ">");
+                return assembledStatements;
             } else {
-                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(tokens));
+                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                 return null;
             }
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c has 0 players. Faulty tokenized row: " + Arrays.toString(tokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }
@@ -100,55 +102,177 @@ public class RelationInsertGenerator extends InsertGenerator {
         return ret.toString();
     }
 
-    private Collection<? extends Statement> createPlayerMatchAndInsert(String[] tokens, String[] headerTokens, int insertCounter) {
+    private Collection<? extends Statement> createPlayerMatchAndInsert(String[] rowTokens, String[] columnNames, int insertCounter) {
         ArrayList<Statement> players = new ArrayList<>();
         Statement playersInsertStatement = Graql.var("rel-" + insertCounter);
         int playerCounter = 0;
-        for (DataConfigEntry.GeneratorSpecification playerDataConfigEntry : dce.getPlayers()) {
-            ProcessorConfigEntry.ConceptGenerator playerGenerator = gce.getPlayerGenerator(playerDataConfigEntry.getGenerator());
-            int playerDataIndex = idxOf(headerTokens, playerDataConfigEntry);
 
-            if(playerDataIndex == -1) {
-                appLogger.error("The column header in your dataconfig mapping to the uniquePlayerId [" + playerGenerator.getUniquePlayerId() + "] cannot be found in the file you specified.");
+        // add Entity Players:
+        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForPlayer : dce.getPlayers()) {
+            String generatorKey = generatorMappingForPlayer.getGenerator();
+            ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getPlayerGenerator(generatorKey);
+            String columnName = generatorMappingForPlayer.getColumnName();
+            int columnNameIndex = idxOf(columnNames, columnName);
+
+            if(columnNameIndex == -1) {
+                appLogger.error("The column header " + generatorMappingForPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
             }
 
-            if (tokens.length > playerDataIndex && // make sure that there are enough tokens in the row for your column of interest
-                    !cleanToken(tokens[playerDataIndex]).isEmpty()) { // make sure that after cleaning, there is more than an empty string
-                String listSeparator = playerDataConfigEntry.getListSeparator();
-                if(listSeparator != null) {
-                    for (String exploded: tokens[playerDataIndex].split(listSeparator)) {
+            if (rowTokens.length > columnNameIndex && // make sure that there are enough rowTokens in the row for your column of interest
+                    !cleanToken(rowTokens[columnNameIndex]).isEmpty()) { // make sure that after cleaning, there is more than an empty string
+                String currentCleanedToken = cleanToken(rowTokens[columnNameIndex]);
+                String columnListSeparator = generatorMappingForPlayer.getListSeparator();
+                if(columnListSeparator != null) {
+                    for (String exploded: currentCleanedToken.split(columnListSeparator)) {
                         if(!cleanToken(exploded).isEmpty()) {
+                            String currentExplodedCleanedToken = cleanToken(exploded);
                             String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
-                            players.add(createPlayerMatchStatement(exploded, playerGenerator, playerVariable));
-                            playersInsertStatement = playersInsertStatement.rel(playerGenerator.getRoleType(), playerVariable);
+                            String playerRole = playerGenerator.getRoleType();
+                            players.add(createPlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                            playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
                             playerCounter++;
                         }
                     }
-                } else { // single player, no listSeparator
+                } else { // single player, no columnListSeparator
                     String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
-                    players.add(createPlayerMatchStatement(cleanToken(tokens[playerDataIndex]), playerGenerator, playerVariable));
-                    playersInsertStatement = playersInsertStatement.rel(playerGenerator.getRoleType(), playerVariable);
+                    String playerRole = playerGenerator.getRoleType();
+                    players.add(createPlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                    playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
                     playerCounter++;
                 }
             }
         }
+        // add Relation Players
+        if (dce.getRelationPlayers() != null) {
+            for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForRelationPlayer : dce.getRelationPlayers()) {
+                String generatorKey = generatorMappingForRelationPlayer.getGenerator();
+                ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
+
+                // if matching RelationPlayer by Attribute:
+                if (generatorMappingForRelationPlayer.getMatchByAttribute() != null) {
+                    String columnName = generatorMappingForRelationPlayer.getColumnName();
+                    int columnNameIndex = idxOf(columnNames, columnName);
+
+                    if(columnNameIndex == -1) {
+                        appLogger.error("The column header " + generatorMappingForRelationPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
+                    }
+
+                    if (rowTokens.length > columnNameIndex &&
+                            !cleanToken(rowTokens[columnNameIndex]).isEmpty()) {
+                        String currentCleanedToken = cleanToken(rowTokens[columnNameIndex]);
+                        String columnListSeparator = generatorMappingForRelationPlayer.getListSeparator();
+                        if(columnListSeparator != null) {
+                            for (String exploded: currentCleanedToken.split(columnListSeparator)) {
+                                if(!cleanToken(exploded).isEmpty()) {
+                                    String currentExplodedCleanedToken = cleanToken(exploded);
+                                    String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
+                                    String playerRole = playerGenerator.getRoleType();
+                                    players.add(createRelationPlayerMatchStatementByAttribute(currentExplodedCleanedToken, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
+                                    playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
+                                    playerCounter++;
+                                }
+                            }
+                        } else { // single player, no listSeparator
+                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
+                            String playerRole = playerGenerator.getRoleType();
+                            players.add(createRelationPlayerMatchStatementByAttribute(currentCleanedToken, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
+                            playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
+                            playerCounter++;
+                        }
+                    }
+                // if matching the relation player by players in that relation:
+                } else if (generatorMappingForRelationPlayer.getMatchByPlayers().length > 0) {
+                    int[] columnNameIndices = indicesOf(columnNames, generatorMappingForRelationPlayer.getColumnNames());
+
+                    for (int i : columnNameIndices) {
+                        if(i == -1) {
+                            appLogger.error("The column header " + generatorMappingForRelationPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
+                        }
+                    }
+
+                    int maxColumnIndex = Arrays.stream(columnNameIndices).max().getAsInt();
+                    if (rowTokens.length > maxColumnIndex) {
+                        String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
+                        String playerRole = playerGenerator.getRoleType();
+                        players.addAll(createRelationPlayerMatchStatementByPlayers(rowTokens, columnNameIndices, playerGenerator, generatorMappingForRelationPlayer, playerVariable, insertCounter));
+                        playersInsertStatement = playersInsertStatement.rel(playerRole, playerVariable);
+                        playerCounter++;
+                    }
+                } else {
+                    appLogger.error("Your config entry for column header: " + generatorMappingForRelationPlayer.getColumnName() + "needs to specify matching either by player/s or by an attribute");
+                }
+            }
+        }
+
         players.add(playersInsertStatement);
         return players;
     }
 
-    private StatementInstance createPlayerMatchStatement(String token, ProcessorConfigEntry.ConceptGenerator playerGenerator, String playerVariable) {
-        String cleanedValue = cleanToken(token);
+    private StatementInstance createPlayerMatchStatement(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, String playerVariable, DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         StatementInstance ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
-        ms = addAttributeOfColumnType(ms, playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedValue);
-                //.has(playerGenerator.getUniquePlayerId(), cleanedValue);
+        String attributeType = playerGenerator.getUniquePlayerId();
+        String attributeValueType = playerGenerator.getIdValueType();
+        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, preprocessorConfig);
         return ms;
     }
 
+    private StatementInstance createRelationPlayerMatchStatementByAttribute(String cleanedToken, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dcm, String playerVariable) {
+        StatementInstance ms = Graql
+                .var(playerVariable)
+                .isa(playerGenerator.getPlayerType());
+        String attributeType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getAttributeType();
+        String attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
+        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, dcm.getPreprocessor());
+        return ms;
+    }
+
+    private ArrayList<Statement> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dcm, String playerVariable, int insertCounter) {
+        ArrayList<Statement> assembledMatchStatements = new ArrayList<>();
+
+        Statement relationPlayerMatchStatement = Graql.var(playerVariable);
+
+        //match the n entites with their attributes
+        int i = 0;
+        for (int columnNameIndex : columnNameIndices) {
+            if (!cleanToken(rowTokens[columnNameIndex]).isEmpty()) {
+                String cleanedToken = cleanToken(rowTokens[columnNameIndex]);
+                String relationPlayerPlayerVariable = "relplayer-player-" + insertCounter + "-" + i;
+                String relationPlayerPlayerType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getPlayerType();
+                String relationPlayerPlayerAttributeType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getUniquePlayerId();
+                String relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
+
+                StatementInstance relationPlayerCurrentPlayerMatchStatement = Graql.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
+                relationPlayerCurrentPlayerMatchStatement = addAttributeOfColumnType(relationPlayerCurrentPlayerMatchStatement, relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, dcm.getPreprocessor());
+                assembledMatchStatements.add(relationPlayerCurrentPlayerMatchStatement);
+
+                // here add the matched player to the relation statement (i.e.: (role: $variable)):
+                String relationPlayerPlayerRole = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getRoleType();
+                relationPlayerMatchStatement = relationPlayerMatchStatement.rel(relationPlayerPlayerRole, relationPlayerPlayerVariable);
+                i++;
+            } else {
+                // this ensures that only relations in which all required players are present actually enter the match statement - empty list = skip of insert
+                boolean requiredButNotPresent = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).isRequired();
+                if (requiredButNotPresent) {
+                    return new ArrayList<>();
+                }
+            }
+        }
+
+        if (assembledMatchStatements.size() > 0) {
+            // complete the relation match statement & add to assembly:
+            relationPlayerMatchStatement = relationPlayerMatchStatement.isa(playerGenerator.getPlayerType());
+            assembledMatchStatements.add(relationPlayerMatchStatement);
+        }
+
+        return assembledMatchStatements;
+    }
+
+
     private StatementInstance relationInsert(StatementInstance si) {
         if (si != null) {
-            si = si.isa(gce.getSchemaType());
+            si = si.isa(pce.getSchemaType());
             return si;
         } else {
             return null;
@@ -164,7 +288,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         }
         String insertStatement = insertStatements.get(0).toString();
         // missing required players
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRelationRequiredPlayers().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: pce.getRelationRequiredPlayers().entrySet()) {
             if (!matchStatement.toString().contains("isa " + generatorEntry.getValue().getPlayerType())) {
                 return false;
             }
@@ -173,7 +297,7 @@ public class RelationInsertGenerator extends InsertGenerator {
             }
         }
         // missing required attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: gce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry: pce.getRequiredAttributes().entrySet()) {
             if (!insertStatement.contains("has " + generatorEntry.getValue().getAttributeType())) {
                 return false;
             }

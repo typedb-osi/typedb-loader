@@ -1,11 +1,16 @@
 package configuration;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 public class DataConfigEntry {
     private String dataPath;
     private String separator;
     private String processor;
-    private GeneratorSpecification[] attributes;
-    private GeneratorSpecification[] players;
+    private DataConfigGeneratorMapping[] attributes;
+    private DataConfigGeneratorMapping[] players;
+    private DataConfigGeneratorMapping[] relationPlayers;
     private int batchSize;
     private int threads;
 
@@ -21,12 +26,16 @@ public class DataConfigEntry {
         return processor;
     }
 
-    public GeneratorSpecification[] getAttributes() {
+    public DataConfigGeneratorMapping[] getAttributes() {
         return attributes;
     }
 
-    public GeneratorSpecification[] getPlayers() {
+    public DataConfigGeneratorMapping[] getPlayers() {
         return players;
+    }
+
+    public DataConfigGeneratorMapping[] getRelationPlayers() {
+        return relationPlayers;
     }
 
     public int getBatchSize() {
@@ -37,13 +46,32 @@ public class DataConfigEntry {
         return threads;
     }
 
-    public static class GeneratorSpecification {
+    public ArrayList<DataConfigEntry.DataConfigGeneratorMapping> getMatchAttributes() {
+        ArrayList<DataConfigEntry.DataConfigGeneratorMapping> matchAttributes = new ArrayList<>();
+        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping: getAttributes()) {
+            if (attributeMapping.isMatch()) {
+                matchAttributes.add(attributeMapping);
+            }
+        }
+        return matchAttributes;
+    }
+
+    public static class DataConfigGeneratorMapping {
         private String columnName;
+        private String[] columnNames;
         private String generator;
         private String listSeparator;
+        private String matchByAttribute;
+        private String[] matchByPlayers;
+        private boolean match;
+        private PreprocessorConfig preprocessor;
 
         public String getColumnName() {
             return columnName;
+        }
+
+        public String[] getColumnNames() {
+            return columnNames;
         }
 
         public String getGenerator() {
@@ -53,5 +81,40 @@ public class DataConfigEntry {
         public String getListSeparator() {
             return listSeparator;
         }
+
+        public String[] getMatchByPlayers() { return matchByPlayers; }
+
+        public String getMatchByAttribute() { return matchByAttribute; }
+
+        public boolean isMatch() { return match; }
+
+        public PreprocessorConfig getPreprocessor() { return preprocessor; }
+
+        public static class PreprocessorConfig {
+            private String type;
+            private PreprocessorParams params;
+
+            public String getType() {
+                return type;
+            }
+
+            public PreprocessorParams getParams() {
+                return params;
+            }
+
+            public static class PreprocessorParams {
+                String regexMatch;
+                String regexReplace;
+
+                public String getRegexMatch() {
+                    return regexMatch;
+                }
+
+                public String getRegexReplace() {
+                    return regexReplace;
+                }
+            }
+        }
+
     }
 }

@@ -113,7 +113,7 @@
     },
     {
       "processor": "communication-channel",
-      "processorType": "relation-of-relation",
+      "processorType": "relation-with-relation",
       "schemaType": "communication-channel",
       "conceptGenerators": {
         "players": {
@@ -123,12 +123,88 @@
             "idValueType": "string",
             "roleType": "peer",
             "required": true
-          },
+          }
+        },
+        "relationPlayers": {
           "past-call": {
             "playerType": "call",
-            "uniquePlayerId": "started-at",
-            "idValueType": "datetime",
             "roleType": "past-call",
+            "required": true,
+            "matchByAttribute": {
+              "started-at": {
+                "attributeType": "started-at",
+                "valueType": "datetime"
+              }
+            },
+            "matchByPlayer": {
+              "caller": {
+                "playerType": "person",
+                "uniquePlayerId": "phone-number",
+                "idValueType": "string",
+                "roleType": "caller",
+                "required": true
+              },
+              "callee": {
+                "playerType": "person",
+                "uniquePlayerId": "phone-number",
+                "idValueType": "string",
+                "roleType": "callee",
+                "required": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "processor": "append-twitter-to-person",
+      "processorType": "append-attribute",
+      "schemaType": "person",
+      "conceptGenerators": {
+        "attributes": {
+          "phone-number": {
+            "attributeType": "phone-number",
+            "valueType": "string"
+          },
+          "twitter-username": {
+            "attributeType": "twitter-username",
+            "valueType": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "processor": "append-call-rating-to-call",
+      "processorType": "append-attribute",
+      "schemaType": "call",
+      "conceptGenerators": {
+        "attributes": {
+          "started-at": {
+            "attributeType": "started-at",
+            "valueType": "datetime"
+          },
+          "call-rating": {
+            "attributeType": "call-rating",
+            "valueType": "long",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "processor": "append-pp-fb-to-person",
+      "processorType": "append-attribute",
+      "schemaType": "person",
+      "conceptGenerators": {
+        "attributes": {
+          "phone-number": {
+            "attributeType": "phone-number",
+            "valueType": "string"
+          },
+          "fakebook-link": {
+            "attributeType": "fakebook-link",
+            "valueType": "string",
             "required": true
           }
         }
