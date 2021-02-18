@@ -3,20 +3,15 @@ package migrator;
 import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
 import grakn.client.GraknClient;
+import grakn.client.GraknClient.Session;
+import grakn.client.GraknClient.Transaction;
 import graql.lang.Graql;
-import graql.lang.query.GraqlGet;
-import graql.lang.statement.Statement;
-import graql.lang.statement.StatementInstance;
+import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
@@ -24,56 +19,61 @@ import static util.Util.getAbsPath;
 
 public class SchemaUpdaterTest {
 
+    String graknURI = "localhost:1729";
+
     @Test
     public void updateSchemaTest() throws IOException {
 
-        String keyspaceName = "grami_phone_call_test_su";
+        String databaseName = "grami_phone_call_test_su";
         String asp = getAbsPath("src/test/resources/phone-calls/schema.gql");
         String msp = getAbsPath("src/test/resources/phone-calls/migrationStatus.json");
         String adcp = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
+        MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
         mig.migrate(true, true, true,true);
 
-        GraknInserter gi = new GraknInserter("localhost", "48555", asp, keyspaceName);
+        GraknInserter gi = new GraknInserter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
 
         asp = getAbsPath("src/test/resources/phone-calls/schema-updated.gql");
-        SchemaUpdateConfig suConfig = new SchemaUpdateConfig("localhost:48555",keyspaceName, asp);
+        SchemaUpdateConfig suConfig = new SchemaUpdateConfig(graknURI,databaseName, asp);
         SchemaUpdater su = new SchemaUpdater(suConfig);
         su.updateSchema();
 
-        postUpdateSchemaTests(gi, keyspaceName);
+        postUpdateSchemaTests(gi);
     }
 
-    private void postUpdateSchemaTests(GraknInserter gi, String keyspace) {
+    private void postUpdateSchemaTests(GraknInserter gi) {
         GraknClient client = gi.getClient();
-        GraknClient.Session session = client.session(keyspace);
+        Session session = gi.getDataSession(client);
 
         // query attribute type
-        GraknClient.Transaction read = session.transaction().read();
-        GraqlGet getQuery = Graql.match(var("a").type("added-attribute")).get().limit(1000);
-        Assert.assertEquals(1, read.stream(getQuery).get().count());
+        Transaction read = session.transaction(Transaction.Type.READ);
+        GraqlMatch.Filtered getQuery = Graql.match(var("a").type("added-attribute")).get("a");
+        Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
 
         // query entity type
-        read = session.transaction().read();
-        getQuery = Graql.match(var("a").type("added-entity")).get().limit(1000);
-        Assert.assertEquals(1, read.stream(getQuery).get().count());
+        read = session.transaction(Transaction.Type.READ);
+        GraqlMatch.Limited getQuery2 = Graql.match(var("a").type("added-entity")).get("a").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query relation type
-        read = session.transaction().read();
-        getQuery = Graql.match(var("a").type("added-relation")).get().limit(1000);
-        Assert.assertEquals(1, read.stream(getQuery).get().count());
+        read = session.transaction(Transaction.Type.READ);
+        getQuery2 = Graql.match(var("a").type("added-relation")).get("a").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query role type
-        read = session.transaction().read();
-        getQuery = Graql.match(type("added-relation").relates(var("r"))).get().limit(1000);
-        Assert.assertEquals(1, read.stream(getQuery).get().count());
+        read = session.transaction(Transaction.Type.READ);
+        getQuery2 = Graql.match(type("added-relation").relates(var("r"))).limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
+
+        session.close();
+        client.close();
     }
 
 }

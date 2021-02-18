@@ -1,53 +1,55 @@
 package insert;
 
 import grakn.client.GraknClient;
-import grakn.client.answer.ConceptMap;
+import grakn.client.GraknClient.Session;
+import grakn.client.GraknClient.Transaction;
 import graql.lang.Graql;
 import graql.lang.query.GraqlDelete;
-import graql.lang.query.GraqlGet;
 import graql.lang.query.GraqlInsert;
+import graql.lang.query.GraqlMatch;
 import org.junit.Assert;
 import org.junit.Test;
 import util.Util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static graql.lang.Graql.parse;
 import static graql.lang.Graql.var;
 
 public class GraknInserterTest {
 
-    GraknInserter gm;
-    String keyspaceName = "grakn_migrator_test";
+    GraknInserter gi;
+    String databaseName = "grakn_migrator_test";
+    String schemaPath;
 
     public GraknInserterTest() {
-        String schemaPath = Util.getAbsPath("src/test/resources/genericTests/schema-test.gql");
-        this.gm = new GraknInserter("localhost", "48555", schemaPath, keyspaceName);
+        this.schemaPath = Util.getAbsPath("src/test/resources/genericTests/schema-test.gql");
+        this.gi = new GraknInserter("localhost", "1729", schemaPath, databaseName);
     }
 
     @Test
     public void reloadKeyspaceTest() {
-        GraknClient client = gm.getClient();
-        GraknClient.Session session = client.session(keyspaceName);
+        GraknClient client = gi.getClient();
 
-        session = gm.setKeyspaceToSchema(client, session);
-        Assert.assertTrue(client.keyspaces().retrieve().contains(keyspaceName));
+        gi.cleanAndDefineSchemaToDatabase(client);
+        Assert.assertTrue(client.databases().contains(databaseName));
 
         //ensure Keyspace contains schema
-        GraknClient.Transaction read = session.transaction().read();
-        GraqlGet getQuery = Graql.match(var("e").sub("entity")).get().limit(3);
-        Assert.assertEquals(3, read.stream(getQuery).get().count());
+        Session dataSession = gi.getDataSession(client);
+        Transaction read = dataSession.transaction(Transaction.Type.READ);
+        GraqlMatch.Limited mq = Graql.match(var("e").sub("entity")).get("e").limit(100);
+        Assert.assertEquals(4, read.query().match(mq).count());
         read.close();
 
-        session.close();
+         read = dataSession.transaction(Transaction.Type.READ);
+        mq = Graql.match(var("e").type("entity1")).get("e").limit(100);
+        Assert.assertEquals(1, read.query().match(mq).count());
+        read.close();
+
+        dataSession.close();
         client.close();
     }
 
     @Test
     public void loadSchemaFromFileTest() {
-        String schema = gm.loadSchemaFromFile();
+        String schema = Util.loadSchemaFromFile(schemaPath);
 
         Assert.assertTrue("schema test positive", schema.contains("entity1 sub entity"));
         Assert.assertFalse("schema test negative", schema.contains("entity99 sub entity"));
@@ -56,60 +58,48 @@ public class GraknInserterTest {
     @Test
     public void insertToGraknTest() {
 
-        GraknClient client = gm.getClient();
-        GraknClient.Session session = client.session(keyspaceName);
-
-        session = gm.setKeyspaceToSchema(client, session);
+        GraknClient client = gi.getClient();
+        gi.cleanAndDefineSchemaToDatabase(client);
 
         //perform data entry
-        GraknClient.Transaction write = session.transaction().write();
+        Session dataSession = gi.getDataSession(client);
+        Transaction write = dataSession.transaction(Transaction.Type.WRITE);
         GraqlInsert insertQuery = Graql.insert(var("e").isa("entity1").has("entity1-id", "ide1"));
-        write.execute(insertQuery);
+        write.query().insert(insertQuery);
         write.commit();
+        write.close();
 
         //ensure graph contains our insert
-        GraknClient.Transaction read = session.transaction().read();
-        GraqlGet getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get().limit(1);
-        Assert.assertEquals(1, read.stream(getQuery).get().count());
+        Transaction read = dataSession.transaction(Transaction.Type.READ);
+        GraqlMatch.Limited getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get("e").limit(100);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
 
-        read = session.transaction().read();
-        getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide2")).get().limit(1);
-        Assert.assertEquals(0, read.stream(getQuery).get().count());
+        read = dataSession.transaction(Transaction.Type.READ);
+        getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide2")).limit(100);
+        Assert.assertEquals(0, read.query().match(getQuery).count());
         read.close();
 
         //another test for our insert
-        List<String> queryList = Arrays.asList(
-                "match ",
-                " $e isa entity1, has entity1-id \"ide1\";",
-                " get $e;"
-        );
-        read = session.transaction().read();
-        List<String> res = new ArrayList<String>();
-        List<ConceptMap> answers = read.execute((GraqlGet) parse(String.join("", queryList))).get();
-        GraknClient.Session finalSession = session;
-        answers.forEach(a -> {
-            finalSession.transaction().read().getConcept(a.get("e").id()).asThing().attributes().forEach(l -> {
-                System.out.println(l.value());
-                res.add(l.value().toString());
+        read = dataSession.transaction(Transaction.Type.READ);
+        getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get("e").limit(100);
+        read.query().match(getQuery).forEach( answers -> {
+            answers.concepts().stream().forEach( entry -> {
+                Assert.assertTrue(entry.isEntity());
             });
         });
-        Assert.assertEquals("ide1", res.get(0));
         read.close();
 
         //clean up:
-        GraknClient.Transaction delete = session.transaction().write();
+        Transaction delete = dataSession.transaction(Transaction.Type.WRITE);
         GraqlDelete delQuery = Graql.match(
                 var("e").isa("entity1").has("entity1-id", "ide1")
         ).delete(var("e").isa("entity1"));
-        delete.execute(delQuery);
-        delQuery = Graql.match(
-                var("a").isa("entity1-id").val("ide1")
-        ).delete(var("a").isa("entity1-id"));
-        delete.execute(delQuery);
+        delete.query().delete(delQuery);
         delete.commit();
+        delete.close();
 
-        session.close();
+        dataSession.close();
         client.close();
     }
 

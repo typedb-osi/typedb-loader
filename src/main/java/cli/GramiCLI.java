@@ -8,7 +8,7 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 
-@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.0.3", mixinStandardHelpOptions = true)
+@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.0", mixinStandardHelpOptions = true)
 public class GramiCLI {
 
     public static void main(String[] args) {
@@ -40,7 +40,7 @@ class MigrateCommand implements Runnable {
     @CommandLine.Option(names = {"-k", "--keyspace"}, description = "target keyspace in your grakn instance", required = true)
     private String keyspaceName;
 
-    @CommandLine.Option(names = {"-g", "--grakn"}, description = "optional - grakn DB in format: server:port (default: localhost:48555)", defaultValue = "localhost:48555")
+    @CommandLine.Option(names = {"-g", "--grakn"}, description = "optional - grakn DB in format: server:port (default: localhost:1729)", defaultValue = "localhost:1729")
     private String graknURI;
 
     @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists")

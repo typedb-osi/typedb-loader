@@ -1,228 +1,146 @@
 package insert;
 
 import grakn.client.GraknClient;
+import grakn.client.GraknClient.Transaction;
+import grakn.client.GraknClient.Session;
 import graql.lang.Graql;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDefine;
-import graql.lang.statement.Statement;
+import graql.lang.query.GraqlInsert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static graql.lang.Graql.parse;
+import static util.Util.loadSchemaFromFile;
 
 public class GraknInserter {
 
     private final String schemaPath;
-    private final String keyspaceName;
-    private final String uri;
+    private final String databaseName;
+    private final String graknURI;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
-    public GraknInserter(String uri, String port, String schemaPath, String keyspaceName) {
+    public GraknInserter(String graknURI, String port, String schemaPath, String databaseName) {
         this.schemaPath = schemaPath;
-        this.keyspaceName = keyspaceName;
-        this.uri = String.format("%s:%s", uri, port);
+        this.databaseName = databaseName;
+        this.graknURI = String.format("%s:%s", graknURI, port);
     }
 
     // Schema Operations
-    public GraknClient.Session setKeyspaceToSchema(GraknClient client, GraknClient.Session session) {
-        if (client.keyspaces().retrieve().contains(keyspaceName)) {
-            deleteKeyspace(client);
-            session = getSession(client);
-        }
-        String schema = loadSchemaFromFile();
-        defineToGrakn(schema, session);
-        return session;
+    public void cleanAndDefineSchemaToDatabase(GraknClient client) {
+        deleteDatabaseIfExists(client);
+        createDatabase(client);
+        String schema = loadSchemaFromFile(schemaPath);
+        defineToGrakn(schema, client);
     }
 
-    public GraknClient.Session updateCurrentSchema(GraknClient client, GraknClient.Session session) {
-        String schema = loadSchemaFromFile();
-        defineToGrakn(schema, session);
-        return session;
+    private void createDatabase(GraknClient client) {
+        client.databases().create(databaseName);
     }
 
-    public String loadSchemaFromFile() {
-        String schema="";
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(this.schemaPath)));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            while (line != null) {
-                sb.append(line).append("\n");
-                line = br.readLine();
-            }
-            schema = sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return schema;
-    }
+    private void defineToGrakn(String schemaAsString, GraknClient client) {
+        Session schemaSession = getSchemaSession(client);
+        GraqlDefine q = Graql.parseQuery(schemaAsString);
 
-    private void defineToGrakn(String insertString, GraknClient.Session session) {
-        GraknClient.Transaction writeTransaction = session.transaction().write();
-        writeTransaction.execute((GraqlDefine) parse(insertString));
+
+        Transaction writeTransaction = schemaSession.transaction(Transaction.Type.WRITE);
+        writeTransaction.query().define(q);
         writeTransaction.commit();
-        appLogger.info("Successfully defined schema");
+        writeTransaction.close();
+        schemaSession.close();
+
+        appLogger.info("Defined schema to database <" + databaseName + ">");
     }
 
-    // Entity Operations
-    public int insertEntityToGrakn(ArrayList<Statement> statements, GraknClient.Session session) {
-        GraknClient.Transaction writeTransaction = session.transaction().write();
-        int i = 0;
-        for (Statement st : statements) {
-            writeTransaction.execute(Graql.insert(st));
-            i++;
+    public void matchInsertThreadedInserting(HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements, Session session, int threads, int batchSize) throws InterruptedException {
+
+        AtomicInteger queryIndex = new AtomicInteger(0);
+        Thread[] ts = new Thread[threads];
+
+        Runnable matchInsertThread =
+                () -> {
+                    ArrayList<ArrayList<ThingVariable<?>>> matchStatements = statements.get("match");
+                    ArrayList<ArrayList<ThingVariable<?>>> insertStatements = statements.get("insert");
+
+                    while (queryIndex.get() < matchStatements.size()) {
+                        try (Transaction tx = session.transaction(Transaction.Type.WRITE)) {
+                            int q;
+                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < matchStatements.size(); i++) {
+                                ArrayList<ThingVariable<?>> rowMatchStatements = matchStatements.get(q);
+                                ArrayList<ThingVariable<?>> rowInsertStatements = insertStatements.get(q);
+                                GraqlInsert query = Graql.match(rowMatchStatements).insert(rowInsertStatements);
+                                tx.query().insert(query);
+                            }
+                            tx.commit();
+                        }
+                    }
+                };
+
+        for (int i = 0; i < ts.length; i++) {
+            ts[i] = new Thread(matchInsertThread);
         }
-        writeTransaction.commit();
-        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", writeTransaction.toString()));
-        return i;
-    }
-
-    public void futuresParallelInsertEntity(ArrayList<Statement> insertStatements, GraknClient.Session session, int cores) throws ExecutionException, InterruptedException {
-        ArrayList<ArrayList<Statement>> batches = createEvenEntityBatches(insertStatements, cores);
-
-        List<CompletableFuture<Integer>> futures = new ArrayList<>();
-        for (ArrayList<Statement> batch : batches) {
-            if (!batch.isEmpty()) {
-                CompletableFuture<Integer> inserted = CompletableFuture.supplyAsync(() ->  insertEntityToGrakn(batch, session));
-                futures.add(inserted);
-            }
+        for (Thread value : ts) {
+            value.start();
         }
-        for (CompletableFuture<Integer> f : futures) {
-            f.get();
-        }
-    }
-
-    private static ArrayList<ArrayList<Statement>> createEvenEntityBatches(ArrayList<Statement> inserts, int cores) {
-
-        ArrayList<ArrayList<Statement>> batches = new ArrayList<>();
-        ArrayList<String> batchStrings = new ArrayList<>();
-
-        for (int i = 0; i < cores; i++) {
-            ArrayList<Statement> batch = new ArrayList<>();
-            batches.add(batch);
-            batchStrings.add("");
-        }
-
-        for (Statement insert: inserts) {
-            int shortest = getListIndexOfShortestString(batchStrings);
-            batches.get(shortest).add(insert);
-            String curString = batchStrings.get(shortest);
-            batchStrings.set(shortest, curString + insert.toString());
-        }
-
-        appLogger.trace("entity batches.size: " + batches.size());
-        appLogger.trace("bucket sizes:");
-        for (String s : batchStrings) {
-            appLogger.trace(s.length());
-        }
-        return batches;
-    }
-
-    // Relation Operations
-    public int insertMatchInsertToGrakn(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session) {
-
-        ArrayList<ArrayList<Statement>> matchStatements = statements.get(0);
-        ArrayList<ArrayList<Statement>> insertStatements = statements.get(1);
-
-        GraknClient.Transaction writeTransaction = session.transaction().write();
-        int i = 0;
-        for (int row = 0; row < matchStatements.size(); row++) {
-            ArrayList<Statement> rowMatchStatements = matchStatements.get(row);
-            ArrayList<Statement> rowInsertStatements = insertStatements.get(row);
-            writeTransaction.execute(Graql.match(rowMatchStatements).insert(rowInsertStatements));
-            i++;
-        }
-        writeTransaction.commit();
-        appLogger.trace(String.format("Txn with ID: %s has committed and is closed", writeTransaction.toString()));
-        return i;
-    }
-
-    public void futuresParallelInsertMatchInsert(ArrayList<ArrayList<ArrayList<Statement>>> statements, GraknClient.Session session, int cores) throws ExecutionException, InterruptedException {
-        ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> batches = createEvenMatchInsertBatches(statements, cores);
-
-        List<CompletableFuture<Integer>> futures = new ArrayList<>();
-        for (ArrayList<ArrayList<ArrayList<Statement>>> batch : batches) {
-            if (!batch.isEmpty()) {
-                CompletableFuture<Integer> inserted = CompletableFuture.supplyAsync(() -> insertMatchInsertToGrakn(batch, session));
-                futures.add(inserted);
-            }
-        }
-        for (CompletableFuture<Integer> f : futures) {
-            f.get();
+        for (Thread thread : ts) {
+            thread.join();
         }
     }
 
-    private static ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> createEvenMatchInsertBatches(ArrayList<ArrayList<ArrayList<Statement>>> statements, int cores) {
+    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, Session session, int threads, int batchSize) throws InterruptedException {
 
-        ArrayList<ArrayList<ArrayList<ArrayList<Statement>>>> batches = new ArrayList<>();
-        ArrayList<String> batchStrings = new ArrayList<>();
+        AtomicInteger queryIndex = new AtomicInteger(0);
+        Thread[] ts = new Thread[threads];
 
-        ArrayList<ArrayList<Statement>> matchStatements = statements.get(0);
-        ArrayList<ArrayList<Statement>> insertStatements = statements.get(1);
-
-        for (int i = 0; i < cores; i++) {
-            ArrayList<ArrayList<Statement>> matches = new ArrayList<>();
-            ArrayList<ArrayList<Statement>> inserts = new ArrayList<>();
-
-            ArrayList<ArrayList<ArrayList<Statement>>> batch = new ArrayList<>();
-            batch.add(matches);
-            batch.add(inserts);
-
-            batches.add(batch);
-            batchStrings.add("");
+        Runnable insertThread =
+                () -> {
+                    while (queryIndex.get() < statements.size()) {
+                        try (Transaction tx = session.transaction(Transaction.Type.WRITE)) {
+                            int q;
+                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < statements.size(); i++) {
+                                GraqlInsert query = Graql.insert(statements.get(q));
+                                tx.query().insert(query);
+                            }
+                            tx.commit();
+                        }
+                    }
+                };
+        for (int i = 0; i < ts.length; i++) {
+            ts[i] = new Thread(insertThread);
         }
-
-        for (int i = 0; i < matchStatements.size(); i++) {
-            int shortestBatchIndex = getListIndexOfShortestString(batchStrings);
-            // add matches
-            batches.get(shortestBatchIndex).get(0).add(matchStatements.get(i));
-            // add inserts
-            batches.get(shortestBatchIndex).get(1).add(insertStatements.get(i));
-            // update string for batchIndex
-            String curString = batchStrings.get(shortestBatchIndex);
-            String mat = matchStatements.get(i).stream().map(Statement::toString).collect(Collectors.joining(";"));
-            mat += insertStatements.get(i).get(0).toString();
-            batchStrings.set(shortestBatchIndex, curString + mat);
+        for (Thread value : ts) {
+            value.start();
         }
-
-        appLogger.trace("relation batches.size: " + batches.size());
-        appLogger.trace("bucket sizes:");
-        for (String s : batchStrings) {
-            appLogger.trace(s.length());
+        for (Thread thread : ts) {
+            thread.join();
         }
-
-        return batches;
     }
 
     // Utility functions
-    public GraknClient.Session getSession(GraknClient client) {
-        return client.session(this.keyspaceName);
+    public Session getDataSession(GraknClient client) {
+        return client.session(databaseName, Session.Type.DATA);
+    }
+
+    public Session getSchemaSession(GraknClient client) {
+        return client.session(databaseName, Session.Type.SCHEMA);
     }
 
     public GraknClient getClient() {
-        return new GraknClient(this.uri);
+        return GraknClient.core(graknURI);
     }
 
-    private void deleteKeyspace(GraknClient client) {
-        client.keyspaces().delete(this.keyspaceName);
-    }
-
-    private static int getListIndexOfShortestString(ArrayList<String> batchStrings) {
-        int shortest = 0;
-        for (String s : batchStrings) {
-            if (s.length() < batchStrings.get(shortest).length()) {
-                shortest = batchStrings.indexOf(s);
-            }
+    private void deleteDatabaseIfExists(GraknClient client) {
+        if (client.databases().contains(databaseName)) {
+            client.databases().delete(databaseName);
         }
-        return shortest;
+    }
+
+    // used by <grami update> command
+    public void loadAndDefineSchema(GraknClient client) {
+        String schema = loadSchemaFromFile(schemaPath);
+        defineToGrakn(schema, client);
     }
 }

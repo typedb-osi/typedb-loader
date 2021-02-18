@@ -1,6 +1,5 @@
 package migrator;
 
-import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
 import grakn.client.GraknClient;
 import insert.GraknInserter;
@@ -22,11 +21,9 @@ public class SchemaUpdater {
 
     public void updateSchema() {
         GraknClient client = gm.getClient();
-        GraknClient.Session session = gm.getSession(client);
         appLogger.info("applying schema to existing schema");
-        gm.updateCurrentSchema(client, session);
+        gm.loadAndDefineSchema(client);
         appLogger.info("GraMi is finished applying your schema!");
-        session.close();
         client.close();
     }
 }
