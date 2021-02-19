@@ -34,36 +34,36 @@ define
     call sub relation,
         relates caller,
         relates callee,
-        has started-at,
-        has duration,
-        has call-rating,
-        plays past-call;
+        owns started-at,
+        owns duration,
+        owns call-rating,
+        plays communication-channel:past-call;
 
     communication-channel sub relation,
         relates peer,
         relates past-call;
 
     company sub entity,
-        plays provider,
-        has name;
+        plays contract:provider,
+        owns name;
 
     person sub entity,
-        plays customer,
-        plays caller,
-        plays callee,
-        has first-name,
-        has last-name,
-        has phone-number,
-        has city,
-        has age,
-        has nick-name,
-        has twitter-username,
-        has fakebook-link,
-        plays peer;
+        plays contract:customer,
+        plays call:caller,
+        plays call:callee,
+        owns first-name,
+        owns last-name,
+        owns phone-number,
+        owns city,
+        owns age,
+        owns nick-name,
+        owns twitter-username,
+        owns fakebook-link,
+        plays communication-channel:peer;
 
     added-entity sub entity,
-        has added-attribute,
-        plays added-role;
+        owns added-attribute,
+        plays added-relation:added-role;
 
     added-relation sub relation,
         relates added-role;

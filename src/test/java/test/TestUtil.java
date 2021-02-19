@@ -1,7 +1,7 @@
 package test;
 
+import graql.lang.pattern.variable.ThingVariable;
 import loader.DataLoader;
-import graql.lang.statement.Statement;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -40,11 +40,10 @@ public class TestUtil {
         return rows;
     }
 
-    public static String concatMatches(ArrayList<Statement> statements) {
+    public static String concatMatches(ArrayList<ThingVariable<?>> statements) {
         String ret = "";
-        for (Statement st :
-                statements) {
-            ret = ret + st.toString();
+        for (ThingVariable st : statements) {
+            ret = ret + st.toString() + ";";
         }
         return ret;
     }

@@ -1,13 +1,13 @@
 define
 
 text sub entity,
-    key uid,
-    plays tagged;
+    owns uid @key,
+    plays tag:tagged;
 uid sub attribute, value long;
 
 label sub entity,
-    key name,
-    plays tagger;
+    owns name @key,
+    plays tag:tagger;
 name sub attribute, value string;
 
 tag sub relation,

@@ -4,16 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
 import generator.*;
-import loader.DataLoader;
 import grakn.client.GraknClient;
+import grakn.client.GraknClient.Session;
+import graql.lang.pattern.variable.ThingVariable;
+import loader.DataLoader;
 import insert.GraknInserter;
-import graql.lang.statement.Statement;
-
 import java.io.*;
 import java.lang.reflect.Type;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +25,7 @@ public class GraknMigrator {
     private final String migrationStatePath;
     private boolean cleanAndMigrate = false;
     private HashMap<String, MigrationStatus> migrationStatus;
-    private final GraknInserter gm;
+    private final GraknInserter graknInserter;
     private final MigrationConfig migrationConfig;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
@@ -33,7 +34,7 @@ public class GraknMigrator {
         this.dataConfig = migrationConfig.getDataConfig();
         this.migrationStatePath = migrationStatePath;
         this.migrationConfig = migrationConfig;
-        this.gm = new GraknInserter(migrationConfig.getGraknURI().split(":")[0],
+        this.graknInserter = new GraknInserter(migrationConfig.getGraknURI().split(":")[0],
                 migrationConfig.getGraknURI().split(":")[1],
                 migrationConfig.getSchemaPath(),
                 migrationConfig.getKeyspace()
@@ -52,26 +53,25 @@ public class GraknMigrator {
 
     public void migrate(boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
 
-        GraknClient client = gm.getClient();
-        GraknClient.Session session = gm.getSession(client);
-
-        getMigrationStatus();
+        initializeMigrationStatus();
+        GraknClient client = graknInserter.getClient();
 
         if (cleanAndMigrate) {
-            session = gm.setKeyspaceToSchema(client, session);
-            appLogger.info("cleaned and reloaded keyspace");
+            graknInserter.cleanAndDefineSchemaToDatabase(client);
+            appLogger.info("cleaned database and migrate schema...");
         } else {
-            appLogger.info("continuing previous migration...");
+            appLogger.info("using existing DB and schema to continue previous migration...");
         }
 
-        migrateThingsInOrder(session, migrateEntities, migrateRelations, migrateRelationRelations, migrateAppendAttributes);
+        GraknClient.Session dataSession = graknInserter.getDataSession(client);
+        migrateThingsInOrder(dataSession, migrateEntities, migrateRelations, migrateRelationRelations, migrateAppendAttributes);
 
-        session.close();
+        dataSession.close();
         client.close();
         appLogger.info("GraMi is finished migrating your stuff!");
     }
 
-    private void migrateThingsInOrder(GraknClient.Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
+    private void migrateThingsInOrder(Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
         if (migrateEntities) {
             appLogger.info("migrating entities...");
             getStatusAndMigrate(session, "entity");
@@ -94,7 +94,7 @@ public class GraknMigrator {
         }
     }
 
-    private void getStatusAndMigrate(GraknClient.Session session, String processorType) throws IOException {
+    private void getStatusAndMigrate(Session session, String processorType) throws IOException {
         for (String dcEntryKey : dataConfig.keySet()) {
             DataConfigEntry dce = dataConfig.get(dcEntryKey);
             String currentProcessor = dce.getProcessor();
@@ -125,7 +125,7 @@ public class GraknMigrator {
         return false;
     }
 
-    private void getGeneratorAndInsert(GraknClient.Session session, DataConfigEntry dce, int skipRows) throws IOException {
+    private void getGeneratorAndInsert(Session session, DataConfigEntry dce, int skipRows) throws IOException {
         // choose insert generator
         InsertGenerator gen = getProcessor(dce);
 
@@ -133,13 +133,17 @@ public class GraknMigrator {
         updateMigrationStatusIsCompleted(dce);
     }
 
-    private void writeThingToGrakn(DataConfigEntry dce, InsertGenerator gen, GraknClient.Session session, int skipLines) {
+    private void writeThingToGrakn(DataConfigEntry dce, InsertGenerator gen, Session session, int skipLines) {
+
+        appLogger.info("inserting using " + dce.getThreads() + " threads" + " with thread commit size of " + dce.getBatchSize() + " rows");
+
         InputStream entityStream = DataLoader.getInputStream(dce.getDataPath());
         String header = "";
         ArrayList<String> rows = new ArrayList<>();
         String line;
         int batchSizeCounter = 0;
         int totalRecordCounter = 0;
+        double timerStart = System.currentTimeMillis();
 
         if (entityStream != null) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(entityStream))) {
@@ -158,61 +162,56 @@ public class GraknMigrator {
                     // insert Batch once chunk size is reached
                     rows.add(line);
                     batchSizeCounter++;
-                    if (batchSizeCounter == dce.getBatchSize()) {
+//                    if (batchSizeCounter == dce.getBatchSize()) {
+                    if (batchSizeCounter == dce.getBatchSize() * dce.getThreads()) {
+                        System.out.print("+");
+                        System.out.flush();
                         writeThing(dce, gen, session, rows, batchSizeCounter, header);
                         batchSizeCounter = 0;
                         rows.clear();
                     }
                     // logging
                     if (totalRecordCounter % 50000 == 0) {
-                        appLogger.info("progress: # rows processed so far (k): " + totalRecordCounter/1000);
+                        System.out.println();
+                        appLogger.info("processed " + totalRecordCounter/1000 + "k rows");
                     }
                 }
                 //insert the rest when loop exits with less than batch size
                 if (!rows.isEmpty()) {
                     writeThing(dce, gen, session, rows, batchSizeCounter, header);
-                    appLogger.info("final # rows processed: " + totalRecordCounter);
+                    if (totalRecordCounter % 50000 != 0) {
+                        System.out.println();
+                    }
                 }
+
+                appLogger.info("final # rows processed: " + totalRecordCounter);
+                appLogger.info(logInsertRate(timerStart, totalRecordCounter));
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void writeThing(DataConfigEntry dce, InsertGenerator gen, GraknClient.Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
-        int cores = dce.getThreads();
+
+
+    private void writeThing(DataConfigEntry dce, InsertGenerator gen, Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
+        int threads = dce.getThreads();
         try {
             if (isOfProcessorType(dce.getProcessor(), "entity")) {
-                ArrayList<Statement> insertStatements = gen.graknEntityInsert(rows, header);
+                ArrayList<ThingVariable<?>> insertStatements = gen.graknEntityInsert(rows, header);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.size());
-                if (cores > 1) {
-                    appLogger.debug("inserting using " + cores + " threads");
-                    gm.futuresParallelInsertEntity(insertStatements, session, cores);
-                } else {
-                    appLogger.debug("inserting using 1 thread");
-                    gm.insertEntityToGrakn(insertStatements, session);
-                }
+                graknInserter.insertThreadedInserting(insertStatements, session, threads, dce.getBatchSize());
             } else if (isOfProcessorType(dce.getProcessor(), "relation") ||
                     isOfProcessorType(dce.getProcessor(), "relation-with-relation")) {
-                ArrayList<ArrayList<ArrayList<Statement>>> statements = gen.graknRelationInsert(rows, header);
-                appLogger.trace("number of generated insert Statements: " + statements.get(0).size());
-                if (cores > 1) {
-                    appLogger.debug("inserting using " + cores + " threads");
-                    gm.futuresParallelInsertMatchInsert(statements, session, cores);
-                } else {
-                    appLogger.debug("inserting using 1 thread");
-                    gm.insertMatchInsertToGrakn(statements, session);
-                }
+                HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements = gen.graknRelationInsert(rows, header);
+                appLogger.trace("number of generated insert Statements: " + statements.get("match").size());
+                graknInserter.matchInsertThreadedInserting(statements, session, threads, dce.getBatchSize());
             } else if (isOfProcessorType(dce.getProcessor(), "append-attribute")) {
-                ArrayList<ArrayList<ArrayList<Statement>>> statements = gen.graknAppendAttributeInsert(rows, header);
-                appLogger.trace("number of generated insert Statements: " + statements.get(0).size());
-                if (cores > 1) {
-                    appLogger.debug("inserting using " + cores + " threads");
-                    gm.futuresParallelInsertMatchInsert(statements, session, cores);
-                } else {
-                    appLogger.debug("inserting using 1 thread");
-                    gm.insertMatchInsertToGrakn(statements, session);
-                }
+                HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements = gen.graknAppendAttributeInsert(rows, header);
+                appLogger.trace("number of generated insert Statements: " + statements.get("match").size());
+                graknInserter.matchInsertThreadedInserting(statements, session, threads, dce.getBatchSize());
             } else {
                 throw new IllegalArgumentException("the processor <" + dce.getProcessor() + "> is not known");
             }
@@ -226,7 +225,7 @@ public class GraknMigrator {
         new FileWriter(migrationStatePath, false).close();
     }
 
-    private void getMigrationStatus() {
+    private void initializeMigrationStatus() {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(migrationStatePath));
@@ -304,6 +303,19 @@ public class GraknMigrator {
             }
         }
         return null;
+    }
+
+    private String logInsertRate(double timerStart, int totalRecordCounter) {
+        double timerEnd = System.currentTimeMillis();
+        double secs = (timerEnd - timerStart) / 1000;
+        DecimalFormat df = new DecimalFormat("#");
+        df.setRoundingMode(RoundingMode.DOWN);
+        if (secs > 0) {
+            return "insert rate inserts/second: " + df.format((totalRecordCounter / secs));
+        } else {
+            return "insert rate inserts/second: superfast";
+        }
+
     }
 
 }

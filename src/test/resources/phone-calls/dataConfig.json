@@ -42,7 +42,7 @@
         "generator": "name"
       }],
     "batchSize": 100,
-    "threads": 4
+    "threads": 1
   },
   "contract": {
     "dataPath": "src/test/resources/phone-calls/contract.csv",
