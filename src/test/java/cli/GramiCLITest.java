@@ -14,11 +14,11 @@ public class GramiCLITest {
     public void migrateTest() {
         String[] args = {
                 "migrate",
-                "-d", "src/test/resources/phone-calls/dataConfig.json",
-                "-p", "src/test/resources/phone-calls/processorConfig.json",
-                "-m", "src/test/resources/phone-calls/migrationStatus.json",
+                "-dc", "src/test/resources/phone-calls/dataConfig.json",
+                "-pc", "src/test/resources/phone-calls/processorConfig.json",
+                "-ms", "src/test/resources/phone-calls/migrationStatus.json",
                 "-s", "src/test/resources/phone-calls/schema.gql",
-                "-k", "grami_cli_test",
+                "-db", "grami_cli_test",
                 "-g", "127.0.0.1:1729",
                 "-cm"
         };
@@ -41,7 +41,7 @@ public class GramiCLITest {
         String[] args = {
                 "schema-update",
                 "-s", "src/test/resources/phone-calls/schema-updated.gql",
-                "-k", "grami_cli_test",
+                "-db", "grami_cli_test",
                 "-g", "127.0.0.1:1729",
         };
 

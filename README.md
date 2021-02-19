@@ -78,12 +78,11 @@ Once your configuration files are complete, you can use GraMi in one of two ways
 
 ```Shell
 ./bin/grami migrate \
--d /path/to/dataConfig.json \
--p /path/to/processorConfig.json \
--m /path/to/migrationStatus.json \
+-dc /path/to/dataConfig.json \
+-pc /path/to/processorConfig.json \
+-ms /path/to/migrationStatus.json \
 -s /path/to/schema.gql \
--k yourFavoriteKeyspace \
--cm
+-db yourFavoriteDatabase
 ```
 
 [See details here](https://github.com/bayer-science-for-a-better-life/grami/wiki/Grami-as-Executable-CLI)
@@ -99,9 +98,9 @@ public class Migration {
     private static final String migrationStatus = "/path/to/your/migrationStatus.json";
 
     private static final String graknURI = "127.0.0.1:1729";               // defines which grakn server to migrate into
-    private static final String keyspaceName = "yourFavoriteKeyspace";      // defines which keyspace to migrate into
+    private static final String databaseName = "yourFavoriteDatabase";      // defines which keyspace to migrate into
 
-    private static final MigrationConfig migrationConfig = new MigrationConfig(graknURI, keyspaceName, schema, dataConfig, processorConfig);
+    private static final MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
 
     public static void main(String[] args) throws IOException {
         GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
@@ -118,6 +117,8 @@ public class Migration {
 A complete tutorial for grakn version >= 2.0 is in work and will be published asap.
 
 A complete tutorial for grakn version >= 1.8.2, but < 2.0 can be found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
+
+There is this [example repository](https://github.com/bayer-science-for-a-better-life/grami-example).
 
 ## Compatibility
 

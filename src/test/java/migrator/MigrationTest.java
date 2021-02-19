@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class MigrationTest {
 
-    String graknURI = "localhost:1730";
+    String graknURI = "localhost:1729";
 
     @Test
     public void migrateGenericTestsTest() throws IOException {
