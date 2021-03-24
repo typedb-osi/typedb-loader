@@ -122,9 +122,9 @@ There is this [example repository](https://github.com/bayer-science-for-a-better
 
 ## Compatibility
 
-GraMi version >= 0.1.0 is tested for:
-- [grakn-core](https://github.com/graknlabs/grakn) >= 2.0-alpha-6
-- [client-java](https://github.com/graknlabs/client-java) >= 2.0.0-alpha-8
+GraMi version >= 0.1.0-alpha-12 is tested for:
+- [grakn-core](https://github.com/graknlabs/grakn) >= 2.0-alpha-9
+- using [client-java](https://github.com/graknlabs/client-java) >= 2.0.0-alpha-12
 
 GraMi version < 0.1.0 is tested for: 
  - [grakn-core](https://github.com/graknlabs/grakn) >= 1.8.2 

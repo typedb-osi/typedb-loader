@@ -134,7 +134,7 @@ public class GraknInserter {
 
     private void deleteDatabaseIfExists(GraknClient client) {
         if (client.databases().contains(databaseName)) {
-            client.databases().delete(databaseName);
+            client.databases().get(databaseName).delete();
         }
     }
 
