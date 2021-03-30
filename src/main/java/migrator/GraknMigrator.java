@@ -97,12 +97,6 @@ public class GraknMigrator {
             getStatusAndMigrate(session, "append-attribute");
             appLogger.info("migration of append-attribute completed");
         }
-        boolean migrate_attribute_relations = true;
-        if (migrate_attribute_relations) {
-            appLogger.info("migrating attribute-attribute relations...");
-            getStatusAndMigrate(session, "attribute-relation");
-            appLogger.info("migration of attribute-attribute relations completed");
-        }
     }
 
     private void getStatusAndMigrate(Session session, String processorType) throws IOException {
