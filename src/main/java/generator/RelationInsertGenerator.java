@@ -86,7 +86,7 @@ public class RelationInsertGenerator extends InsertGenerator {
                 assembledStatements.add(insertStatements);
 
                 if (isValid(assembledStatements)) {
-//                    System.out.println("valid query: <" + assembleQuery(assembledStatements) + ">");
+                    appLogger.debug("valid query: <" + assembleQuery(assembledStatements) + ">");
                     return assembledStatements;
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
