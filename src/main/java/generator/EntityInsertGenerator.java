@@ -33,14 +33,12 @@ public class EntityInsertGenerator extends InsertGenerator {
     public ArrayList<ThingVariable<?>> graknEntityInsert(ArrayList<String> rows,
                                                       String header) throws IllegalArgumentException {
         ArrayList<ThingVariable<?>> patterns = new ArrayList<>();
-        int insertCounter = 0;
         for (String row : rows) {
             try {
-                ThingVariable temp = graknEntityQueryFromRow(row, header, insertCounter);
+                ThingVariable temp = graknEntityQueryFromRow(row, header);
                 if (temp != null) {
                     patterns.add(temp);
                 }
-                insertCounter++;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,15 +47,14 @@ public class EntityInsertGenerator extends InsertGenerator {
     }
 
     public ThingVariable graknEntityQueryFromRow(String row,
-                                                 String header,
-                                                 int insertCounter) throws Exception {
+                                                 String header) throws Exception {
         String fileSeparator = dce.getSeparator();
         String[] rowTokens = row.split(fileSeparator);
         String[] columnNames = header.split(fileSeparator);
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
-        Thing entityInsertStatement = addEntityToStatement(insertCounter);
+        Thing entityInsertStatement = addEntityToStatement();
 
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
             entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
@@ -72,9 +69,9 @@ public class EntityInsertGenerator extends InsertGenerator {
         }
     }
 
-    private Thing addEntityToStatement(int insertCounter) {
+    private Thing addEntityToStatement() {
         if (pce.getSchemaType() != null) {
-            return Graql.var("e-" + insertCounter).isa(pce.getSchemaType());
+            return Graql.var("e").isa(pce.getSchemaType());
         } else {
             throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
         }
