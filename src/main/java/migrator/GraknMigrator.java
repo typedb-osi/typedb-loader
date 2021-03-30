@@ -227,10 +227,6 @@ public class GraknMigrator {
                 ArrayList<ThingVariable<?>> statements = gen.graknAttributeInsert(rows, header);
                 appLogger.trace("number of generated insert Statements: " + statements.size());
                 graknInserter.insertThreadedInserting(statements, session, threads, dce.getBatchSize());
-//            } else if (isOfProcessorType(dce.getProcessor(), "attribute-relation")) {
-//                HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements = gen.graknAttributeRelationInsert(rows, header);
-//                appLogger.trace("number of generated insert Statements: " + statements.get("match").size());
-//                graknInserter.matchInsertThreadedInserting(statements, session, threads, dce.getBatchSize());
             } else {
                 throw new IllegalArgumentException("the processor <" + dce.getProcessor() + "> is not known");
             }
@@ -313,9 +309,6 @@ public class GraknMigrator {
         } else if (gce != null && gce.getProcessorType().equals("attribute")) {
             appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
             return new AttributeInsertGenerator(dce, gce);
-//        } else if (gce != null && gce.getProcessorType().equals("attribute-relation")) {
-//            appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-//            return new AttributeRelationInsertGenerator(dce, gce);
         } else {
             throw new IllegalArgumentException(String.format("Invalid/No generator provided for: %s", dce.getProcessor()));
         }

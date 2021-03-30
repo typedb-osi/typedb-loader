@@ -224,14 +224,23 @@
       }
     },
     {
-      "processor": "weather",
-      "processorType": "entity",
-      "schemaType": "weather",
+      "processor": "in-use",
+      "processorType": "relation",
+      "schemaType": "in-use",
       "conceptGenerators": {
-        "attributes": {
-          "perceived-as": {
-            "attributeType": "perceived-as",
-            "valueType": "string",
+        "players": {
+          "account": {
+            "playerType": "phone-number",
+            "uniquePlayerId": "_attribute_player_",
+            "idValueType": "string",
+            "roleType": "account",
+            "required": true
+          },
+          "status": {
+            "playerType": "is-in-use",
+            "uniquePlayerId": "_attribute_player_",
+            "idValueType": "string",
+            "roleType": "status",
             "required": true
           }
         }

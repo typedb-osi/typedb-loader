@@ -11,7 +11,8 @@ define
     last-name sub attribute,
       value string;
     phone-number sub attribute,
-      value string;
+      value string,
+      plays in-use:account;
     city sub attribute,
       value string;
     age sub attribute,
@@ -19,8 +20,7 @@ define
     nick-name sub attribute,
       value string;
     twitter-username sub attribute,
-      value string,
-      plays in-use:account;
+      value string;
     fakebook-link sub attribute,
       value string;
     call-rating sub attribute,
@@ -36,7 +36,6 @@ define
         owns started-at,
         owns duration,
         owns call-rating,
-        plays circumstance:call-of-interest,
         plays communication-channel:past-call;
 
     communication-channel sub relation,
@@ -60,15 +59,6 @@ define
         owns twitter-username,
         owns fakebook-link,
         plays communication-channel:peer;
-
-    weather sub entity,
-        owns perceived-as,
-        plays circumstance:weather-perception;
-    perceived-as sub attribute, value string;
-
-    circumstance sub relation,
-        relates weather-perception,
-        relates call-of-interest;
 
     is-in-use sub attribute, value string,
         plays in-use:status;

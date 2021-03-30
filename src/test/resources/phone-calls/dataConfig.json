@@ -209,21 +209,25 @@
     "threads": 4,
     "attributes": [
       {
-        "columnName": "is_in_use",
+        "columnName": "values",
         "generator": "is-in-use"
       }
     ]
   },
-  "weather": {
-    "dataPath": "src/test/resources/phone-calls/weather.csv",
+  "in-use": {
+    "dataPath": "src/test/resources/phone-calls/in-use.csv",
     "separator": ",",
-    "processor": "weather",
+    "processor": "in-use",
     "batchSize": 50,
     "threads": 4,
-    "attributes": [
+    "players": [
       {
-        "columnName": "weather_condition",
-        "generator": "perceived-as"
+        "columnName": "pn",
+        "generator": "account"
+      },
+      {
+        "columnName": "in_use",
+        "generator": "status"
       }
     ]
   }

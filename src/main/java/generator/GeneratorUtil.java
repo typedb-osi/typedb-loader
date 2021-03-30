@@ -72,10 +72,9 @@ public class GeneratorUtil {
             if ( columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
-                String attributeType = attributeGenerator.getAttributeType();
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                att = addAttributeValueOfType(statement, attributeType, attributeValueType, cleanedToken, preprocessorConfig);
+                att = addAttributeValueOfType(statement, attributeValueType, cleanedToken, preprocessorConfig);
             }
         }
         return att;
@@ -418,8 +417,7 @@ public class GeneratorUtil {
         return returnThing;
     }
 
-    public static Attribute addAttributeValueOfType(UnboundVariable statement,
-                                                String conceptType,
+    public static Attribute addAttributeValueOfType(UnboundVariable unboundVar,
                                                 String valueType,
                                                 String cleanedValue,
                                                 DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -430,11 +428,11 @@ public class GeneratorUtil {
 
         switch (valueType) {
             case "string":
-                att = statement.eq(cleanedValue);
+                att = unboundVar.eq(cleanedValue);
                 break;
             case "long":
                 try {
-                    att = statement.eq(Integer.parseInt(cleanedValue));
+                    att = unboundVar.eq(Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
                     dataLogger.warn(numberFormatException.getMessage());
@@ -442,7 +440,7 @@ public class GeneratorUtil {
                 break;
             case "double":
                 try {
-                    att = statement.eq(Double.parseDouble(cleanedValue));
+                    att = unboundVar.eq(Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
                     dataLogger.warn(numberFormatException.getMessage());
@@ -450,9 +448,9 @@ public class GeneratorUtil {
                 break;
             case "boolean":
                 if (cleanedValue.toLowerCase().equals("true")) {
-                    att = statement.eq( true);
+                    att = unboundVar.eq( true);
                 } else if (cleanedValue.toLowerCase().equals("false")) {
-                    att = statement.eq( false);
+                    att = unboundVar.eq( false);
                 } else {
                     dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
                 }
@@ -465,10 +463,10 @@ public class GeneratorUtil {
                     if (dt.length > 1) {
                         LocalTime time = LocalTime.parse(dt[1], DateTimeFormatter.ISO_TIME);
                         LocalDateTime dateTime = date.atTime(time);
-                        att = statement.eq(dateTime);
+                        att = unboundVar.eq(dateTime);
                     } else {
                         LocalDateTime dateTime = date.atStartOfDay();
-                        att = statement.eq(dateTime);
+                        att = unboundVar.eq(dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
                     dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");

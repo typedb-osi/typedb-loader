@@ -16,12 +16,10 @@ import static test.TestUtil.getData;
 
 public class RelationInsertGeneratorTest {
 
-    private final String keyspaceName = "grakn_migrator_test";
-    private final String asp = getAbsPath("src/test/resources/genericTests/schema-test.gql");
     private final String adcp = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
     private final String gcp = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
     private final String rel1dp = getAbsPath("src/test/resources/genericTests/rel1-test-data.tsv");
-    private final MigrationConfig migrationConfig = new MigrationConfig("localhost:48555",keyspaceName, asp, adcp, gcp);
+    private final MigrationConfig migrationConfig = new MigrationConfig(null,null, null, adcp, gcp);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> gc = migrationConfig.getProcessorConfig();
 
     @Test
