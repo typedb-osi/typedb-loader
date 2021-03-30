@@ -58,6 +58,7 @@ public class MigrationTest {
         testRelations(session);
         testRelationWithRelations(session);
         testAppendAttribute(session);
+        testAttributes(session);
         session.close();
         client.close();
     }
@@ -242,6 +243,22 @@ public class MigrationTest {
             Assert.assertEquals(5L, answer.get("cr").asAttribute().getValue());
         });
 
+        read.close();
+    }
+
+    public void testAttributes(Session session) {
+
+        Transaction read = session.transaction(Transaction.Type.READ);
+        GraqlMatch getQuery = Graql.match(var("a").isa("is-in-use")).get("a");
+        Assert.assertEquals(2, read.query().match(getQuery).count());
+
+        read = session.transaction(Transaction.Type.READ);
+        getQuery = Graql.match(var("a").eq("in-use").isa("is-in-use")).get("a");
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read = session.transaction(Transaction.Type.READ);
+        getQuery = Graql.match(var("a").eq("not-in-use").isa("is-in-use")).get("a");
+        Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
     }
 

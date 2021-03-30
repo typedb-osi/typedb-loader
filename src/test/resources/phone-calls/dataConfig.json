@@ -3,7 +3,7 @@
     "dataPath": "src/test/resources/phone-calls/person.csv",
     "separator": ",",
     "processor": "person",
-    "batchSize": 2000,
+    "batchSize": 50,
     "threads": 4,
     "attributes": [
       {
@@ -200,5 +200,31 @@
     ],
     "batchSize": 100,
     "threads": 4
+  },
+  "is-in-use": {
+    "dataPath": "src/test/resources/phone-calls/is-in-use.csv",
+    "separator": ",",
+    "processor": "is-in-use",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "is_in_use",
+        "generator": "is-in-use"
+      }
+    ]
+  },
+  "weather": {
+    "dataPath": "src/test/resources/phone-calls/weather.csv",
+    "separator": ",",
+    "processor": "weather",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "weather_condition",
+        "generator": "perceived-as"
+      }
+    ]
   }
 }

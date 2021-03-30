@@ -209,6 +209,33 @@
           }
         }
       }
+    },
+    {
+      "processor": "is-in-use",
+      "processorType": "attribute",
+      "schemaType": "is-in-use",
+      "conceptGenerators": {
+        "attributes": {
+          "is-in-use": {
+            "attributeType": "is-in-use",
+            "valueType": "string"
+          }
+        }
+      }
+    },
+    {
+      "processor": "weather",
+      "processorType": "entity",
+      "schemaType": "weather",
+      "conceptGenerators": {
+        "attributes": {
+          "perceived-as": {
+            "attributeType": "perceived-as",
+            "valueType": "string",
+            "required": true
+          }
+        }
+      }
     }
   ]
 }
