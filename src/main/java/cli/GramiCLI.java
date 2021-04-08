@@ -8,7 +8,7 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 
-@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.0", mixinStandardHelpOptions = true)
+@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.1", mixinStandardHelpOptions = true)
 public class GramiCLI {
 
     public static void main(String[] args) {

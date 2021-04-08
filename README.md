@@ -22,7 +22,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - supports any tabular data file with your separator of choice (i.e.: csv, tsv, whatever-sv...)
     - supports gzipped files
     - ignores unnecessary columns
- - [Entity](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities), [Relation](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations), and [Nested Relations](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations) Migration:
+ - [Attribute](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes), [Entity](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities), [Relation](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations), [Nested Relations](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations), [Attribute-Player Relations](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations) Migration:
     - migrate required/optional attributes of any grakn type (string, boolean, long, double, datetime)
     - migrate required/optional role players (entity & relations)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
@@ -53,9 +53,11 @@ The processor configuration file describes how you want data to be migrated give
 
 Depending on what you would like to migrate, see here:
 
+ - [Attribute Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes#processor-config)
  - [Entity Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities#processor-config)
  - [Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#processor-config)
  - [Nested Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#processor-config)
+ - [Attribute-Player Relation](https://github.com/bayer-science-for-a-better-life/grami/wiki/Attribute-Player-Relations#processor-config)
 
 ### Data Configuration
 
@@ -65,10 +67,13 @@ A good point to start the performance optimization is to set the number of threa
 
 See Example here:
 
+ - [Attribute Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes#data-config)
  - [Entity Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities#data-config)
  - [Relation Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#data-config)
  - [Nested Relation - Match by Attribute(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---attribute-matching)
  - [Nested Relation - Match by Player(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---player-matching)
+ - [Attribute-Player Relation - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Attribute-Player-Relations#data-config)
+ - [Custom Migration Order](https://github.com/bayer-science-for-a-better-life/grami/wiki/Custom-Migration-Order)
 
 ### Migrate Data
 
@@ -104,7 +109,7 @@ public class Migration {
 
     public static void main(String[] args) throws IOException {
         GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
-        mig.migrate(true, true, true, true);
+        mig.migrate();
     }
 }
 ```
@@ -122,13 +127,11 @@ There is this [example repository](https://github.com/bayer-science-for-a-better
 
 ## Compatibility
 
-GraMi version >= 0.1.0-alpha-12 is tested for:
-- [grakn-core](https://github.com/graknlabs/grakn) >= 2.0-alpha-9
-- using [client-java](https://github.com/graknlabs/client-java) >= 2.0.0-alpha-12
+GraMi version == 0.1.1 is tested for:
+- [grakn-core](https://github.com/graknlabs/grakn) == 2.0.1
 
 GraMi version < 0.1.0 is tested for: 
- - [grakn-core](https://github.com/graknlabs/grakn) >= 1.8.2 
- - [client-java](https://github.com/graknlabs/client-java) >= 1.8.3
+ - [grakn-core](https://github.com/graknlabs/grakn) >= 1.8.2
 
 Find the Readme for GraMi for grakn < 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
 
