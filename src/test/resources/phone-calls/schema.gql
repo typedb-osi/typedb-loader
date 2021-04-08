@@ -11,7 +11,8 @@ define
     last-name sub attribute,
       value string;
     phone-number sub attribute,
-      value string;
+      value string,
+      plays in-use:account;
     city sub attribute,
       value string;
     age sub attribute,
@@ -58,3 +59,10 @@ define
         owns twitter-username,
         owns fakebook-link,
         plays communication-channel:peer;
+
+    is-in-use sub attribute, value string,
+        plays in-use:status;
+
+    in-use sub relation,
+        relates status,
+        relates account;

@@ -1,7 +1,7 @@
 package migrator;
 
 import configuration.SchemaUpdateConfig;
-import grakn.client.GraknClient;
+import grakn.client.api.GraknClient;
 import insert.GraknInserter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -209,6 +209,42 @@
           }
         }
       }
+    },
+    {
+      "processor": "is-in-use",
+      "processorType": "attribute",
+      "schemaType": "is-in-use",
+      "conceptGenerators": {
+        "attributes": {
+          "is-in-use": {
+            "attributeType": "is-in-use",
+            "valueType": "string"
+          }
+        }
+      }
+    },
+    {
+      "processor": "in-use",
+      "processorType": "relation",
+      "schemaType": "in-use",
+      "conceptGenerators": {
+        "players": {
+          "account": {
+            "playerType": "phone-number",
+            "uniquePlayerId": "_attribute_player_",
+            "idValueType": "string",
+            "roleType": "account",
+            "required": true
+          },
+          "status": {
+            "playerType": "is-in-use",
+            "uniquePlayerId": "_attribute_player_",
+            "idValueType": "string",
+            "roleType": "status",
+            "required": true
+          }
+        }
+      }
     }
   ]
 }

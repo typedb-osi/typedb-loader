@@ -3,7 +3,7 @@
     "dataPath": "src/test/resources/phone-calls/person.csv",
     "separator": ",",
     "processor": "person",
-    "batchSize": 2000,
+    "batchSize": 50,
     "threads": 4,
     "attributes": [
       {
@@ -200,5 +200,35 @@
     ],
     "batchSize": 100,
     "threads": 4
+  },
+  "is-in-use": {
+    "dataPath": "src/test/resources/phone-calls/is-in-use.csv",
+    "separator": ",",
+    "processor": "is-in-use",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "values",
+        "generator": "is-in-use"
+      }
+    ]
+  },
+  "in-use": {
+    "dataPath": "src/test/resources/phone-calls/in-use.csv",
+    "separator": ",",
+    "processor": "in-use",
+    "batchSize": 50,
+    "threads": 4,
+    "players": [
+      {
+        "columnName": "pn",
+        "generator": "account"
+      },
+      {
+        "columnName": "in_use",
+        "generator": "status"
+      }
+    ]
   }
 }

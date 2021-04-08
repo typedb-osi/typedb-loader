@@ -1,8 +1,9 @@
 package insert;
 
-import grakn.client.GraknClient;
-import grakn.client.GraknClient.Transaction;
-import grakn.client.GraknClient.Session;
+import grakn.client.Grakn;
+import grakn.client.api.GraknClient;
+import grakn.client.api.GraknSession;
+import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDefine;
@@ -18,10 +19,10 @@ import static util.Util.loadSchemaFromFile;
 
 public class GraknInserter {
 
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private final String schemaPath;
     private final String databaseName;
     private final String graknURI;
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
     public GraknInserter(String graknURI, String port, String schemaPath, String databaseName) {
         this.schemaPath = schemaPath;
@@ -42,11 +43,11 @@ public class GraknInserter {
     }
 
     private void defineToGrakn(String schemaAsString, GraknClient client) {
-        Session schemaSession = getSchemaSession(client);
+        GraknSession schemaSession = getSchemaSession(client);
         GraqlDefine q = Graql.parseQuery(schemaAsString);
 
 
-        Transaction writeTransaction = schemaSession.transaction(Transaction.Type.WRITE);
+        GraknTransaction writeTransaction = schemaSession.transaction(GraknTransaction.Type.WRITE);
         writeTransaction.query().define(q);
         writeTransaction.commit();
         writeTransaction.close();
@@ -55,7 +56,7 @@ public class GraknInserter {
         appLogger.info("Defined schema to database <" + databaseName + ">");
     }
 
-    public void matchInsertThreadedInserting(HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements, Session session, int threads, int batchSize) throws InterruptedException {
+    public void matchInsertThreadedInserting(HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -66,7 +67,7 @@ public class GraknInserter {
                     ArrayList<ArrayList<ThingVariable<?>>> insertStatements = statements.get("insert");
 
                     while (queryIndex.get() < matchStatements.size()) {
-                        try (Transaction tx = session.transaction(Transaction.Type.WRITE)) {
+                        try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
                             int q;
                             for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < matchStatements.size(); i++) {
                                 ArrayList<ThingVariable<?>> rowMatchStatements = matchStatements.get(q);
@@ -90,7 +91,7 @@ public class GraknInserter {
         }
     }
 
-    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, Session session, int threads, int batchSize) throws InterruptedException {
+    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -98,7 +99,7 @@ public class GraknInserter {
         Runnable insertThread =
                 () -> {
                     while (queryIndex.get() < statements.size()) {
-                        try (Transaction tx = session.transaction(Transaction.Type.WRITE)) {
+                        try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
                             int q;
                             for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < statements.size(); i++) {
                                 GraqlInsert query = Graql.insert(statements.get(q));
@@ -120,16 +121,16 @@ public class GraknInserter {
     }
 
     // Utility functions
-    public Session getDataSession(GraknClient client) {
-        return client.session(databaseName, Session.Type.DATA);
+    public GraknSession getDataSession(GraknClient client) {
+        return client.session(databaseName, GraknSession.Type.DATA);
     }
 
-    public Session getSchemaSession(GraknClient client) {
-        return client.session(databaseName, Session.Type.SCHEMA);
+    public GraknSession getSchemaSession(GraknClient client) {
+        return client.session(databaseName, GraknSession.Type.SCHEMA);
     }
 
     public GraknClient getClient() {
-        return GraknClient.core(graknURI);
+        return Grakn.coreClient(graknURI);
     }
 
     private void deleteDatabaseIfExists(GraknClient client) {

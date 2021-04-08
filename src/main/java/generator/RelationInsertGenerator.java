@@ -1,10 +1,6 @@
 package generator;
 
-import static generator.GeneratorUtil.idxOf;
-import static generator.GeneratorUtil.indicesOf;
-import static generator.GeneratorUtil.cleanToken;
-import static generator.GeneratorUtil.addAttribute;
-import static generator.GeneratorUtil.addAttributeOfColumnType;
+import static generator.GeneratorUtil.*;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -13,6 +9,7 @@ import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.ThingVariable.Relation;
+import graql.lang.pattern.variable.ThingVariable.Attribute;
 import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,7 +83,7 @@ public class RelationInsertGenerator extends InsertGenerator {
                 assembledStatements.add(insertStatements);
 
                 if (isValid(assembledStatements)) {
-//                    System.out.println("valid query: <" + assembleQuery(assembledStatements) + ">");
+                    appLogger.debug("valid query: <" + assembleQuery(assembledStatements) + ">");
                     return assembledStatements;
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
@@ -115,7 +112,6 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     private Collection<? extends ThingVariable<?>> createPlayerMatchAndInsert(String[] rowTokens, String[] columnNames, int insertCounter) {
         ArrayList<ThingVariable<?>> players = new ArrayList<>();
-//        UnboundVariable relVariable = Graql.var("rel-" + insertCounter);
         UnboundVariable relVariable = Graql.var("rel");
         ArrayList<ArrayList<String>> relationStrings = new ArrayList<>();
         int playerCounter = 0;
@@ -139,10 +135,13 @@ public class RelationInsertGenerator extends InsertGenerator {
                     for (String exploded : currentCleanedToken.split(columnListSeparator)) {
                         if (!cleanToken(exploded).isEmpty()) {
                             String currentExplodedCleanedToken = cleanToken(exploded);
-//                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
                             String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
                             String playerRole = playerGenerator.getRoleType();
-                            players.add(createPlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                            if (playerGenerator.getUniquePlayerId().contains("_attribute_player_")) {
+                                players.add(createAttributePlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                            } else {
+                                players.add(createEntityPlayerMatchStatement(currentExplodedCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                            }
                             ArrayList<String> rel = new ArrayList<>();
                             rel.add(playerRole);
                             rel.add(playerVariable);
@@ -151,10 +150,13 @@ public class RelationInsertGenerator extends InsertGenerator {
                         }
                     }
                 } else { // single player, no columnListSeparator
-//                    String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
                     String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
                     String playerRole = playerGenerator.getRoleType();
-                    players.add(createPlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                    if (playerGenerator.getUniquePlayerId().contains("_attribute_player_")) {
+                        players.add(createAttributePlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                    } else {
+                        players.add(createEntityPlayerMatchStatement(currentCleanedToken, playerGenerator, playerVariable, generatorMappingForPlayer.getPreprocessor()));
+                    }
                     ArrayList<String> rel = new ArrayList<>();
                     rel.add(playerRole);
                     rel.add(playerVariable);
@@ -248,16 +250,26 @@ public class RelationInsertGenerator extends InsertGenerator {
         return players;
     }
 
-    private ThingVariable createPlayerMatchStatement(String cleanedToken,
-                                                     ProcessorConfigEntry.ConceptGenerator playerGenerator,
-                                                     String playerVariable,
-                                                     DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+    private ThingVariable createEntityPlayerMatchStatement(String cleanedToken,
+                                                           ProcessorConfigEntry.ConceptGenerator playerGenerator,
+                                                           String playerVariable,
+                                                           DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         Thing ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getUniquePlayerId();
         String attributeValueType = playerGenerator.getIdValueType();
         ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, preprocessorConfig);
+        return ms;
+    }
+
+    private ThingVariable createAttributePlayerMatchStatement(String cleanedToken,
+                                                           ProcessorConfigEntry.ConceptGenerator playerGenerator,
+                                                           String playerVariable,
+                                                           DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+        UnboundVariable uv = Graql.var(playerVariable);
+        Attribute ms = addAttributeValueOfType(uv, playerGenerator.getIdValueType(), cleanedToken, preprocessorConfig);
+        ms = ms.isa(playerGenerator.getPlayerType());
         return ms;
     }
 
