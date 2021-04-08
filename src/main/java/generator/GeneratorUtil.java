@@ -243,7 +243,7 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -251,7 +251,7 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -261,7 +261,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
                 }
                 break;
             case "datetime":
@@ -278,7 +278,7 @@ public class GeneratorUtil {
                         statement = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
+                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
                     dataLogger.warn(dateTimeException.getMessage());
                 }
                 break;
@@ -306,7 +306,7 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -314,7 +314,7 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -324,7 +324,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
                 }
                 break;
             case "datetime":
@@ -341,7 +341,7 @@ public class GeneratorUtil {
                         statement = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
+                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
                     dataLogger.warn(dateTimeException.getMessage());
                 }
                 break;
@@ -371,7 +371,7 @@ public class GeneratorUtil {
                 try {
                     returnThing = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -379,7 +379,7 @@ public class GeneratorUtil {
                 try {
                     returnThing = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
                     dataLogger.warn(numberFormatException.getMessage());
                 }
                 break;
@@ -389,7 +389,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     returnThing = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
+                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
                 }
                 break;
             case "datetime":
@@ -406,7 +406,7 @@ public class GeneratorUtil {
                         returnThing = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
+                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
                     dataLogger.warn(dateTimeException.getMessage());
                 }
                 break;

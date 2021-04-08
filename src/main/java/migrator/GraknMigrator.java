@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
 import generator.*;
-import grakn.client.GraknClient;
-import grakn.client.GraknClient.Session;
+import grakn.client.api.GraknClient;
+import grakn.client.api.GraknSession;
 import graql.lang.pattern.variable.ThingVariable;
 import loader.DataLoader;
 import insert.GraknInserter;
@@ -63,7 +63,7 @@ public class GraknMigrator {
             appLogger.info("using existing DB and schema to continue previous migration...");
         }
 
-        GraknClient.Session dataSession = graknInserter.getDataSession(client);
+        GraknSession dataSession = graknInserter.getDataSession(client);
         migrateThingsInOrder(dataSession, migrateEntities, migrateRelations, migrateRelationRelations, migrateAppendAttributes);
 
         dataSession.close();
@@ -71,11 +71,11 @@ public class GraknMigrator {
         appLogger.info("GraMi is finished migrating your stuff!");
     }
 
-    private void migrateThingsInOrder(Session session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
+    private void migrateThingsInOrder(GraknSession session, boolean migrateEntities, boolean migrateRelations, boolean migrateRelationRelations, boolean migrateAppendAttributes) throws IOException {
 
-        appLogger.info("migrating floating attributes...");
+        appLogger.info("migrating independent attributes...");
         getStatusAndMigrate(session, "attribute");
-        appLogger.info("migration of floating attributes completed");
+        appLogger.info("migration of independent attributes completed");
 
         if (migrateEntities) {
             appLogger.info("migrating entities...");
@@ -96,26 +96,27 @@ public class GraknMigrator {
             appLogger.info("migrating append-attribute...");
             getStatusAndMigrate(session, "append-attribute");
             appLogger.info("migration of append-attribute completed");
-        }
+        } //TODO: relations with attributes have to come at end
     }
 
-    private void getStatusAndMigrate(Session session, String processorType) throws IOException {
+    private void getStatusAndMigrate(GraknSession session, String processorType) throws IOException {
         for (String dcEntryKey : dataConfig.keySet()) {
             DataConfigEntry dce = dataConfig.get(dcEntryKey);
             String currentProcessor = dce.getProcessor();
             if(isOfProcessorType(currentProcessor, processorType)){
                 appLogger.info("migrating [" + dcEntryKey + "]...");
-                if (migrationStatus != null && migrationStatus.get(dce.getDataPath()) != null) {
-                    appLogger.info("previous migration status found for: [" + dcEntryKey + "]");
-                    if (!migrationStatus.get(dce.getDataPath()).isCompleted()) {
-                        appLogger.info(dcEntryKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(dce.getDataPath()).getMigratedRows());
-                        getGeneratorAndInsert(session, dce, migrationStatus.get(dce.getDataPath()).getMigratedRows());
+                String migrationStatusKey = dcEntryKey + "-" + dce.getDataPath();
+                if (migrationStatus != null && migrationStatus.get(migrationStatusKey) != null) {
+                    appLogger.info("previous migration status found for: [" + migrationStatusKey + "]");
+                    if (!migrationStatus.get(migrationStatusKey).isCompleted()) {
+                        appLogger.info(migrationStatusKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(migrationStatusKey).getMigratedRows());
+                        getGeneratorAndInsert(session, dce, migrationStatus.get(migrationStatusKey).getMigratedRows(), migrationStatusKey);
                     } else {
-                        appLogger.info(dcEntryKey + " is already completely migrated - moving on...");
+                        appLogger.info(migrationStatusKey + " is already completely migrated - moving on...");
                     }
                 } else {
-                    appLogger.info("nothing previously migrated for [" + dcEntryKey + "] - starting with row 0");
-                    getGeneratorAndInsert(session, dce, 0);
+                    appLogger.info("nothing previously migrated for [" + migrationStatusKey + "] - starting with row 0");
+                    getGeneratorAndInsert(session, dce, 0, migrationStatusKey);
                 }
             }
         }
@@ -130,15 +131,15 @@ public class GraknMigrator {
         return false;
     }
 
-    private void getGeneratorAndInsert(Session session, DataConfigEntry dce, int skipRows) throws IOException {
+    private void getGeneratorAndInsert(GraknSession session, DataConfigEntry dce, int skipRows, String migrationStatusKey) throws IOException {
         // choose insert generator
         InsertGenerator gen = getProcessor(dce);
 
-        writeThingToGrakn(dce, gen, session, skipRows);
-        updateMigrationStatusIsCompleted(dce);
+        writeThingToGrakn(dce, gen, session, skipRows, migrationStatusKey);
+        updateMigrationStatusIsCompleted(migrationStatusKey);
     }
 
-    private void writeThingToGrakn(DataConfigEntry dce, InsertGenerator gen, Session session, int skipLines) {
+    private void writeThingToGrakn(DataConfigEntry dce, InsertGenerator gen, GraknSession session, int skipLines, String migrationStatusKey) {
 
         appLogger.info("inserting using " + dce.getThreads() + " threads" + " with thread commit size of " + dce.getBatchSize() + " rows");
 
@@ -171,7 +172,7 @@ public class GraknMigrator {
                     if (batchSizeCounter == dce.getBatchSize() * dce.getThreads()) {
                         System.out.print("+");
                         System.out.flush();
-                        writeThing(dce, gen, session, rows, batchSizeCounter, header);
+                        writeThing(dce, gen, session, rows, batchSizeCounter, header, migrationStatusKey);
                         batchSizeCounter = 0;
                         rows.clear();
                     }
@@ -183,7 +184,7 @@ public class GraknMigrator {
                 }
                 //insert the rest when loop exits with less than batch size
                 if (!rows.isEmpty()) {
-                    writeThing(dce, gen, session, rows, batchSizeCounter, header);
+                    writeThing(dce, gen, session, rows, batchSizeCounter, header, migrationStatusKey);
                     if (totalRecordCounter % 50000 != 0) {
                         System.out.println();
                     }
@@ -201,7 +202,7 @@ public class GraknMigrator {
 
 
 
-    private void writeThing(DataConfigEntry dce, InsertGenerator gen, Session session, ArrayList<String> rows, int lineCounter, String header) throws IOException {
+    private void writeThing(DataConfigEntry dce, InsertGenerator gen, GraknSession session, ArrayList<String> rows, int lineCounter, String header, String migrationStatusKey) throws IOException {
         int threads = dce.getThreads();
         try {
             if (isOfProcessorType(dce.getProcessor(), "entity")) {
@@ -224,7 +225,7 @@ public class GraknMigrator {
             } else {
                 throw new IllegalArgumentException("the processor <" + dce.getProcessor() + "> is not known");
             }
-            updateMigrationStatusMigratedRows(dce, lineCounter);
+            updateMigrationStatusMigratedRows(dce, lineCounter, migrationStatusKey);
         } catch (Exception ee) {
             ee.printStackTrace();
         }
@@ -245,22 +246,22 @@ public class GraknMigrator {
         }
     }
 
-    private void updateMigrationStatusMigratedRows(DataConfigEntry dce, int lineCounter) throws IOException {
+    private void updateMigrationStatusMigratedRows(DataConfigEntry dce, int lineCounter, String migrationStatusKey) throws IOException {
         try {
             ProcessorConfigEntry pce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getProcessorConfig());
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
 
             if (migrationStatus != null) {
-                if (migrationStatus.get(dce.getDataPath()) != null) { //updating an existing entry
-                    int updatedMigratedRows = migrationStatus.get(dce.getDataPath()).getMigratedRows() + lineCounter;
-                    migrationStatus.get(dce.getDataPath()).setMigratedRows(updatedMigratedRows);
+                if (migrationStatus.get(migrationStatusKey) != null) { //updating an existing entry
+                    int updatedMigratedRows = migrationStatus.get(migrationStatusKey).getMigratedRows() + lineCounter;
+                    migrationStatus.get(migrationStatusKey).setMigratedRows(updatedMigratedRows);
                 } else { // writing new entry
-                    migrationStatus.put(dce.getDataPath(), new MigrationStatus(pce.getSchemaType(), false, lineCounter));
+                    migrationStatus.put(migrationStatusKey, new MigrationStatus(pce.getSchemaType(), false, lineCounter));
                 }
             } else { //writing very first entry (i.e. file was empty)
                 migrationStatus = new HashMap<>();
-                migrationStatus.put(dce.getDataPath(), new MigrationStatus(pce.getSchemaType(), false, lineCounter));
+                migrationStatus.put(migrationStatusKey, new MigrationStatus(pce.getSchemaType(), false, lineCounter));
             }
 
             // update file
@@ -272,11 +273,11 @@ public class GraknMigrator {
         }
     }
 
-    private void updateMigrationStatusIsCompleted(DataConfigEntry dce) throws IOException {
+    private void updateMigrationStatusIsCompleted(String migrationStatusKey) throws IOException {
         try {
             Gson gson = new Gson();
             Type MigrationStatusMapType = new TypeToken<HashMap<String, MigrationStatus>>(){}.getType();
-            migrationStatus.get(dce.getDataPath()).setCompleted(true);
+            migrationStatus.get(migrationStatusKey).setCompleted(true);
             FileWriter fw = new FileWriter(migrationStatePath);
             gson.toJson(migrationStatus, MigrationStatusMapType, fw);
             fw.flush();

@@ -31,10 +31,10 @@ public class AttributeInsertGeneratorTest {
 
         ArrayList<ThingVariable<?>> result = testAttributeInsertGenerator.graknAttributeInsert(rows, header);
 
-        String tc0 = "$a \"in_use\" isa is-in-use";
+        String tc0 = "$a \"yes\" isa is-in-use";
         Assert.assertEquals(tc0, result.get(0).toString());
 
-        String tc1 = "$a \"not_in_use\" isa is-in-use";
+        String tc1 = "$a \"no\" isa is-in-use";
         Assert.assertEquals(tc1, result.get(1).toString());
 
         Assert.assertEquals(2, result.size());

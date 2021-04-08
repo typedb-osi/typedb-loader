@@ -2,9 +2,9 @@ package migrator;
 
 import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
-import grakn.client.GraknClient;
-import grakn.client.GraknClient.Session;
-import grakn.client.GraknClient.Transaction;
+import grakn.client.api.GraknClient;
+import grakn.client.api.GraknSession;
+import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
@@ -46,28 +46,28 @@ public class SchemaUpdaterTest {
 
     private void postUpdateSchemaTests(GraknInserter gi) {
         GraknClient client = gi.getClient();
-        Session session = gi.getDataSession(client);
+        GraknSession session = gi.getDataSession(client);
 
         // query attribute type
-        Transaction read = session.transaction(Transaction.Type.READ);
+        GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch.Filtered getQuery = Graql.match(var("a").type("added-attribute")).get("a");
         Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
 
         // query entity type
-        read = session.transaction(Transaction.Type.READ);
+        read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch.Limited getQuery2 = Graql.match(var("a").type("added-entity")).get("a").limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query relation type
-        read = session.transaction(Transaction.Type.READ);
+        read = session.transaction(GraknTransaction.Type.READ);
         getQuery2 = Graql.match(var("a").type("added-relation")).get("a").limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query role type
-        read = session.transaction(Transaction.Type.READ);
+        read = session.transaction(GraknTransaction.Type.READ);
         getQuery2 = Graql.match(type("added-relation").relates(var("r"))).limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
