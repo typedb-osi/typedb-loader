@@ -29,7 +29,7 @@ public class AttributeInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        ArrayList<ThingVariable<?>> result = testAttributeInsertGenerator.graknAttributeInsert(rows, header);
+        ArrayList<ThingVariable<?>> result = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
 
         String tc0 = "$a \"yes\" isa is-in-use";
         Assert.assertEquals(tc0, result.get(0).toString());

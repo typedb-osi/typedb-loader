@@ -113,7 +113,7 @@
     },
     {
       "processor": "communication-channel",
-      "processorType": "relation-with-relation",
+      "processorType": "nested-relation",
       "schemaType": "communication-channel",
       "conceptGenerators": {
         "players": {
@@ -225,7 +225,7 @@
     },
     {
       "processor": "in-use",
-      "processorType": "relation",
+      "processorType": "attribute-relation",
       "schemaType": "in-use",
       "conceptGenerators": {
         "players": {

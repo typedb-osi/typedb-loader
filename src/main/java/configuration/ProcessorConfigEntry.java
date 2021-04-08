@@ -66,7 +66,7 @@ public class ProcessorConfigEntry {
 
     public HashMap<String,ConceptGenerator> getRelationRequiredPlayers() {
         HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation") || processorType.equals("relation-with-relation")) {
+        if (processorType.equals("relation") || processorType.equals("nested-relation") || processorType.equals("attribute-relation")) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
             for (Map.Entry<String, ConceptGenerator> pg: playerGenerators.entrySet()) {
                 if (pg.getValue().isRequired()) {

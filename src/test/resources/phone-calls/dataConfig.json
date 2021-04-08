@@ -230,5 +230,107 @@
         "generator": "status"
       }
     ]
+  },
+  "person-order3": {
+    "orderAfter": 3,
+    "dataPath": "src/test/resources/phone-calls/person3.csv",
+    "separator": ",",
+    "processor": "person",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "first_name",
+        "generator": "first-name"
+      },
+      {
+        "columnName": "last_name",
+        "generator" : "last-name"
+      },
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number"
+      },
+      {
+        "columnName": "city",
+        "generator": "city"
+      },
+      {
+        "columnName": "age",
+        "generator": "age"
+      },
+      {
+        "columnName": "nick_name",
+        "generator": "nick-name",
+        "listSeparator": ";"
+      }]
+  },
+  "person-order1": {
+    "orderAfter": 1,
+    "dataPath": "src/test/resources/phone-calls/person1.csv",
+    "separator": ",",
+    "processor": "person",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "first_name",
+        "generator": "first-name"
+      },
+      {
+        "columnName": "last_name",
+        "generator" : "last-name"
+      },
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number"
+      },
+      {
+        "columnName": "city",
+        "generator": "city"
+      },
+      {
+        "columnName": "age",
+        "generator": "age"
+      },
+      {
+        "columnName": "nick_name",
+        "generator": "nick-name",
+        "listSeparator": ";"
+      }]
+  },
+  "person-order2": {
+    "orderAfter": 2,
+    "dataPath": "src/test/resources/phone-calls/person2.csv",
+    "separator": ",",
+    "processor": "person",
+    "batchSize": 50,
+    "threads": 4,
+    "attributes": [
+      {
+        "columnName": "first_name",
+        "generator": "first-name"
+      },
+      {
+        "columnName": "last_name",
+        "generator" : "last-name"
+      },
+      {
+        "columnName": "phone_number",
+        "generator": "phone-number"
+      },
+      {
+        "columnName": "city",
+        "generator": "city"
+      },
+      {
+        "columnName": "age",
+        "generator": "age"
+      },
+      {
+        "columnName": "nick_name",
+        "generator": "nick-name",
+        "listSeparator": ";"
+      }]
   }
 }

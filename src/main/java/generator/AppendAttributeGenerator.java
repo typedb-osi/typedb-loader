@@ -15,14 +15,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static generator.GeneratorUtil.*;
+import static generator.GeneratorUtil.addAttribute;
+import static generator.GeneratorUtil.malformedRow;
 
 public class AppendAttributeGenerator extends InsertGenerator {
 
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
+    private final DataConfigEntry dce;
+    private final ProcessorConfigEntry pce;
 
     public AppendAttributeGenerator(DataConfigEntry dataConfigEntry,
                                     ProcessorConfigEntry processorConfigEntry) {
@@ -33,16 +34,17 @@ public class AppendAttributeGenerator extends InsertGenerator {
     }
 
     public HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> graknAppendAttributeInsert(ArrayList<String> rows,
-                                                                                              String header) throws Exception {
+                                                                                              String header, int rowCounter) throws Exception {
         HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> matchInsertPatterns = new HashMap<>();
 
         ArrayList<ArrayList<ThingVariable<?>>> matchPatterns = new ArrayList<>();
         ArrayList<ArrayList<ThingVariable<?>>> insertPatterns = new ArrayList<>();
 
         int insertCounter = 0;
-
+        int batchCounter = 1;
         for (String row : rows) {
-            ArrayList<ArrayList<ThingVariable<?>>> tmp = graknAppendAttributeQueryFromRow(row, header, insertCounter);
+
+            ArrayList<ArrayList<ThingVariable<?>>> tmp = graknAppendAttributeQueryFromRow(row, header, insertCounter, rowCounter + batchCounter);
             if (tmp != null) {
                 if (tmp.get(0) != null && tmp.get(1) != null) {
                     matchPatterns.add(tmp.get(0));
@@ -50,7 +52,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
                     insertCounter++;
                 }
             }
-
+            batchCounter = batchCounter + 1;
         }
         matchInsertPatterns.put("match", matchPatterns);
         matchInsertPatterns.put("insert", insertPatterns);
@@ -59,7 +61,8 @@ public class AppendAttributeGenerator extends InsertGenerator {
 
     public ArrayList<ArrayList<ThingVariable<?>>> graknAppendAttributeQueryFromRow(String row,
                                                                                    String header,
-                                                                                   int insertCounter) throws Exception {
+                                                                                   int insertCounter,
+                                                                                   int rowCounter) throws Exception {
         String fileSeparator = dce.getSeparator();
         String[] rowTokens = row.split(fileSeparator);
         String[] columnNames = header.split(fileSeparator);
@@ -77,7 +80,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         Thing appendAttributeMatchPattern = addEntityToMatchPattern(insertCounter);
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()) {
-                appendAttributeMatchPattern = addAttribute(rowTokens, appendAttributeMatchPattern, columnNames, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+                appendAttributeMatchPattern = addAttribute(rowTokens, appendAttributeMatchPattern, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
             }
         }
         matchPatterns.add(appendAttributeMatchPattern);
@@ -87,7 +90,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         Thing appendAttributeInsertPattern = null;
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
-                appendAttributeInsertPattern = addAttribute(rowTokens, thingVar, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                appendAttributeInsertPattern = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
             }
         }
         if (appendAttributeInsertPattern != null) {
@@ -100,10 +103,10 @@ public class AppendAttributeGenerator extends InsertGenerator {
 
 
         if (isValid(assembledPatterns)) {
-            appLogger.debug("valid query: <" + assembleQuery(assembledPatterns).toString() + ">");
+            appLogger.debug("valid query: <" + assembleQuery(assembledPatterns) + ">");
             return assembledPatterns;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }

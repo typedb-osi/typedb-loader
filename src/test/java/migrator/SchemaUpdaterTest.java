@@ -32,7 +32,7 @@ public class SchemaUpdaterTest {
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true,true);
+        mig.migrate();
 
         GraknInserter gi = new GraknInserter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
 

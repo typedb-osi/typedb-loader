@@ -31,23 +31,25 @@ public class AttributeInsertGenerator extends InsertGenerator {
     }
 
     public ArrayList<ThingVariable<?>> graknAttributeInsert(ArrayList<String> rows,
-                                                            String header) throws IllegalArgumentException {
+                                                            String header, int rowCounter) throws IllegalArgumentException {
         ArrayList<ThingVariable<?>> patterns = new ArrayList<>();
+        int batchCount = 1;
         for (String row : rows) {
             try {
-                ThingVariable<?> temp = graknAttributeQueryFromRow(row, header);
+                ThingVariable<?> temp = graknAttributeQueryFromRow(row, header, rowCounter + batchCount);
                 if (temp != null) {
                     patterns.add(temp);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            batchCount = batchCount + 1;
         }
         return patterns;
     }
 
     public ThingVariable<Attribute> graknAttributeQueryFromRow(String row,
-                                                               String header) throws Exception {
+                                                               String header, int rowCounter) throws Exception {
         String fileSeparator = dce.getSeparator();
         String[] rowTokens = row.split(fileSeparator);
         String[] columnNames = header.split(fileSeparator);
@@ -58,7 +60,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
         Attribute attributeInsertStatement = null;
 
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-            attributeInsertStatement = addValue(rowTokens, attributeInitialStatement, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+            attributeInsertStatement = addValue(rowTokens, attributeInitialStatement, rowCounter, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
         }
 
         if (attributeInsertStatement != null) {
@@ -68,7 +70,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
                 appLogger.debug("valid query: <insert " + attributeInsertStatement.toString() + ";>");
                 return attributeInsertStatement;
             } else {
-                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                 return null;
             }
         } else {

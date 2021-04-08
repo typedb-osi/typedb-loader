@@ -35,7 +35,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true,true);
+        mig.migrate();
     }
 
     @Test
@@ -49,14 +49,14 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true,true);
+        mig.migrate();
 
         GraknInserter gi = new GraknInserter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
         GraknClient client = gi.getClient();
         GraknSession session = gi.getDataSession(client);
         testEntities(session);
         testRelations(session);
-        testRelationWithRelations(session);
+        testNestedRelations(session);
         testAppendAttribute(session);
         testAttributes(session);
         testAttributeRelation(session);
@@ -79,7 +79,7 @@ public class MigrationTest {
         // query all entities of type person
         read = session.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("c").isa("person")).get("c").limit(1000);
-        Assert.assertEquals(32, read.query().match(getQuery).count());
+        Assert.assertEquals(35, read.query().match(getQuery).count());
 
         // query all entites of type company
         read = session.transaction(GraknTransaction.Type.READ);
@@ -137,7 +137,7 @@ public class MigrationTest {
         read.close();
     }
 
-    public void testRelationWithRelations(GraknSession session) {
+    public void testNestedRelations(GraknSession session) {
 
         // query specific communication-channel and count the number of past calls (single past-call):
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
@@ -283,7 +283,7 @@ public class MigrationTest {
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
-        mig.migrate(true, true, true,true);
+        mig.migrate();
     }
 }
 

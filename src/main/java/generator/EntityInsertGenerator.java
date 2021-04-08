@@ -1,8 +1,5 @@
 package generator;
 
-import static generator.GeneratorUtil.malformedRow;
-import static generator.GeneratorUtil.addAttribute;
-
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
 import graql.lang.Graql;
@@ -16,12 +13,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import static generator.GeneratorUtil.addAttribute;
+import static generator.GeneratorUtil.malformedRow;
+
 public class EntityInsertGenerator extends InsertGenerator {
 
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
+    private final DataConfigEntry dce;
+    private final ProcessorConfigEntry pce;
 
     public EntityInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry) {
         super();
@@ -31,23 +31,26 @@ public class EntityInsertGenerator extends InsertGenerator {
     }
 
     public ArrayList<ThingVariable<?>> graknEntityInsert(ArrayList<String> rows,
-                                                      String header) throws IllegalArgumentException {
+                                                         String header, int rowCounter) throws IllegalArgumentException {
         ArrayList<ThingVariable<?>> patterns = new ArrayList<>();
+        int batchCount = 1;
         for (String row : rows) {
             try {
-                ThingVariable temp = graknEntityQueryFromRow(row, header);
+                ThingVariable temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
                 if (temp != null) {
                     patterns.add(temp);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            batchCount = batchCount + 1;
         }
         return patterns;
     }
 
     public ThingVariable graknEntityQueryFromRow(String row,
-                                                 String header) throws Exception {
+                                                 String header,
+                                                 int rowCounter) throws Exception {
         String fileSeparator = dce.getSeparator();
         String[] rowTokens = row.split(fileSeparator);
         String[] columnNames = header.split(fileSeparator);
@@ -57,14 +60,14 @@ public class EntityInsertGenerator extends InsertGenerator {
         Thing entityInsertStatement = addEntityToStatement();
 
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
         }
 
         if (isValid(entityInsertStatement)) {
             appLogger.debug("valid query: <insert " + entityInsertStatement.toString() + ";>");
             return entityInsertStatement;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }
