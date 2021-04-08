@@ -13,6 +13,7 @@ public class DataConfigEntry {
     private DataConfigGeneratorMapping[] relationPlayers;
     private int batchSize;
     private int threads;
+    private Integer order;
 
     public String getDataPath() {
         return dataPath;
@@ -44,6 +45,10 @@ public class DataConfigEntry {
 
     public int getThreads() {
         return threads;
+    }
+
+    public Integer getOrder() {
+        return order;
     }
 
     public ArrayList<DataConfigEntry.DataConfigGeneratorMapping> getMatchAttributes() {

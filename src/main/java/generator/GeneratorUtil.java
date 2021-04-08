@@ -56,6 +56,7 @@ public class GeneratorUtil {
 
     public static Attribute addValue(String[] tokens,
                                  UnboundVariable statement,
+                                 int lineNumber,
                                  String[] columnNames,
                                  DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
                                  ProcessorConfigEntry pce,
@@ -74,7 +75,7 @@ public class GeneratorUtil {
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                att = addAttributeValueOfType(statement, attributeValueType, cleanedToken, preprocessorConfig);
+                att = addAttributeValueOfType(statement, attributeValueType, cleanedToken, lineNumber, preprocessorConfig);
             }
         }
         return att;
@@ -83,6 +84,7 @@ public class GeneratorUtil {
     public static Thing addAttribute(String[] tokens,
                                      Thing statement,
                                      String[] columnNames,
+                                     int lineNumber,
                                      DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
                                      ProcessorConfigEntry pce,
                                      DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -101,7 +103,7 @@ public class GeneratorUtil {
                 String attributeType = attributeGenerator.getAttributeType();
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, preprocessorConfig);
+                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, lineNumber, columnListSeparator, preprocessorConfig);
             }
         }
         return statement;
@@ -110,6 +112,7 @@ public class GeneratorUtil {
     public static Relation addAttribute(String[] tokens,
                                      Relation statement,
                                      String[] columnNames,
+                                     int lineNumber,
                                      DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
                                      ProcessorConfigEntry pce,
                                      DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -128,7 +131,7 @@ public class GeneratorUtil {
                 String attributeType = attributeGenerator.getAttributeType();
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, preprocessorConfig);
+                statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, lineNumber, preprocessorConfig);
             }
         }
         return statement;
@@ -136,6 +139,7 @@ public class GeneratorUtil {
 
     public static Thing addAttribute(String[] tokens,
                                      UnboundVariable statement,
+                                     int lineNumber,
                                      String[] columnNames,
                                      DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
                                      ProcessorConfigEntry pce,
@@ -156,7 +160,7 @@ public class GeneratorUtil {
                 String attributeType = attributeGenerator.getAttributeType();
                 String attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
-                returnThing = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, preprocessorConfig);
+                returnThing = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, lineNumber, preprocessorConfig);
             }
         }
         return returnThing;
@@ -166,18 +170,19 @@ public class GeneratorUtil {
                                         String cleanedToken,
                                         String conceptType,
                                         String valueType,
+                                        int lineNumber,
                                         String listSeparator,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (listSeparator != null) {
             for (String exploded: cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
-                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, preprocessorConfig);
+                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
                 }
             }
             return statement;
         } else {
-            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, preprocessorConfig);
+            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, lineNumber, preprocessorConfig);
         }
     }
 
@@ -186,17 +191,18 @@ public class GeneratorUtil {
                                         String conceptType,
                                         String valueType,
                                         String listSeparator,
+            int lineNumber,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (listSeparator != null) {
             for (String exploded: cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
-                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, preprocessorConfig);
+                    statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
                 }
             }
             return statement;
         } else {
-            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, preprocessorConfig);
+            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, lineNumber, preprocessorConfig);
         }
     }
 
@@ -205,6 +211,7 @@ public class GeneratorUtil {
                                         String conceptType,
                                         String valueType,
                                         String listSeparator,
+                                        int lineNumber,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         Thing returnThing = null;
         if (listSeparator != null) {
@@ -213,16 +220,16 @@ public class GeneratorUtil {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
                     if (count == 0) {
-                        returnThing = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, preprocessorConfig);
+                        returnThing = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
                     } else {
-                        returnThing = addAttributeOfColumnType(returnThing, conceptType, valueType, cleanedExplodedToken, preprocessorConfig);
+                        returnThing = addAttributeOfColumnType(returnThing, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
                     }
                     count++;
                 }
             }
             return returnThing;
         } else {
-            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, preprocessorConfig);
+            return addAttributeOfColumnType(statement, conceptType, valueType, cleanedToken, lineNumber, preprocessorConfig);
         }
     }
 
@@ -230,6 +237,7 @@ public class GeneratorUtil {
                                                  String conceptType,
                                                  String valueType,
                                                  String cleanedValue,
+                                                 int lineNumber,
                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
@@ -243,16 +251,14 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "double":
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "boolean":
@@ -261,7 +267,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
+                    dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
             case "datetime":
@@ -278,12 +284,11 @@ public class GeneratorUtil {
                         statement = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
-                    dataLogger.warn(dateTimeException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value:  - < %s >", lineNumber, conceptType, dateTimeException.getMessage()));
                 }
                 break;
             default:
-                dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
+                dataLogger.warn("row < %s > column type not valid - must be either: string, long, double, boolean, or datetime");
                 break;
         }
         return statement;
@@ -293,6 +298,7 @@ public class GeneratorUtil {
                                                  String conceptType,
                                                  String valueType,
                                                  String cleanedValue,
+                                                    int lineNumber,
                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
@@ -306,16 +312,14 @@ public class GeneratorUtil {
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "double":
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "boolean":
@@ -324,7 +328,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
+                    dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
             case "datetime":
@@ -341,12 +345,11 @@ public class GeneratorUtil {
                         statement = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
-                    dataLogger.warn(dateTimeException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value:  - < %s >", lineNumber, conceptType, dateTimeException.getMessage()));
                 }
                 break;
             default:
-                dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
+                dataLogger.warn(String.format("row < %s > column type not valid - must be either: string, long, double, boolean, or datetime", lineNumber));
                 break;
         }
         return statement;
@@ -356,6 +359,7 @@ public class GeneratorUtil {
                                                  String conceptType,
                                                  String valueType,
                                                  String cleanedValue,
+                                                 int lineNumber,
                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
@@ -371,16 +375,14 @@ public class GeneratorUtil {
                 try {
                     returnThing = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <long> for variable < %s > with non-<long> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "double":
                 try {
                     returnThing = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn(String.format("current row has column of type <double> for variable < %s > with non-<double> value - skipping column", conceptType));
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
             case "boolean":
@@ -389,7 +391,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     returnThing = statement.has(conceptType, false);
                 } else {
-                    dataLogger.warn(String.format("current row has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", conceptType));
+                    dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
             case "datetime":
@@ -406,12 +408,11 @@ public class GeneratorUtil {
                         returnThing = statement.has(conceptType, dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn(String.format("current row has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value: ", conceptType));
-                    dataLogger.warn(dateTimeException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value:  - < %s >", lineNumber, conceptType, dateTimeException.getMessage()));
                 }
                 break;
             default:
-                dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
+                dataLogger.warn(String.format("row < %s > column type not valid - must be either: string, long, double, boolean, or datetime", lineNumber));
                 break;
         }
         return returnThing;
@@ -420,6 +421,7 @@ public class GeneratorUtil {
     public static Attribute addAttributeValueOfType(UnboundVariable unboundVar,
                                                 String valueType,
                                                 String cleanedValue,
+                                                    int lineNumber,
                                                 DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
@@ -434,16 +436,14 @@ public class GeneratorUtil {
                 try {
                     att = unboundVar.eq(Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <long> with non-<long> value - skipping column");
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <long> with non-<long> value - skipping column - < %s >", lineNumber, numberFormatException.getMessage()));
                 }
                 break;
             case "double":
                 try {
                     att = unboundVar.eq(Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    dataLogger.warn("current row has column of type <double> with non-<double> value - skipping column");
-                    dataLogger.warn(numberFormatException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <double> with non-<double> value - skipping column - < %s >", lineNumber, numberFormatException.getMessage()));
                 }
                 break;
             case "boolean":
@@ -452,7 +452,7 @@ public class GeneratorUtil {
                 } else if (cleanedValue.toLowerCase().equals("false")) {
                     att = unboundVar.eq( false);
                 } else {
-                    dataLogger.warn("current row has column of type <boolean> with non-<boolean> value - skipping column");
+                    dataLogger.warn(String.format("row < %s > has column of type <boolean> with non-<boolean> value - skipping column", lineNumber));
                 }
                 break;
             case "datetime":
@@ -469,12 +469,11 @@ public class GeneratorUtil {
                         att = unboundVar.eq(dateTime);
                     }
                 } catch (DateTimeException dateTimeException) {
-                    dataLogger.warn("current row has column of type <datetime> with non-<ISO 8601 format> datetime value: ");
-                    dataLogger.warn(dateTimeException.getMessage());
+                    dataLogger.warn(String.format("row < %s > has column of type <datetime> with non-<ISO 8601 format> datetime value:  - < %s >", lineNumber, dateTimeException.getMessage()));
                 }
                 break;
             default:
-                dataLogger.warn("column type not valid - must be either: string, long, double, boolean, or datetime");
+                dataLogger.warn(String.format("row < %s > column type not valid - must be either: string, long, double, boolean, or datetime", lineNumber));
                 break;
         }
         return att;

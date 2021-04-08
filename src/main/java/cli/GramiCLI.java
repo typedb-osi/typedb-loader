@@ -8,7 +8,7 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 
-@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.0-alpha-12", mixinStandardHelpOptions = true)
+@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.0", mixinStandardHelpOptions = true)
 public class GramiCLI {
 
     public static void main(String[] args) {
@@ -46,9 +46,6 @@ class MigrateCommand implements Runnable {
     @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists")
     private boolean cleanMigration;
 
-    @CommandLine.Option(names = {"-sc", "--scope"}, description = "optional - set migration scope: 0 - apply schema only (Note: this has no effect unless you also set the cleanMigration flag to true.); 1 - migrate entities; 2 - migrate entities & relations; 3 - migrate entites, relations, & relation-with-relations; everything else defaults to 4 - migrate all (entities, relations, relation-with-relations, append-attributes")
-    private int scope = 4;
-
     @Override
     public void run() {
         spec.commandLine().getOut().println("############## GraMi migration ###############");
@@ -60,24 +57,12 @@ class MigrateCommand implements Runnable {
         spec.commandLine().getOut().println("\tdatabase: " + databaseName);
         spec.commandLine().getOut().println("\tgrakn server: " + graknURI);
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
-        spec.commandLine().getOut().println("\tmigration scope: " + scope);
 
         final MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, schemaFilePath, dataConfigFilePath, processorConfigFilePath);
 
         try {
             GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatusFilePath, cleanMigration);
-
-            if (scope != 0 && scope != 1 && scope != 2 && scope != 3) {
-                scope = 4;
-            }
-
-            switch (scope) {
-                case 0: mig.migrate(false, false, false, false); break;
-                case 1: mig.migrate(true, false, false, false); break;
-                case 2: mig.migrate(true, true, false, false); break;
-                case 3: mig.migrate(true, true, true, false); break;
-                case 4: mig.migrate(true, true, true, true); break;
-            }
+            mig.migrate();
         } catch (IOException e) {
             e.printStackTrace();
         }
