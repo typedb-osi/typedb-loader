@@ -57,7 +57,7 @@ Depending on what you would like to migrate, see here:
  - [Entity Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities#processor-config)
  - [Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#processor-config)
  - [Nested Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#processor-config)
- - [Attribute-Player Relation](https://github.com/bayer-science-for-a-better-life/grami/wiki/Attribute-Player-Relations#processor-config)
+ - [Attribute-Player Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations#processor-config)
 
 ### Data Configuration
 
@@ -72,8 +72,8 @@ See Example here:
  - [Relation Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#data-config)
  - [Nested Relation - Match by Attribute(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---attribute-matching)
  - [Nested Relation - Match by Player(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---player-matching)
- - [Attribute-Player Relation - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Attribute-Player-Relations#data-config)
- - [Custom Migration Order](https://github.com/bayer-science-for-a-better-life/grami/wiki/Custom-Migration-Order)
+ - [Attribute-Player Relation - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations#data-config)
+ - [Custom Migration Order of Data Config Entries](https://github.com/bayer-science-for-a-better-life/grami/wiki/Custom-Migration-Order)
 
 ### Migrate Data
 
