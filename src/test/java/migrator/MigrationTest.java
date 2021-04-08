@@ -79,7 +79,7 @@ public class MigrationTest {
         // query all entities of type person
         read = session.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("c").isa("person")).get("c").limit(1000);
-        Assert.assertEquals(35, read.query().match(getQuery).count());
+        Assert.assertEquals(36, read.query().match(getQuery).count());
 
         // query all entites of type company
         read = session.transaction(GraknTransaction.Type.READ);

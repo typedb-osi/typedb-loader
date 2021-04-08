@@ -1,6 +1,6 @@
 {
   "text": {
-    "dataPath": "src/test/resources/bugfixing/issue10/text.csv",
+    "dataPath": ["src/test/resources/bugfixing/issue10/text.csv"],
     "separator": ",",
     "processor": "text",
     "batchSize": 50,
@@ -12,7 +12,7 @@
       }]
   },
   "label": {
-    "dataPath": "src/test/resources/bugfixing/issue10/label.csv",
+    "dataPath": ["src/test/resources/bugfixing/issue10/label.csv"],
     "separator": ",",
     "processor": "label",
     "batchSize": 50,
@@ -24,7 +24,7 @@
       }]
   },
   "tag": {
-    "dataPath": "src/test/resources/bugfixing/issue10/tag.csv",
+    "dataPath": ["src/test/resources/bugfixing/issue10/tag.csv"],
     "separator": ",",
     "processor": "tag",
     "batchSize": 50,

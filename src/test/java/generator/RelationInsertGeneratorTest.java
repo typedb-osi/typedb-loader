@@ -25,7 +25,7 @@ public class RelationInsertGeneratorTest {
     @Test
     public void graknRelationQueryFromRowTest() throws Exception {
 
-        RelationInsertGenerator testRelationInsertGenerator = new RelationInsertGenerator(migrationConfig.getDataConfig().get("rel1"), gc.get("processors").get(3));
+        RelationInsertGenerator testRelationInsertGenerator = new RelationInsertGenerator(migrationConfig.getDataConfig().get("rel1"), gc.get("processors").get(3), 0);
 
         ArrayList<String> rows = getData(rel1dp);
         String header = rows.get(0);

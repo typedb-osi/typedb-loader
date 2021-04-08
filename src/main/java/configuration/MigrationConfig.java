@@ -34,7 +34,7 @@ public class MigrationConfig {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(dataConfigPath));
-            Type ConfigType = new TypeToken<HashMap<String, DataConfigEntry>>(){}.getType();
+            Type ConfigType = new TypeToken<HashMap<String, DataConfigEntry>>() {}.getType();
             this.dataConfig = new Gson().fromJson(bufferedReader, ConfigType);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -49,14 +49,17 @@ public class MigrationConfig {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(processorConfigPath));
-            Type ConfigType = new TypeToken<HashMap<String, ArrayList<ProcessorConfigEntry>>>(){}.getType();
+            Type ConfigType = new TypeToken<HashMap<String, ArrayList<ProcessorConfigEntry>>>() {
+            }.getType();
             this.processorConfig = new Gson().fromJson(bufferedReader, ConfigType);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public HashMap<String, ArrayList<ProcessorConfigEntry>> getProcessorConfig() { return this.processorConfig; }
+    public HashMap<String, ArrayList<ProcessorConfigEntry>> getProcessorConfig() {
+        return this.processorConfig;
+    }
 
     public String getSchemaPath() {
         return this.schemaPath;

@@ -22,11 +22,13 @@ public class RelationInsertGenerator extends InsertGenerator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     public final DataConfigEntry dce;
     public final ProcessorConfigEntry pce;
+    private final int dataPathIndex;
 
-    public RelationInsertGenerator(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry) {
+    public RelationInsertGenerator(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dce;
         this.pce = processorConfigEntry;
+        this.dataPathIndex = dataPathIndex;
         appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
@@ -86,11 +88,11 @@ public class RelationInsertGenerator extends InsertGenerator {
                     appLogger.debug("valid query: <" + assembleQuery(assembledStatements) + ">");
                     return assembledStatements;
                 } else {
-                    dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+                    dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                     return null;
                 }
             } else {
-                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
+                dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
                 return null;
             }
         } else {

@@ -1,11 +1,9 @@
 package configuration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DataConfigEntry {
-    private String dataPath;
+    private String[] dataPath;
     private String separator;
     private String processor;
     private DataConfigGeneratorMapping[] attributes;
@@ -16,7 +14,7 @@ public class DataConfigEntry {
     private Integer orderBefore;
     private Integer orderAfter;
 
-    public String getDataPath() {
+    public String[] getDataPath() {
         return dataPath;
     }
 

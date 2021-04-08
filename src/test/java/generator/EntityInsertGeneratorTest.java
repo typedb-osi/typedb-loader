@@ -27,7 +27,7 @@ public class EntityInsertGeneratorTest {
     @Test
     public void graknEntityQueryFromRowTest() {
 
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0));
+        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0), 0);
 
         ArrayList<String> rows = getData(entity1dp);
         String header = rows.get(0);
@@ -102,7 +102,7 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowWithBoolAndDoubleTest() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1));
+        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1), 0);
 
         ArrayList<String> rows = getData(entity2dp);
         String header = rows.get(0);
@@ -149,7 +149,7 @@ public class EntityInsertGeneratorTest {
     @Test
     public void graknEntityQueryFromRowWithLongTest() {
 
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2));
+        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2), 0);
 
         ArrayList<String> rows = getData(entity3dp);
         String header = rows.get(0);

@@ -24,12 +24,15 @@ public class AppendAttributeGenerator extends InsertGenerator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private final DataConfigEntry dce;
     private final ProcessorConfigEntry pce;
+    private final int dataPathIndex;
 
     public AppendAttributeGenerator(DataConfigEntry dataConfigEntry,
-                                    ProcessorConfigEntry processorConfigEntry) {
+                                    ProcessorConfigEntry processorConfigEntry,
+                                    int dataPathIndex) {
         super();
         this.dce = dataConfigEntry;
         this.pce = processorConfigEntry;
+        this.dataPathIndex = dataPathIndex;
         appLogger.debug("Creating AppendAttribute for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
@@ -70,7 +73,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         malformedRow(row, rowTokens, columnNames.length);
 
         if (!validateDataConfigEntry()) {
-            throw new IllegalArgumentException("data config entry for " + dce.getDataPath() + " is incomplete - it needs at least one attribute used for matching (\"match\": true) and at least one attribute to be appended (\"match\": false or not set at all");
+            throw new IllegalArgumentException("data config entry for " + dce.getDataPath()[dataPathIndex] + " is incomplete - it needs at least one attribute used for matching (\"match\": true) and at least one attribute to be appended (\"match\": false or not set at all");
         }
 
         ArrayList<ThingVariable<?>> matchPatterns = new ArrayList<>();
@@ -106,7 +109,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
             appLogger.debug("valid query: <" + assembleQuery(assembledPatterns) + ">");
             return assembledPatterns;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }

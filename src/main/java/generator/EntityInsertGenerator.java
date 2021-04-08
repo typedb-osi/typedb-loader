@@ -22,16 +22,19 @@ public class EntityInsertGenerator extends InsertGenerator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private final DataConfigEntry dce;
     private final ProcessorConfigEntry pce;
+    private final int dataPathIndex;
 
-    public EntityInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry) {
+    public EntityInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dataConfigEntry;
         this.pce = processorConfigEntry;
+        this.dataPathIndex = dataPathIndex;
         appLogger.debug("Creating EntityInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
     public ArrayList<ThingVariable<?>> graknEntityInsert(ArrayList<String> rows,
-                                                         String header, int rowCounter) throws IllegalArgumentException {
+                                                         String header,
+                                                         int rowCounter) throws IllegalArgumentException {
         ArrayList<ThingVariable<?>> patterns = new ArrayList<>();
         int batchCount = 1;
         for (String row : rows) {
@@ -67,7 +70,7 @@ public class EntityInsertGenerator extends InsertGenerator {
             appLogger.debug("valid query: <insert " + entityInsertStatement.toString() + ";>");
             return entityInsertStatement;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
     }

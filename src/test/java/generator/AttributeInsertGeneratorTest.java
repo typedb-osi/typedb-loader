@@ -23,7 +23,7 @@ public class AttributeInsertGeneratorTest {
     @Test
     public void graknAttributeQueryFromRowTest() {
 
-        AttributeInsertGenerator testAttributeInsertGenerator = new AttributeInsertGenerator(migrationConfig.getDataConfig().get("is-in-use"), genConf.get("processors").get(8));
+        AttributeInsertGenerator testAttributeInsertGenerator = new AttributeInsertGenerator(migrationConfig.getDataConfig().get("is-in-use"), genConf.get("processors").get(8), 0);
 
         ArrayList<String> rows = getData(file);
         String header = rows.get(0);

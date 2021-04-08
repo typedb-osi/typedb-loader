@@ -22,11 +22,13 @@ public class AttributeInsertGenerator extends InsertGenerator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private final DataConfigEntry dce;
     private final ProcessorConfigEntry pce;
+    private final int dataPathIndex;
 
-    public AttributeInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry) {
+    public AttributeInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dataConfigEntry;
         this.pce = processorConfigEntry;
+        this.dataPathIndex = dataPathIndex;
         appLogger.debug("Creating AttributeInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
@@ -49,7 +51,8 @@ public class AttributeInsertGenerator extends InsertGenerator {
     }
 
     public ThingVariable<Attribute> graknAttributeQueryFromRow(String row,
-                                                               String header, int rowCounter) throws Exception {
+                                                               String header,
+                                                               int rowCounter) throws Exception {
         String fileSeparator = dce.getSeparator();
         String[] rowTokens = row.split(fileSeparator);
         String[] columnNames = header.split(fileSeparator);
@@ -70,7 +73,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
                 appLogger.debug("valid query: <insert " + attributeInsertStatement.toString() + ";>");
                 return attributeInsertStatement;
             } else {
-                dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+                dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                 return null;
             }
         } else {
