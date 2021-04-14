@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class ValidationReport {
     private final String config;
-    private boolean valid = true;
-    private ArrayList<String> errors = new ArrayList<>();
+    private boolean valid;
+    private ArrayList<String> errors;
 
     public ValidationReport(String config, boolean valid, ArrayList<String> errors) {
         this.config = config;

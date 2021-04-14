@@ -17,11 +17,8 @@ public class ConfigValidationTest {
         String dataconf = getAbsPath("src/test/resources/config-validation/dataConfig.json");
         String procconf = getAbsPath("src/test/resources/config-validation/processorConfig.json");
 
-        String migstatus = getAbsPath("src/test/resources/config-validation/migrationStatus.json");
-
         MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "someDB", schema, dataconf, procconf);
-        GraknMigrator mig = new GraknMigrator(migrationConfig, migstatus, true);
-        ArrayList<ValidationReport> reports = mig.validateConfigs();
+        ArrayList<ValidationReport> reports = ConfigValidation.validateConfigs(migrationConfig);
 
         for (ValidationReport rep : reports) {
             for (String s : rep.getErrors()) {
