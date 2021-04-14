@@ -8,6 +8,7 @@ import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.ThingVariable.Relation;
+import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
 import org.junit.Assert;
@@ -60,6 +61,7 @@ public class MigrationTest {
         testAppendAttribute(session);
         testAttributes(session);
         testAttributeRelation(session);
+        testInsertOrAppend(session);
         session.close();
         client.close();
     }
@@ -268,6 +270,14 @@ public class MigrationTest {
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch getQuery = Graql.match(var("a").isa("in-use")).get("a");
         Assert.assertEquals(7, read.query().match(getQuery).count());
+
+        read.close();
+    }
+
+    public void testInsertOrAppend(GraknSession session) {
+        GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
+        GraqlMatch getQuery = Graql.match(var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
+        Assert.assertEquals(1, read.query().match(getQuery).count());
 
         read.close();
     }

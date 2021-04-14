@@ -27,6 +27,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - migrate required/optional role players (entity & relations)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
     - migrate list-like player columns as n players
+    - **migrate entity if not present - if present, either do not insert or append attributes**
  - Data Validation:
     - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
  - Performance:

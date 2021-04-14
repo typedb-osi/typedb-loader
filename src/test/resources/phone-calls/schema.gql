@@ -44,7 +44,7 @@ define
 
     company sub entity,
         plays contract:provider,
-        owns name;
+        owns name @key;
 
     person sub entity,
         plays contract:customer,
@@ -52,7 +52,7 @@ define
         plays call:callee,
         owns first-name,
         owns last-name,
-        owns phone-number,
+        owns phone-number @key,
         owns city,
         owns age,
         owns nick-name,
