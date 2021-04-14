@@ -1,0 +1,15 @@
+package migrator;
+
+public enum ProcessorTypes {
+    entity,
+    attribute,
+    relation,
+    append_attribute,
+    nested_relation,
+    attribute_relation;
+
+    @Override
+    public String toString() {
+        return super.toString().replaceAll("_", "-");
+    }
+}
