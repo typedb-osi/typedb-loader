@@ -11,7 +11,6 @@ import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import graql.lang.pattern.variable.ThingVariable;
 import insert.GraknInserter;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import loader.DataLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,8 +56,6 @@ public class GraknMigrator {
 
     public void migrate() throws IOException {
 
-        ConfigValidation.validateConfigs(migrationConfig);
-
         initializeMigrationStatus();
         GraknClient client = graknInserter.getClient();
 
@@ -67,6 +64,20 @@ public class GraknMigrator {
             appLogger.info("cleaned database and migrate schema...");
         } else {
             appLogger.info("using existing DB and schema to continue previous migration...");
+        }
+
+        HashMap<String, ArrayList<String>> validation = ConfigValidation.validateConfigs(migrationConfig);
+        if (validation.get("processorConfig").size() > 0 ||
+                validation.get("processorConfig").size() > 0) {
+            appLogger.error("Found errors in configuration files: ");
+            for (String error : validation.get("processorConfig")) {
+                appLogger.error(error);
+            }
+            for (String error : validation.get("dataConfig")) {
+                appLogger.error(error);
+            }
+            appLogger.error("Aborting migration - please fix configuration errors");
+            System.exit(1);
         }
 
         GraknSession dataSession = graknInserter.getDataSession(client);
@@ -82,7 +93,7 @@ public class GraknMigrator {
 
         // independent attributes
         appLogger.info("migrating independent attributes...");
-        migrationBatch = getEntryMigrationConfigsByProcessorType("attribute");
+        migrationBatch = getEntryMigrationConfigsByProcessorType("attribute ");
         for (EntryMigrationConfig conf : migrationBatch) {
             appLogger.info("starting migration for: [" + conf.getMigrationStatusKey() + "]");
             batchDataBuildQueriesAndInsert(conf, session);

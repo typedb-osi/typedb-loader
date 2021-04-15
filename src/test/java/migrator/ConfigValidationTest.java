@@ -1,29 +1,38 @@
 package migrator;
 
 import configuration.MigrationConfig;
+import insert.GraknInserter;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static util.Util.getAbsPath;
 
 public class ConfigValidationTest {
 
     @Test
-    public void migrateGenericTestsTest() throws IOException {
+    public void configValidationTest() {
 
-        String schema = getAbsPath("src/test/resources/genericTests/schema-test.gql");
-        String dataconf = getAbsPath("src/test/resources/config-validation/dataConfig.json");
-        String procconf = getAbsPath("src/test/resources/config-validation/processorConfig.json");
+        String schema = getAbsPath("src/test/resources/config-validation/schema.gql");
+        GraknInserter gi = new GraknInserter("localhost", "1729", schema, "config-validation");
+        gi.cleanAndDefineSchemaToDatabase(gi.getClient());
 
-        MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "someDB", schema, dataconf, procconf);
-        ArrayList<ValidationReport> reports = ConfigValidation.validateConfigs(migrationConfig);
+        // general tests
+        String dataConf = getAbsPath("src/test/resources/config-validation/dataConfig.json");
+        String procConf = getAbsPath("src/test/resources/config-validation/processorConfig.json");
+        MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "config-validation", schema, dataConf, procConf);
+        HashMap<String, ArrayList<String>> reports = ConfigValidation.validateConfigs(migrationConfig);
+        Assert.assertEquals(2, reports.size());
+        Assert.assertEquals(0, reports.get("processorConfig").size());
+        Assert.assertEquals(0, reports.get("dataConfig").size());
 
-        for (ValidationReport rep : reports) {
-            for (String s : rep.getErrors()) {
-                System.out.println(s);
-            }
-        }
+        // processorType
+        procConf = getAbsPath("src/test/resources/config-validation/processorConfig_processorType.json");
+        migrationConfig = new MigrationConfig("localhost:1729", "config-validation", schema, dataConf, procConf);
+        reports = ConfigValidation.validateConfigs(migrationConfig);
+        Assert.assertEquals(3, reports.get("processorConfig").size());
+
     }
 }

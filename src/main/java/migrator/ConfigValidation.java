@@ -9,14 +9,14 @@ import java.util.Map;
 
 public class ConfigValidation {
 
-    public static ArrayList<ValidationReport> validateConfigs(MigrationConfig migrationConfig) {
-        ArrayList<ValidationReport> reports = new ArrayList<>();
-        reports.add(validateProcessorConfigAgainstSchema(migrationConfig));
-        reports.add(validateDataConfigAgainstProcessorConfig(migrationConfig));
+    public static HashMap<String, ArrayList<String>> validateConfigs(MigrationConfig migrationConfig) {
+        HashMap<String, ArrayList<String>> reports = new HashMap<>();
+        reports.put("processorConfig", validateProcessorConfigAgainstSchema(migrationConfig));
+        reports.put("dataConfig", validateDataConfigAgainstProcessorConfig(migrationConfig));
         return reports;
     }
 
-    private static ValidationReport validateProcessorConfigAgainstSchema(MigrationConfig migrationConfig) {
+    private static ArrayList<String> validateProcessorConfigAgainstSchema(MigrationConfig migrationConfig) {
         HashMap<String, ArrayList<ProcessorConfigEntry>> procConfig = migrationConfig.getProcessorConfig();
 
         ArrayList<String> errors = new ArrayList<>();
@@ -25,21 +25,27 @@ public class ConfigValidation {
             ArrayList<ProcessorConfigEntry> processors = entry.getValue();
             int processorIndex = 0;
             for (ProcessorConfigEntry processor : processors) {
+                String curError;
+
                 String processorName = processor.getProcessor();
                 if(processorName.isEmpty()) {
                     errors.add("ProcessorConfigEntry at index " + processorIndex + " has an empty \"processor\" field");
                 }
-                String res = validateProcessorType(processor.getProcessorType());
-                if (!res.isEmpty()) errors.add("In Processor <" + processorName + ">: " + res);
+
+                curError = processorTypeExists(processor.getProcessorType());
+                if (!curError.isEmpty()) errors.add("In Processor <" + processorName + ">: " + curError);
+
+//                curError = schemaTypeExists(processor.getSchemaType());
+//                if (!curError.isEmpty()) errors.add("In Processor <" + processorName + ">: " + curError);
+
 
                 processorIndex = processorIndex + 1;
             }
         }
 
         // for each entry:
-        // "processorType" must be one of enum of entity, relation, nested-relation, etc...
         // "schemaType" must exist
-        // "processor" must be unique and non-empty
+
         // if entity
         // conceptGenerators and attributes must be present
         // foreach attribute
@@ -109,26 +115,27 @@ public class ConfigValidation {
         // required must be present as boolean true/false
         // if entity
         // do above validation
-        return new ValidationReport("proc-config", errors.size() <= 0, errors);
+//        return new ValidationReport(errors.size() <= 0, errors);
+        return errors;
     }
 
-    private static String validateProcessorType(String processorType) {
-        boolean flag = false;
+//    private static String schemaTypeExists(String schemaType) {
+//
+//    }
+
+    private static String processorTypeExists(String processorType) {
         for (ProcessorTypes proctype: ProcessorTypes.values()) {
             if (proctype.toString().equals(processorType)) {
-                flag = true;
-                break;
+                return "";
             }
-        }
-        if (flag) {
-            return "";
         }
         return processorType + " is not a valid processorType";
     }
 
-    private static ValidationReport validateDataConfigAgainstProcessorConfig(MigrationConfig migrationConfig) {
+    private static ArrayList<String> validateDataConfigAgainstProcessorConfig(MigrationConfig migrationConfig) {
         ArrayList<String> errors = new ArrayList<>();
-        return new ValidationReport("data-config", errors.size() <= 0, errors);
+//        return new ValidationReport(errors.size() <= 0, errors);
+        return errors;
     }
 
 }
