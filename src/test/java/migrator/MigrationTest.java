@@ -81,7 +81,7 @@ public class MigrationTest {
         // query all entities of type person
         read = session.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("c").isa("person")).get("c").limit(1000);
-        Assert.assertEquals(36, read.query().match(getQuery).count());
+        Assert.assertEquals(39, read.query().match(getQuery).count());
 
         // query all entites of type company
         read = session.transaction(GraknTransaction.Type.READ);
@@ -146,7 +146,7 @@ public class MigrationTest {
         Thing playerOne = Graql.var("p1").isa("person").has("phone-number", "+54 398 559 0423");
         Thing playerTwo = Graql.var("p2").isa("person").has("phone-number", "+48 195 624 2025");
         Relation relation = Graql.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call","x").isa("communication-channel");
-        ArrayList<ThingVariable> statements = new ArrayList<>();
+        ArrayList<ThingVariable<?>> statements = new ArrayList<>();
         statements.add(playerOne);
         statements.add(playerTwo);
         statements.add(relation);
@@ -277,6 +277,23 @@ public class MigrationTest {
     public void testInsertOrAppend(GraknSession session) {
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch getQuery = Graql.match(var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
+        Assert.assertEquals(12, read.query().match(getQuery).count());
+
+        // test Rolli is unchanged (no additional attributes)
+
+        // test Jenny still exists
+
+        // test new ones present (middle and at end)
+        read = session.transaction(GraknTransaction.Type.READ);
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "Naruto")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read = session.transaction(GraknTransaction.Type.READ);
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "Sasuke")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read = session.transaction(GraknTransaction.Type.READ);
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "Sakura")).get("p").limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery).count());
 
         read.close();

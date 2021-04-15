@@ -9,6 +9,7 @@ import configuration.ProcessorConfigEntry;
 import generator.*;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
+import grakn.client.api.GraknTransaction;
 import graql.lang.pattern.variable.ThingVariable;
 import insert.GraknInserter;
 import loader.DataLoader;
@@ -93,7 +94,7 @@ public class GraknMigrator {
 
         // independent attributes
         appLogger.info("migrating independent attributes...");
-        migrationBatch = getEntryMigrationConfigsByProcessorType("attribute ");
+        migrationBatch = getEntryMigrationConfigsByProcessorType("attribute");
         for (EntryMigrationConfig conf : migrationBatch) {
             appLogger.info("starting migration for: [" + conf.getMigrationStatusKey() + "]");
             batchDataBuildQueriesAndInsert(conf, session);
@@ -166,7 +167,6 @@ public class GraknMigrator {
             appLogger.info("starting migration for: [" + conf.getMigrationStatusKey() + "] of order-after " + conf.getDce().getOrderAfter());
             batchDataBuildQueriesAndInsert(conf, session);
             updateMigrationStatusIsCompleted(conf.getMigrationStatusKey());
-            System.out.println(conf.getDce().getOrderAfter());
             appLogger.info("migration for: [" + conf.getMigrationStatusKey() + "] of order-after " + conf.getDce().getOrderAfter() + " is completed");
         }
         appLogger.info("migration of order-after entries completed");
@@ -187,14 +187,14 @@ public class GraknMigrator {
                         appLogger.info("previous migration status found for: [" + migrationStatusKey + "]");
                         if (!migrationStatus.get(migrationStatusKey).isCompleted()) {
                             appLogger.info(migrationStatusKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(migrationStatusKey).getMigratedRows());
-                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex));
+                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), graknInserter);
                             entries.add(entry);
                         } else { // migration already completed
                             appLogger.info(migrationStatusKey + " is already completely migrated - moving on...");
                         }
                     } else { // no previous migration
                         appLogger.info("nothing previously migrated for [" + migrationStatusKey + "] - starting from row 0");
-                        EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex));
+                        EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), graknInserter);
                         entries.add(entry);
                     }
                 }
@@ -218,14 +218,14 @@ public class GraknMigrator {
                         appLogger.info("previous migration status found for ordered entry: [" + migrationStatusKey + "]");
                         if (!migrationStatus.get(migrationStatusKey).isCompleted()) {
                             appLogger.info(migrationStatusKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(migrationStatusKey).getMigratedRows());
-                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex));
+                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), graknInserter);
                             entries.add(entry);
                         } else { // migration already completed
                             appLogger.info(migrationStatusKey + " is already completely migrated - moving on...");
                         }
                     } else { // no previous migration
                         appLogger.info("nothing previously migrated for ordered entry [" + migrationStatusKey + "] - starting with row 0");
-                        EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex));
+                        EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), graknInserter);
                         entries.add(entry);
                     }
                 }
@@ -322,7 +322,7 @@ public class GraknMigrator {
             if (isOfProcessorType(conf.getDce().getProcessor(), "entity")) {
                 ArrayList<ThingVariable<?>> insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.size());
-                graknInserter.insertThreadedInserting(insertStatements, session, threads, conf.getDce().getBatchSize());
+                graknInserter.insertThreadedInserting(insertStatements, session, threads, conf.getDce().getBatchSize(), conf);
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "nested-relation") ||
@@ -339,7 +339,7 @@ public class GraknMigrator {
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "attribute")) {
                 ArrayList<ThingVariable<?>> statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.size());
-                graknInserter.insertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
+                graknInserter.insertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize(), conf);
             } else {
                 throw new IllegalArgumentException("the processor <" + conf.getDce().getProcessor() + "> is not known - please check your processor config");
             }

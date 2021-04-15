@@ -53,7 +53,7 @@ define
         plays call:callee,
         owns first-name,
         owns last-name,
-        owns phone-number @key,
+        owns phone-number,
         owns city,
         owns age,
         owns nick-name,

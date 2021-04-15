@@ -8,6 +8,7 @@ import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
+import migrator.EntryMigrationConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -91,7 +92,7 @@ public class GraknInserter {
         }
     }
 
-    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, GraknSession session, int threads, int batchSize, EntryMigrationConfig conf) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -119,6 +120,39 @@ public class GraknInserter {
             thread.join();
         }
     }
+
+//    private HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> convertInsertQuery(ArrayList<ThingVariable<?>> queries, EntryMigrationConfig conf) {
+//        if (conf.getSchemaTypeKey() != null) {
+//            HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements = new HashMap<>();
+//            ArrayList<ArrayList<ThingVariable<?>>> matchStatements = new ArrayList<>();
+//            ArrayList<ArrayList<ThingVariable<?>>> insertStatements = new ArrayList<>();
+//
+//            for (ThingVariable<?> insert : queries) {
+//                ArrayList<ThingConstraint> insertConstraints = new ArrayList<>();
+//                for (ThingConstraint constraint : insert.constraints()) {
+//                    if (constraint.isHas() && constraint.toString().contains(conf.getSchemaTypeKey())) {
+//                        ThingVariable<?> matchStatement = var(insert.name()).isa(conf.getPce().getSchemaType()).constrain(constraint.asHas());
+//                        ArrayList<ThingVariable<?>> matchStatementList = new ArrayList<>();
+//                        matchStatementList.add(matchStatement);
+//                        matchStatements.add(matchStatementList);
+//                    }
+//                    insertConstraints.add(constraint);
+//                }
+//                ThingVariable<?> insertWithoutKey = var(insert.name()).isa(conf.getPce().getSchemaType());
+//                for (ThingConstraint constraint : insertConstraints) {
+//                    if (constraint.isHas() && !constraint.toString().contains(conf.getSchemaTypeKey())) {
+//                        insertWithoutKey.constrain(constraint.asHas());
+//                    }
+//                }
+//                insertStatements.add(new ArrayList<>(Collections.singletonList(insertWithoutKey)));
+//            }
+//            statements.put("match", matchStatements);
+//            statements.put("insert", insertStatements);
+//            return statements;
+//        } else {
+//            return null;
+//        }
+//    }
 
     // Utility functions
     public GraknSession getDataSession(GraknClient client) {
