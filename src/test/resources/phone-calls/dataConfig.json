@@ -338,10 +338,10 @@
   },
   "person-insert-or-append": {
     "dataPath": [
-      "src/test/resources/phone-calls/person-insert-or-append.csv"
+      "src/test/resources/phone-calls/person-append-or-insert.csv"
     ],
     "separator": ",",
-    "processor": "person",
+    "processor": "person-append-or-insert",
     "batchSize": 50,
     "threads": 4,
     "attributes": [
@@ -355,7 +355,8 @@
       },
       {
         "columnName": "phone_number",
-        "generator": "phone-number"
+        "generator": "phone-number",
+        "match": true
       },
       {
         "columnName": "city",
@@ -369,6 +370,7 @@
         "columnName": "nick_name",
         "generator": "nick-name",
         "listSeparator": ";"
-      }]
+      }
+    ]
   }
 }

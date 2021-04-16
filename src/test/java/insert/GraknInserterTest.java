@@ -60,9 +60,9 @@ public class GraknInserterTest {
 
         GraknClient client = gi.getClient();
         gi.cleanAndDefineSchemaToDatabase(client);
+        GraknSession dataSession = gi.getDataSession(client);
 
         //perform data entry
-        GraknSession dataSession = gi.getDataSession(client);
         GraknTransaction write = dataSession.transaction(GraknTransaction.Type.WRITE);
         GraqlInsert insertQuery = Graql.insert(var("e").isa("entity1").has("entity1-id", "ide1"));
         write.query().insert(insertQuery);
@@ -98,6 +98,42 @@ public class GraknInserterTest {
         delete.query().delete(delQuery);
         delete.commit();
         delete.close();
+
+        dataSession.close();
+        client.close();
+    }
+
+    @Test
+    public void threadedInsertGraknTest() {
+
+        GraknClient client = gi.getClient();
+        gi.cleanAndDefineSchemaToDatabase(client);
+        GraknSession dataSession = gi.getDataSession(client);
+
+
+        dataSession.close();
+        client.close();
+    }
+
+    @Test
+    public void threadedMatchInsertGraknTest() {
+
+        GraknClient client = gi.getClient();
+        gi.cleanAndDefineSchemaToDatabase(client);
+        GraknSession dataSession = gi.getDataSession(client);
+
+
+        dataSession.close();
+        client.close();
+    }
+
+    @Test
+    public void threadedAppendOrInsertGraknTest() {
+
+        GraknClient client = gi.getClient();
+        gi.cleanAndDefineSchemaToDatabase(client);
+        GraknSession dataSession = gi.getDataSession(client);
+
 
         dataSession.close();
         client.close();

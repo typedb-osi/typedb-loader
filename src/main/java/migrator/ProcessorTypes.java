@@ -6,7 +6,8 @@ public enum ProcessorTypes {
     relation,
     append_attribute,
     nested_relation,
-    attribute_relation;
+    attribute_relation,
+    append_or_insert;
 
     @Override
     public String toString() {

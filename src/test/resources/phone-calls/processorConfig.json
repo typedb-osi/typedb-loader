@@ -245,6 +245,11 @@
           }
         }
       }
+    },
+    {
+      "processor": "person-append-or-insert",
+      "processorType": "append-or-insert",
+      "referenceProcessor": "person"
     }
   ]
 }

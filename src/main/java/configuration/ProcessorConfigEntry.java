@@ -12,6 +12,7 @@ public class ProcessorConfigEntry {
     private String processor;
     private String processorType;
     private String schemaType;
+    private String referenceProcessor;
 
     // top-level HashMap has single entry "conceptGenerators"
     // second-level HashMap has two entries: "attributes" and "players" (for relations only)
@@ -28,6 +29,10 @@ public class ProcessorConfigEntry {
 
     public String getSchemaType() {
         return schemaType;
+    }
+
+    public String getReferenceProcessor() {
+        return referenceProcessor;
     }
 
     public HashMap<String, HashMap<String, ConceptGenerator>> getConceptGenerators() {

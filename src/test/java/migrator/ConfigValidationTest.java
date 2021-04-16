@@ -34,5 +34,14 @@ public class ConfigValidationTest {
         reports = ConfigValidation.validateConfigs(migrationConfig);
         Assert.assertEquals(3, reports.get("processorConfig").size());
 
+
+
+
+        // processorConfig phone-calls
+        procConf = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
+        migrationConfig = new MigrationConfig("localhost:1729", "config-validation", schema, dataConf, procConf);
+        reports = ConfigValidation.validateConfigs(migrationConfig);
+        Assert.assertEquals(0, reports.get("processorConfig").size());
+
     }
 }

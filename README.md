@@ -36,6 +36,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - tracking of your migration status to stop/restart, or restart after failure
  - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami/wiki/Schema-Updating) for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
  - [Appending Attributes](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-Attributes) to existing things
+ - [Append-If-Present-Else-Insert](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-If-Present-Else-Insert)
  - [Basic Column Preprocessing using RegEx's](https://github.com/bayer-science-for-a-better-life/grami/wiki/Preprocessing)
 
 After creating your processor configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json)) and data configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json)), you can use GraMi
