@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class InsertGenerator {
-    public ArrayList<ThingVariable<?>> graknEntityInsert(ArrayList<String> rows, String header, int rowCounter) {
+    public GeneratorStatements graknEntityInsert(ArrayList<String> rows, String header, int rowCounter) {
         return null;
     }
 
-    public ArrayList<ThingVariable<?>> graknAttributeInsert(ArrayList<String> rows, String header, int rowCounter) {
+    public GeneratorStatements graknAttributeInsert(ArrayList<String> rows, String header, int rowCounter) {
         return null;
     }
 

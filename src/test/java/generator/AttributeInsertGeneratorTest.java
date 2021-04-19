@@ -29,14 +29,14 @@ public class AttributeInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        ArrayList<ThingVariable<?>> result = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
+        GeneratorStatements results = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
 
         String tc0 = "$a \"yes\" isa is-in-use";
-        Assert.assertEquals(tc0, result.get(0).toString());
+        Assert.assertEquals(tc0, results.getInserts().get(0).toString());
 
         String tc1 = "$a \"no\" isa is-in-use";
-        Assert.assertEquals(tc1, result.get(1).toString());
+        Assert.assertEquals(tc1, results.getInserts().get(1).toString());
 
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(2, results.getInserts().size());
     }
 }

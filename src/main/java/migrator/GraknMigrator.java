@@ -331,9 +331,9 @@ public class GraknMigrator {
         int threads = conf.getDce().getThreads();
         try {
             if (isOfProcessorType(conf.getDce().getProcessor(), "entity")) {
-                ArrayList<ThingVariable<?>> insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + insertStatements.size());
-                graknInserter.insertThreadedInserting(insertStatements, session, threads, conf.getDce().getBatchSize(), conf);
+                GeneratorStatements insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
+                appLogger.trace("number of generated insert Statements: " + insertStatements.getInserts().size());
+                graknInserter.insertThreadedInserting(insertStatements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "nested-relation") ||
@@ -353,9 +353,9 @@ public class GraknMigrator {
                 graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "attribute")) {
-                ArrayList<ThingVariable<?>> statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + statements.size());
-                graknInserter.insertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize(), conf);
+                GeneratorStatements statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
+                appLogger.trace("number of generated insert Statements: " + statements.getInserts().size());
+                graknInserter.insertThreadedInserting(statements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
             } else {
                 throw new IllegalArgumentException("the processor <" + conf.getDce().getProcessor() + "> is not known - please check your processor config");
             }

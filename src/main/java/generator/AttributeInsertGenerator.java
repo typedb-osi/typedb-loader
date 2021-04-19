@@ -32,22 +32,22 @@ public class AttributeInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating AttributeInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public ArrayList<ThingVariable<?>> graknAttributeInsert(ArrayList<String> rows,
-                                                            String header, int rowCounter) throws IllegalArgumentException {
-        ArrayList<ThingVariable<?>> patterns = new ArrayList<>();
+    public GeneratorStatements graknAttributeInsert(ArrayList<String> rows,
+                                                    String header, int rowCounter) throws IllegalArgumentException {
+        GeneratorStatements statements = new GeneratorStatements();
         int batchCount = 1;
         for (String row : rows) {
             try {
                 ThingVariable<?> temp = graknAttributeQueryFromRow(row, header, rowCounter + batchCount);
                 if (temp != null) {
-                    patterns.add(temp);
+                    statements.getInserts().add(temp);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
             batchCount = batchCount + 1;
         }
-        return patterns;
+        return statements;
     }
 
     public ThingVariable<Attribute> graknAttributeQueryFromRow(String row,
@@ -70,7 +70,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
             attributeInsertStatement = attributeInsertStatement.isa(pce.getSchemaType());
 
             if (isValid(attributeInsertStatement)) {
-                appLogger.debug("valid query: <insert " + attributeInsertStatement.toString() + ";>");
+                appLogger.debug("valid query: <insert " + attributeInsertStatement + ";>");
                 return attributeInsertStatement;
             } else {
                 dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
