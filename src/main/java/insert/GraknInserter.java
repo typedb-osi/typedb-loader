@@ -1,5 +1,6 @@
 package insert;
 
+import generator.GeneratorStatements;
 import grakn.client.Grakn;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
@@ -57,22 +58,19 @@ public class GraknInserter {
         appLogger.info("Defined schema to database <" + databaseName + ">");
     }
 
-    public void matchInsertThreadedInserting(HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void matchInsertThreadedInserting(GeneratorStatements statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
 
         Runnable matchInsertThread =
                 () -> {
-                    ArrayList<ArrayList<ThingVariable<?>>> matchStatements = statements.get("match");
-                    ArrayList<ArrayList<ThingVariable<?>>> insertStatements = statements.get("insert");
-
-                    while (queryIndex.get() < matchStatements.size()) {
+                    while (queryIndex.get() < statements.getMatchInserts().size()) {
                         try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
                             int q;
-                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < matchStatements.size(); i++) {
-                                ArrayList<ThingVariable<?>> rowMatchStatements = matchStatements.get(q);
-                                ArrayList<ThingVariable<?>> rowInsertStatements = insertStatements.get(q);
+                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < statements.getMatchInserts().size(); i++) {
+                                ArrayList<ThingVariable<?>> rowMatchStatements = statements.getMatchInserts().get(q).getMatches();
+                                ThingVariable<?> rowInsertStatements = statements.getMatchInserts().get(q).getInsert();
                                 GraqlInsert query = Graql.match(rowMatchStatements).insert(rowInsertStatements);
                                 tx.query().insert(query);
                             }
@@ -121,39 +119,39 @@ public class GraknInserter {
         }
     }
 
-    public void appendOrInsertThreadedInserting(HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void appendOrInsertThreadedInserting(GeneratorStatements statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
-        AtomicInteger queryIndex = new AtomicInteger(0);
-        Thread[] ts = new Thread[threads];
-
-        Runnable matchInsertThread =
-                () -> {
-                    ArrayList<ArrayList<ThingVariable<?>>> matchStatements = statements.get("match");
-                    ArrayList<ArrayList<ThingVariable<?>>> insertStatements = statements.get("insert");
-
-                    while (queryIndex.get() < matchStatements.size()) {
-                        try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
-                            int q;
-                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < matchStatements.size(); i++) {
-                                ArrayList<ThingVariable<?>> rowMatchStatements = matchStatements.get(q);
-                                ArrayList<ThingVariable<?>> rowInsertStatements = insertStatements.get(q);
-                                GraqlInsert query = Graql.match(rowMatchStatements).insert(rowInsertStatements);
-                                tx.query().insert(query);
-                            }
-                            tx.commit();
-                        }
-                    }
-                };
-
-        for (int i = 0; i < ts.length; i++) {
-            ts[i] = new Thread(matchInsertThread);
-        }
-        for (Thread value : ts) {
-            value.start();
-        }
-        for (Thread thread : ts) {
-            thread.join();
-        }
+//        AtomicInteger queryIndex = new AtomicInteger(0);
+//        Thread[] ts = new Thread[threads];
+//
+//        Runnable matchInsertThread =
+//                () -> {
+//                    ArrayList<ArrayList<ThingVariable<?>>> matchStatements = statements.get("match");
+//                    ArrayList<ArrayList<ThingVariable<?>>> insertStatements = statements.get("insert");
+//
+//                    while (queryIndex.get() < matchStatements.size()) {
+//                        try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
+//                            int q;
+//                            for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < matchStatements.size(); i++) {
+//                                ArrayList<ThingVariable<?>> rowMatchStatements = matchStatements.get(q);
+//                                ArrayList<ThingVariable<?>> rowInsertStatements = insertStatements.get(q);
+//                                GraqlInsert query = Graql.match(rowMatchStatements).insert(rowInsertStatements);
+//                                tx.query().insert(query);
+//                            }
+//                            tx.commit();
+//                        }
+//                    }
+//                };
+//
+//        for (int i = 0; i < ts.length; i++) {
+//            ts[i] = new Thread(matchInsertThread);
+//        }
+//        for (Thread value : ts) {
+//            value.start();
+//        }
+//        for (Thread thread : ts) {
+//            thread.join();
+//        }
     }
 
 //    private HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> convertInsertQuery(ArrayList<ThingVariable<?>> queries, EntryMigrationConfig conf) {
