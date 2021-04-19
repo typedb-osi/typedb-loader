@@ -277,11 +277,7 @@ public class MigrationTest {
     public void testInsertOrAppend(GraknSession session) {
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch getQuery = Graql.match(var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
-        Assert.assertEquals(12, read.query().match(getQuery).count());
-
-        // test Rolli is unchanged (no additional attributes)
-
-        // test Jenny still exists
+        Assert.assertEquals(7, read.query().match(getQuery).count());
 
         // test new ones present (middle and at end)
         read = session.transaction(GraknTransaction.Type.READ);

@@ -35,26 +35,25 @@ public class RelationInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public GeneratorStatements graknRelationInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
-        GeneratorStatements generatorStatements = new GeneratorStatements();
+    public GeneratorStatement graknRelationInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
+        GeneratorStatement generatorStatement = new GeneratorStatement();
 
         int batchCounter = 1;
         for (String row : rows) {
-            GeneratorStatements.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
+            GeneratorStatement.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
             if (tmp != null) {
                 if (tmp.getMatches() != null && tmp.getInsert() != null) {
-                    generatorStatements.getMatchInserts().add(tmp);
+                    generatorStatement.getMatchInserts().add(tmp);
                 }
             }
             batchCounter = batchCounter + 1;
         }
-        return generatorStatements;
+        return generatorStatement;
     }
 
-    public GeneratorStatements.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
+    public GeneratorStatement.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
+        String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
+        String[] columnNames = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         GeneratorUtil.malformedRow(row, rowTokens, columnNames.length);
 
@@ -75,7 +74,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
                 if (isValid(matchStatements, assembledInsertStatement)) {
                     appLogger.debug("valid query: <" + assembleQuery(matchStatements, assembledInsertStatement) + ">");
-                    return new GeneratorStatements.MatchInsert(matchStatements, assembledInsertStatement);
+                    return new GeneratorStatement.MatchInsert(matchStatements, assembledInsertStatement);
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                     return null;

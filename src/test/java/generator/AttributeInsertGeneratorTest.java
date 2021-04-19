@@ -2,7 +2,6 @@ package generator;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
-import graql.lang.pattern.variable.ThingVariable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,7 +28,7 @@ public class AttributeInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatements results = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
+        GeneratorStatement results = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
 
         String tc0 = "$a \"yes\" isa is-in-use";
         Assert.assertEquals(tc0, results.getInserts().get(0).toString());

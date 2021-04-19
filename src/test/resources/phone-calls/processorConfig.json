@@ -249,7 +249,41 @@
     {
       "processor": "person-append-or-insert",
       "processorType": "append-or-insert",
-      "referenceProcessor": "person"
+      "schemaType": "person",
+      "conceptGenerators": {
+        "attributes": {
+          "first-name": {
+            "attributeType": "first-name",
+            "valueType": "string",
+            "required": false
+          },
+          "last-name": {
+            "attributeType": "last-name",
+            "valueType": "string",
+            "required": false
+          },
+          "phone-number": {
+            "attributeType": "phone-number",
+            "valueType": "string",
+            "required": false
+          },
+          "city": {
+            "attributeType": "city",
+            "valueType": "string",
+            "required": false
+          },
+          "age": {
+            "attributeType": "age",
+            "valueType": "long",
+            "required": false
+          },
+          "nick-name": {
+            "attributeType": "nick-name",
+            "valueType": "string",
+            "required": false
+          }
+        }
+      }
     }
   ]
 }

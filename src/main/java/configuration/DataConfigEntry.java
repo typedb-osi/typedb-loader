@@ -64,6 +64,16 @@ public class DataConfigEntry {
         return matchAttributes;
     }
 
+    public ArrayList<String> getMatchAttributeGenerators() {
+        ArrayList<String> matchAttributeGenerators = new ArrayList<>();
+        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping: getAttributes()) {
+            if (attributeMapping.isMatch()) {
+                matchAttributeGenerators.add(attributeMapping.getGenerator());
+            }
+        }
+        return matchAttributeGenerators;
+    }
+
     public static class DataConfigGeneratorMapping {
         private String columnName;
         private String[] columnNames;

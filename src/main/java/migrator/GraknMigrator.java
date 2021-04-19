@@ -9,8 +9,6 @@ import configuration.ProcessorConfigEntry;
 import generator.*;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
-import grakn.client.api.GraknTransaction;
-import graql.lang.pattern.variable.ThingVariable;
 import insert.GraknInserter;
 import loader.DataLoader;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +18,10 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class GraknMigrator {
@@ -189,7 +190,7 @@ public class GraknMigrator {
         for (String dcEntryKey : dataConfig.keySet()) {
             DataConfigEntry dce = dataConfig.get(dcEntryKey);
             int dataPathIndex = 0;
-            for (String dataPath : dce.getDataPath()){
+            for (String dataPath : dce.getDataPath()) {
                 ProcessorConfigEntry pce = getProcessorConfigEntry(dce.getProcessor());
                 String migrationStatusKey = dcEntryKey + "-" + dataPath;
 
@@ -331,29 +332,29 @@ public class GraknMigrator {
         int threads = conf.getDce().getThreads();
         try {
             if (isOfProcessorType(conf.getDce().getProcessor(), "entity")) {
-                GeneratorStatements insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
+                GeneratorStatement insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.getInserts().size());
                 graknInserter.insertThreadedInserting(insertStatements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "nested-relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "attribute-relation")) {
-                GeneratorStatements statements = conf.getInsertGenerator().graknRelationInsert(rows, header, rowCounter - lineCounter);
+                GeneratorStatement statements = conf.getInsertGenerator().graknRelationInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "append-or-insert")) {
-                GeneratorStatements statements = conf.getInsertGenerator().graknAppendOrInsertInsert(rows, header, rowCounter - lineCounter);
+                GeneratorStatement statements = conf.getInsertGenerator().graknAppendOrInsertInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "append-attribute")) {
-                GeneratorStatements statements = conf.getInsertGenerator().graknAppendAttributeInsert(rows, header, rowCounter - lineCounter);
+                GeneratorStatement statements = conf.getInsertGenerator().graknAppendAttributeInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "attribute")) {
-                GeneratorStatements statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
+                GeneratorStatement statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getInserts().size());
                 graknInserter.insertThreadedInserting(statements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
             } else {

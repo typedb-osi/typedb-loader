@@ -2,6 +2,7 @@ package generator;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.ThingVariable.Relation;
@@ -21,6 +22,11 @@ public class GeneratorUtil {
 
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
+
+    public static String[] tokenizeCSVStandard(String row, String fileSeparator) {
+        //TODO: allow for quote-based escaping + can escape actual quotes by double quotes (i.e. replace by \" for grakn)
+        return row.split(fileSeparator);
+    }
 
     public static String cleanToken(String token) {
         //TODO - expand cleaning of other strange characters at some point
@@ -293,6 +299,7 @@ public class GeneratorUtil {
         }
         return statement;
     }
+
 
     public static Relation addAttributeOfColumnType(Relation statement,
                                                  String conceptType,

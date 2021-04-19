@@ -13,8 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static generator.GeneratorUtil.addValue;
-import static generator.GeneratorUtil.malformedRow;
+import static generator.GeneratorUtil.*;
 
 public class AttributeInsertGenerator extends InsertGenerator {
 
@@ -32,9 +31,9 @@ public class AttributeInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating AttributeInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public GeneratorStatements graknAttributeInsert(ArrayList<String> rows,
-                                                    String header, int rowCounter) throws IllegalArgumentException {
-        GeneratorStatements statements = new GeneratorStatements();
+    public GeneratorStatement graknAttributeInsert(ArrayList<String> rows,
+                                                   String header, int rowCounter) throws IllegalArgumentException {
+        GeneratorStatement statements = new GeneratorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {
@@ -53,9 +52,8 @@ public class AttributeInsertGenerator extends InsertGenerator {
     public ThingVariable<Attribute> graknAttributeQueryFromRow(String row,
                                                                String header,
                                                                int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
+        String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
+        String[] columnNames = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 

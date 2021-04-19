@@ -12,11 +12,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
-import static generator.GeneratorUtil.addAttribute;
-import static generator.GeneratorUtil.malformedRow;
+import static generator.GeneratorUtil.*;
 
 public class AppendOrInsertGenerator extends InsertGenerator {
 
@@ -36,105 +34,98 @@ public class AppendOrInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating AppendOrInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> graknAppendAttributeInsert(ArrayList<String> rows,
-                                                                                              String header, int rowCounter) throws Exception {
-        HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> matchInsertPatterns = new HashMap<>();
+    public GeneratorStatement graknAppendOrInsertInsert(ArrayList<String> rows,
+                                                        String header, int rowCounter) throws Exception {
+        GeneratorStatement generatorStatement = new GeneratorStatement();
 
-        ArrayList<ArrayList<ThingVariable<?>>> matchPatterns = new ArrayList<>();
-        ArrayList<ArrayList<ThingVariable<?>>> insertPatterns = new ArrayList<>();
-
-        int insertCounter = 0;
         int batchCounter = 1;
         for (String row : rows) {
-
-            ArrayList<ArrayList<ThingVariable<?>>> tmp = graknAppendAttributeQueryFromRow(row, header, insertCounter, rowCounter + batchCounter);
-            if (tmp != null) {
-                if (tmp.get(0) != null && tmp.get(1) != null) {
-                    matchPatterns.add(tmp.get(0));
-                    insertPatterns.add(tmp.get(1));
-                    insertCounter++;
-                }
-            }
+            graknAppendAttributeQueryFromRow(generatorStatement, row, header, rowCounter + batchCounter);
             batchCounter = batchCounter + 1;
         }
-        matchInsertPatterns.put("match", matchPatterns);
-        matchInsertPatterns.put("insert", insertPatterns);
-        return matchInsertPatterns;
+        return generatorStatement;
     }
 
-    public ArrayList<ArrayList<ThingVariable<?>>> graknAppendAttributeQueryFromRow(String row,
-                                                                                   String header,
-                                                                                   int insertCounter,
-                                                                                   int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
+    public void graknAppendAttributeQueryFromRow(GeneratorStatement generatorStatement,
+                                                 String row,
+                                                 String header,
+                                                 int rowCounter) throws Exception {
+        String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
+        String[] columnNames = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
         //TODO: move this into configValidation
         if (!validateDataConfigEntry()) {
-            throw new IllegalArgumentException("data config entry for " + dce.getDataPath()[dataPathIndex] + " is incomplete - it needs at least one attribute used for matching (\"match\": true) and at least one attribute to be appended (\"match\": false or not set at all");
+            throw new IllegalArgumentException("data config entry for " + dce.getDataPath()[dataPathIndex] + " is incomplete - it needs at least one attribute used for matching (\"match\": true)");
         }
-
-        ArrayList<ThingVariable<?>> matchPatterns = new ArrayList<>();
-        ArrayList<ThingVariable<?>> insertPatterns = new ArrayList<>();
-
-        //TODO overall: make two hashmaps, one containing match-inserts, one containing only inserts, then flow is: run through match-inserts, if found and insert is OK, do next; if insert gives no result/no match-insert present because row didn't have value, use pure insert statement at same index and insert, then commit together
 
         // get all attributes that are isMatch() --> construct match clause
-        //TODO: modify so that if the row is empty, the match clause is dropped for the index
-        //TODO: note - already takes in multiple match attributes, non?
-        Thing appendAttributeMatchPattern = addEntityToMatchPattern(insertCounter);
+        ArrayList<ThingVariable<?>> matchStatements = new ArrayList<>();
+        Thing matchStatement = addEntityToMatchPattern();
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()) {
-                appendAttributeMatchPattern = addAttribute(rowTokens, appendAttributeMatchPattern, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
             }
         }
-        matchPatterns.add(appendAttributeMatchPattern);
+        matchStatements.add(matchStatement);
 
         // get all attributes that are !isMatch() --> construct insert clause
-        // TODO: this will have to be reversed on fail to find --> then need to put these into
-        UnboundVariable thingVar = addEntityToInsertPattern(insertCounter);
-        Thing appendAttributeInsertPattern = null;
+        UnboundVariable tmpMI = addEntityToInsertPattern();
+        Thing matchInsertStatement = null;
+        boolean first = true;
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
-                appendAttributeInsertPattern = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                if (first) {
+                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                    if (matchInsertStatement != null) {
+                        first = false;
+                    }
+                } else {
+                    matchInsertStatement = addAttribute(rowTokens, matchInsertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                }
             }
-        }
-        if (appendAttributeInsertPattern != null) {
-            insertPatterns.add(appendAttributeInsertPattern);
+
         }
 
-        ArrayList<ArrayList<ThingVariable<?>>> assembledPatterns = new ArrayList<>();
-        assembledPatterns.add(matchPatterns);
-        assembledPatterns.add(insertPatterns);
+        // construct insertStatement
+        Thing insertStatement = addEntityToMatchPattern();
+        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
+            insertStatement = addAttribute(rowTokens, insertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+        }
 
-
-        if (isValid(assembledPatterns)) {
-            appLogger.debug("valid query: <" + assembleQuery(assembledPatterns) + ">");
-            return assembledPatterns;
+        if (isValid(matchStatements, matchInsertStatement)) {
+            appLogger.debug("valid match-insert query: <" + assembleQuery(matchStatements, matchInsertStatement) + ">");
+            generatorStatement.getMatchInserts().add(new GeneratorStatement.MatchInsert(matchStatements, matchInsertStatement));
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
-            return null;
+            dataLogger.trace("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
+                    + "  does not contain at least one match attribute and one insert attribute. Tokenized row: " + Arrays.toString(rowTokens)
+                    + " - invalid query: " + assembleQuery(matchStatements, matchInsertStatement) + " - will insert without doing match first");
+            generatorStatement.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        }
+
+        if (isValid(insertStatement)) {
+            appLogger.debug("valid insert query: <" + insertStatement.toString() + ">");
+            generatorStatement.getInserts().add(insertStatement);
+        } else {
+            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
+                    + " does not contain at least one match attribute and one insert attribute. Skipping faulty tokenized row: " + Arrays.toString(rowTokens)
+                    + " - invalid query: " + insertStatement.toString());
+            generatorStatement.getInserts().add(insertStatement);
         }
     }
 
     private boolean validateDataConfigEntry() {
         boolean containsMatchAttribute = false;
-        boolean containsAppendAttribute = false;
         for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getAttributes()) {
             if (attributeMapping.isMatch()) {
                 containsMatchAttribute = true;
             }
-            if (!attributeMapping.isMatch()) {
-                containsAppendAttribute = true;
-            }
         }
-        return containsMatchAttribute && containsAppendAttribute;
+        return containsMatchAttribute;
     }
 
-    private Thing addEntityToMatchPattern(int insertCounter) {
+    private Thing addEntityToMatchPattern() {
         if (pce.getSchemaType() != null) {
             return Graql.var("e").isa(pce.getSchemaType());
         } else {
@@ -142,7 +133,7 @@ public class AppendOrInsertGenerator extends InsertGenerator {
         }
     }
 
-    private UnboundVariable addEntityToInsertPattern(int insertCounter) {
+    private UnboundVariable addEntityToInsertPattern() {
         if (pce.getSchemaType() != null) {
             return Graql.var("e");
         } else {
@@ -150,43 +141,54 @@ public class AppendOrInsertGenerator extends InsertGenerator {
         }
     }
 
-    private String assembleQuery(ArrayList<ArrayList<ThingVariable<?>>> queries) {
+    private String assembleQuery(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> insertStatement) {
         StringBuilder ret = new StringBuilder();
-        for (ThingVariable<?> st : queries.get(0)) {
+        for (ThingVariable<?> st : matchStatements) {
             ret.append(st.toString());
         }
-        ret.append(queries.get(1).get(0).toString());
+        ret.append(insertStatement.toString());
         return ret.toString();
     }
 
-    private boolean isValid(ArrayList<ArrayList<ThingVariable<?>>> si) {
-        ArrayList<ThingVariable<?>> matchPatterns = si.get(0);
-        ArrayList<ThingVariable<?>> insertPatterns = si.get(1);
+    private boolean isValid(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> matchInsertInsertStatement) {
 
-        if (insertPatterns.size() < 1) {
-            return false;
-        }
-
-        StringBuilder matchPattern = new StringBuilder();
-        for (Pattern st : matchPatterns) {
-            matchPattern.append(st.toString());
-        }
-        String insertPattern = insertPatterns.get(0).toString();
-
+        // Match-Insert pairs:
         // missing match attribute
+        if (matchInsertInsertStatement == null) return false;
+        StringBuilder matchStatement = new StringBuilder();
+        for (Pattern st : matchStatements) {
+            matchStatement.append(st.toString());
+        }
+        ArrayList<String> matchAttributes = new ArrayList<>();
         for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getMatchAttributes()) {
             String generatorKey = attributeMapping.getGenerator();
             ProcessorConfigEntry.ConceptGenerator generatorEntry = pce.getAttributeGenerator(generatorKey);
-            if (!matchPattern.toString().contains("has " + generatorEntry.getAttributeType())) {
+            if (!matchStatement.toString().contains("has " + generatorEntry.getAttributeType())) {
                 return false;
             }
+            matchAttributes.add(generatorEntry.getAttributeType());
         }
         // missing required insert attribute
         for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            if (!insertPattern.contains("has " + generatorEntry.getValue().getAttributeType())) {
+            System.out.println("required attribute: " + generatorEntry.getValue().getAttributeType());
+            if (!matchInsertInsertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType()) &&
+                    !matchAttributes.contains(generatorEntry.getValue().getAttributeType())) {
                 return false;
             }
         }
         return true;
     }
+
+    private boolean isValid(ThingVariable<?> insertStatement){
+        // missing required insert attribute
+        if (insertStatement == null) return false;
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
+            if (!insertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }

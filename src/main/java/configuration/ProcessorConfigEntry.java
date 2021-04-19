@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class ProcessorConfigEntry {
 
+    //TODO: clean up hashmap of hashmap stuff...
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
     private String processor;
@@ -37,6 +38,14 @@ public class ProcessorConfigEntry {
 
     public HashMap<String, HashMap<String, ConceptGenerator>> getConceptGenerators() {
         return conceptGenerators;
+    }
+
+    public void setSchemaType(String schemaType) {
+        this.schemaType = schemaType;
+    }
+
+    public void setConceptGenerators(HashMap<String, HashMap<String, ConceptGenerator>> conceptGenerators) {
+        this.conceptGenerators = conceptGenerators;
     }
 
     public ConceptGenerator getAttributeGenerator(String key) {

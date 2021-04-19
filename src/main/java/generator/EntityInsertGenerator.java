@@ -13,8 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import static generator.GeneratorUtil.addAttribute;
-import static generator.GeneratorUtil.malformedRow;
+import static generator.GeneratorUtil.*;
 
 public class EntityInsertGenerator extends InsertGenerator {
 
@@ -32,31 +31,30 @@ public class EntityInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating EntityInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public GeneratorStatements graknEntityInsert(ArrayList<String> rows,
-                                                 String header,
-                                                 int rowCounter) throws IllegalArgumentException {
-        GeneratorStatements generatorStatements = new GeneratorStatements();
+    public GeneratorStatement graknEntityInsert(ArrayList<String> rows,
+                                                String header,
+                                                int rowCounter) throws IllegalArgumentException {
+        GeneratorStatement generatorStatement = new GeneratorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {
-                ThingVariable temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
+                ThingVariable<?> temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
                 if (temp != null) {
-                    generatorStatements.getInserts().add(temp);
+                    generatorStatement.getInserts().add(temp);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
             batchCount = batchCount + 1;
         }
-        return generatorStatements;
+        return generatorStatement;
     }
 
-    public ThingVariable graknEntityQueryFromRow(String row,
+    public ThingVariable<?> graknEntityQueryFromRow(String row,
                                                  String header,
                                                  int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
+        String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
+        String[] columnNames = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 

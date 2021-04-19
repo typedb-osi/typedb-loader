@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import static generator.GeneratorUtil.addAttribute;
-import static generator.GeneratorUtil.malformedRow;
+import static generator.GeneratorUtil.*;
 
 public class AppendAttributeGenerator extends InsertGenerator {
 
@@ -35,31 +34,30 @@ public class AppendAttributeGenerator extends InsertGenerator {
         appLogger.debug("Creating AppendAttribute for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public GeneratorStatements graknAppendAttributeInsert(ArrayList<String> rows,
-                                                          String header, int rowCounter) throws Exception {
-        GeneratorStatements generatorStatements = new GeneratorStatements();
+    public GeneratorStatement graknAppendAttributeInsert(ArrayList<String> rows,
+                                                         String header, int rowCounter) throws Exception {
+        GeneratorStatement generatorStatement = new GeneratorStatement();
 
         int insertCounter = 0;
         int batchCounter = 1;
         for (String row : rows) {
-            GeneratorStatements.MatchInsert tmp = graknAppendAttributeQueryFromRow(row, header, rowCounter + batchCounter);
+            GeneratorStatement.MatchInsert tmp = graknAppendAttributeQueryFromRow(row, header, rowCounter + batchCounter);
             if (tmp != null) {
                 if (tmp.getMatches() != null && tmp.getInsert() != null) {
-                    generatorStatements.getMatchInserts().add(tmp);
+                    generatorStatement.getMatchInserts().add(tmp);
                 }
             }
             batchCounter = batchCounter + 1;
             insertCounter = insertCounter + 1;
         }
-        return generatorStatements;
+        return generatorStatement;
     }
 
-    public GeneratorStatements.MatchInsert graknAppendAttributeQueryFromRow(String row,
-                                                                            String header,
-                                                                            int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
+    public GeneratorStatement.MatchInsert graknAppendAttributeQueryFromRow(String row,
+                                                                           String header,
+                                                                           int rowCounter) throws Exception {
+        String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
+        String[] columnNames = header.split(dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
@@ -90,7 +88,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
 
         if (isValid(matchStatements, insertStatement)) {
             appLogger.debug("valid query: <" + assembleQuery(matchStatements, insertStatement) + ">");
-            return new GeneratorStatements.MatchInsert(matchStatements, insertStatement);
+            return new GeneratorStatement.MatchInsert(matchStatements, insertStatement);
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;

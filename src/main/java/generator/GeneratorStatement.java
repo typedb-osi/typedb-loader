@@ -14,9 +14,14 @@ import java.util.ArrayList;
 
 //ArrayList<ThingVariable<?>>
 
-public class GeneratorStatements {
-    private ArrayList<MatchInsert> matchInserts = new ArrayList<>();
-    private ArrayList<ThingVariable<?>> inserts = new ArrayList<>();
+public class GeneratorStatement {
+    private ArrayList<MatchInsert> matchInserts;
+    private ArrayList<ThingVariable<?>> inserts;
+
+    public GeneratorStatement() {
+        this.matchInserts = new ArrayList<>();
+        this.inserts = new ArrayList<>();
+    }
 
     public ArrayList<MatchInsert> getMatchInserts() {
         return matchInserts;

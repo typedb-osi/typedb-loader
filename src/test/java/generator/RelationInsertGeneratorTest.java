@@ -29,7 +29,7 @@ public class RelationInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatements results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         // test all there
         String tc2m = "$entity1-0 isa entity1, has entity1-id \"entity1id1\";$entity2-1 isa entity2, has entity2-id \"entity2id1\";$entity3-2 isa entity3, has entity3-id \"entity3id1\";";

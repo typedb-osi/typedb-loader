@@ -2,7 +2,6 @@ package generator;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
-import graql.lang.pattern.variable.ThingVariable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +32,7 @@ public class EntityInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatements results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
 
         String tc0 = "$e isa entity1, has entity1-id \"entity1id0\", has entity1-name \"entity1name0\", has entity1-exp \"entity1id0exp0\"";
         Assert.assertEquals(tc0, results.getInserts().get(0).toString());
@@ -108,7 +107,7 @@ public class EntityInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatements results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
 
         String tc0 = "$e isa entity2, has entity2-id \"entity2id0\", has entity2-bool true, has entity2-double 0.0";
         Assert.assertEquals(tc0, results.getInserts().get(0).toString());
@@ -155,7 +154,7 @@ public class EntityInsertGeneratorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatements results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
 
         String tc0 = "$e isa entity3, has entity3-id \"entity3id0\", has entity3-int 0";
         Assert.assertEquals(tc0, results.getInserts().get(0).toString());

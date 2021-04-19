@@ -38,7 +38,8 @@ public class MigrationConfig {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(dataConfigPath));
-            Type ConfigType = new TypeToken<HashMap<String, DataConfigEntry>>() {}.getType();
+            Type ConfigType = new TypeToken<HashMap<String, DataConfigEntry>>() {
+            }.getType();
             this.dataConfig = new Gson().fromJson(bufferedReader, ConfigType);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -57,6 +58,7 @@ public class MigrationConfig {
             }.getType();
             try {
                 this.processorConfig = new Gson().fromJson(bufferedReader, ConfigType);
+                resolveProcessorReference();
             } catch (JsonSyntaxException ex) {
                 appLogger.error("you have a duplicate key somewhere in your processor configuration file - must be fixed, cannot migrate");
                 System.exit(1);
@@ -64,6 +66,29 @@ public class MigrationConfig {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void resolveProcessorReference() {
+        for (ProcessorConfigEntry pce : processorConfig.get("processors")) {
+            if (pce.getReferenceProcessor() != null) {
+                ProcessorConfigEntry referencedPCE = getReferenceProcessorConfigEntry(pce.getReferenceProcessor());
+                if (referencedPCE != null) {
+                    pce.setSchemaType(referencedPCE.getSchemaType());
+                    pce.setConceptGenerators(referencedPCE.getConceptGenerators());
+                } else {
+                    appLogger.error("the referenced processor <" + pce.getReferenceProcessor() + "> does not exist in the processor configuration file.");
+                }
+            }
+        }
+    }
+
+    private ProcessorConfigEntry getReferenceProcessorConfigEntry(String referenceProcessor) {
+        for (ProcessorConfigEntry pce : processorConfig.get("processors")) {
+            if (pce.getProcessor().equals(referenceProcessor)) {
+                return pce;
+            }
+        }
+        return null;
     }
 
     public HashMap<String, ArrayList<ProcessorConfigEntry>> getProcessorConfig() {
