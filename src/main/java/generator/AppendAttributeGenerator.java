@@ -68,29 +68,29 @@ public class AppendAttributeGenerator extends InsertGenerator {
             throw new IllegalArgumentException("data config entry for " + dce.getDataPath()[dataPathIndex] + " is incomplete - it needs at least one attribute used for matching (\"match\": true) and at least one attribute to be appended (\"match\": false or not set at all");
         }
 
-        ArrayList<ThingVariable<?>> matchPatterns = new ArrayList<>();
+        ArrayList<ThingVariable<?>> matchStatements = new ArrayList<>();
 
         // get all attributes that are isMatch() --> construct match clause
-        Thing appendAttributeMatchPattern = addEntityToMatchPattern();
+        Thing matchStatement = addEntityToMatch();
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()) {
-                appendAttributeMatchPattern = addAttribute(rowTokens, appendAttributeMatchPattern, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
             }
         }
-        matchPatterns.add(appendAttributeMatchPattern);
+        matchStatements.add(matchStatement);
 
         // get all attributes that are !isMatch() --> construct insert clause
-        UnboundVariable thingVar = addEntityToInsertPattern();
-        Thing appendAttributeInsertPattern = null;
+        UnboundVariable thingVar = addEntityToInsert();
+        Thing insertStatement = null;
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
-                appendAttributeInsertPattern = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                insertStatement = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
             }
         }
 
-        if (isValid(matchPatterns, appendAttributeInsertPattern)) {
-            appLogger.debug("valid query: <" + assembleQuery(matchPatterns, appendAttributeInsertPattern) + ">");
-            return new GeneratorStatements.MatchInsert(matchPatterns, appendAttributeInsertPattern);
+        if (isValid(matchStatements, insertStatement)) {
+            appLogger.debug("valid query: <" + assembleQuery(matchStatements, insertStatement) + ">");
+            return new GeneratorStatements.MatchInsert(matchStatements, insertStatement);
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
@@ -111,7 +111,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         return containsMatchAttribute && containsAppendAttribute;
     }
 
-    private Thing addEntityToMatchPattern() {
+    private Thing addEntityToMatch() {
         if (pce.getSchemaType() != null) {
             return Graql.var("e").isa(pce.getSchemaType());
         } else {
@@ -119,7 +119,7 @@ public class AppendAttributeGenerator extends InsertGenerator {
         }
     }
 
-    private UnboundVariable addEntityToInsertPattern() {
+    private UnboundVariable addEntityToInsert() {
         if (pce.getSchemaType() != null) {
             return Graql.var("e");
         } else {
