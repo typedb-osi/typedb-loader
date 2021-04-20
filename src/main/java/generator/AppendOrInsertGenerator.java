@@ -85,7 +85,6 @@ public class AppendOrInsertGenerator extends InsertGenerator {
                     matchInsertStatement = addAttribute(rowTokens, matchInsertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
                 }
             }
-
         }
 
         // construct insertStatement
@@ -105,13 +104,13 @@ public class AppendOrInsertGenerator extends InsertGenerator {
         }
 
         if (isValid(insertStatement)) {
-            appLogger.debug("valid insert query: <" + insertStatement.toString() + ">");
+            appLogger.debug("valid insert query: <" + insertStatement + ">");
             generatorStatement.getInserts().add(insertStatement);
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
                     + " does not contain at least one match attribute and one insert attribute. Skipping faulty tokenized row: " + Arrays.toString(rowTokens)
                     + " - invalid query: " + insertStatement.toString());
-            generatorStatement.getInserts().add(insertStatement);
+            generatorStatement.getInserts().add(null);
         }
     }
 
@@ -170,7 +169,6 @@ public class AppendOrInsertGenerator extends InsertGenerator {
         }
         // missing required insert attribute
         for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            System.out.println("required attribute: " + generatorEntry.getValue().getAttributeType());
             if (!matchInsertInsertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType()) &&
                     !matchAttributes.contains(generatorEntry.getValue().getAttributeType())) {
                 return false;

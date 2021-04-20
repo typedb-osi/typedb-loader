@@ -280,7 +280,7 @@
           "age": {
             "attributeType": "age",
             "valueType": "long",
-            "required": false
+            "required": true
           },
           "nick-name": {
             "attributeType": "nick-name",
