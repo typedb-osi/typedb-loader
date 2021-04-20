@@ -39,9 +39,7 @@ public class EntityInsertGenerator extends InsertGenerator {
         for (String row : rows) {
             try {
                 ThingVariable<?> temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
-                if (temp != null) {
-                    generatorStatement.getInserts().add(temp);
-                }
+                generatorStatement.getInserts().add(temp);
             } catch (Exception e) {
                 e.printStackTrace();
             }

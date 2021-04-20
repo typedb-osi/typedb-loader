@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static test.TestUtil.concatMatches;
@@ -82,6 +83,9 @@ public class AppendOrInsertGeneratorTest {
         Assert.assertNull(results.getInserts().get(idx));
 
         Assert.assertEquals(7, results.getInserts().size());
+        results.getInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(6, results.getInserts().size());
+
         Assert.assertEquals(7, results.getMatchInserts().size());
         int nullCount = 0;
         for (int i = 0; i < results.getMatchInserts().size(); i++) {

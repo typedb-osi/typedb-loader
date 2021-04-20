@@ -48,5 +48,14 @@ public class AttributeInsertGeneratorTest {
         Assert.assertEquals(4, results.getInserts().size());
         results.getInserts().removeAll(Collections.singleton(null));
         Assert.assertEquals(3, results.getInserts().size());
+
+        Assert.assertEquals(0, results.getMatchInserts().size());
+        int nullCount = 0;
+        for (int i = 0; i < results.getMatchInserts().size(); i++) {
+            if (results.getMatchInserts().get(i).getMatches() == null) {
+                nullCount++;
+            }
+        }
+        Assert.assertEquals(0, results.getMatchInserts().size() - nullCount);
     }
 }

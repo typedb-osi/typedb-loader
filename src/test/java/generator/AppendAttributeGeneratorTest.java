@@ -87,6 +87,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
         Assert.assertEquals(0, results.getInserts().size());
+        results.getInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getInserts().size());
+
         Assert.assertEquals(10, results.getMatchInserts().size());
         int nullCount = 0;
         for (int i = 0; i < results.getMatchInserts().size(); i++) {
@@ -138,6 +141,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
         Assert.assertEquals(0, results.getInserts().size());
+        results.getInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getInserts().size());
+
         Assert.assertEquals(6, results.getMatchInserts().size());
         int nullCount = 0;
         for (int i = 0; i < results.getMatchInserts().size(); i++) {
@@ -195,6 +201,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
         Assert.assertEquals(0, results.getInserts().size());
+        results.getInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getInserts().size());
+
         Assert.assertEquals(7, results.getMatchInserts().size());
         int nullCount = 0;
         for (int i = 0; i < results.getMatchInserts().size(); i++) {
