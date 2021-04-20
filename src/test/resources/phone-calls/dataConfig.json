@@ -142,7 +142,7 @@
     ]
   },
   "append-twitter": {
-    "dataPath": ["src/test/resources/phone-calls/append-twitter.csv"],
+    "dataPath": ["src/test/resources/phone-calls/append-twitter-nickname.csv"],
     "separator": ",",
     "processor": "append-twitter-to-person",
     "attributes": [
@@ -155,6 +155,10 @@
         "columnName": "twitter",
         "generator": "twitter-username",
         "listSeparator": "###"
+      },
+      {
+        "columnName": "nick_name",
+        "generator": "nick-name"
       }
     ],
     "batchSize": 100,

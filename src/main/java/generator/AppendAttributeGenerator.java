@@ -38,17 +38,11 @@ public class AppendAttributeGenerator extends InsertGenerator {
                                                          String header, int rowCounter) throws Exception {
         GeneratorStatement generatorStatement = new GeneratorStatement();
 
-        int insertCounter = 0;
         int batchCounter = 1;
         for (String row : rows) {
             GeneratorStatement.MatchInsert tmp = graknAppendAttributeQueryFromRow(row, header, rowCounter + batchCounter);
-            if (tmp != null) {
-                if (tmp.getMatches() != null && tmp.getInsert() != null) {
-                    generatorStatement.getMatchInserts().add(tmp);
-                }
-            }
+            generatorStatement.getMatchInserts().add(tmp);
             batchCounter = batchCounter + 1;
-            insertCounter = insertCounter + 1;
         }
         return generatorStatement;
     }
@@ -78,20 +72,30 @@ public class AppendAttributeGenerator extends InsertGenerator {
         matchStatements.add(matchStatement);
 
         // get all attributes that are !isMatch() --> construct insert clause
-        UnboundVariable thingVar = addEntityToInsert();
-        Thing insertStatement = null;
+        UnboundVariable tmpMI = addEntityToInsert();
+        Thing matchInsertStatement = null;
+        boolean first = true;
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
-                insertStatement = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                if (first) {
+                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                    if (matchInsertStatement != null) {
+                        first = false;
+                    }
+                } else {
+                    matchInsertStatement = addAttribute(rowTokens, matchInsertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                }
             }
         }
 
-        if (isValid(matchStatements, insertStatement)) {
-            appLogger.debug("valid query: <" + assembleQuery(matchStatements, insertStatement) + ">");
-            return new GeneratorStatement.MatchInsert(matchStatements, insertStatement);
+        if (isValid(matchStatements, matchInsertStatement)) {
+            appLogger.debug("valid match-insert query: <" + assembleQuery(matchStatements, matchInsertStatement) + ">");
+            return new GeneratorStatement.MatchInsert(matchStatements, matchInsertStatement);
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
-            return null;
+            dataLogger.trace("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
+                    + "  does not contain at least one match attribute and one insert attribute. Tokenized row: " + Arrays.toString(rowTokens)
+                    + " - invalid query: " + assembleQuery(matchStatements, matchInsertStatement) + " - will insert without doing match first");
+            return new GeneratorStatement.MatchInsert(null, null);
         }
     }
 
@@ -130,32 +134,29 @@ public class AppendAttributeGenerator extends InsertGenerator {
         for (ThingVariable<?> st : matchStatements) {
             ret.append(st.toString());
         }
-        ret.append(insertStatement.toString());
+        if (insertStatement != null) ret.append(insertStatement.toString()); else ret.append("matchInsertStatement is null");
         return ret.toString();
     }
 
-    private boolean isValid(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> insertStatement) {
+    private boolean isValid(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> matchInsertInsertStatement) {
 
-        if (insertStatement == null) {
-            return false;
-        }
-
+        if (matchInsertInsertStatement == null) return false;
         StringBuilder matchStatement = new StringBuilder();
         for (Pattern st : matchStatements) {
             matchStatement.append(st.toString());
         }
-
-        // missing match attribute
+        ArrayList<String> matchAttributes = new ArrayList<>();
         for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getMatchAttributes()) {
             String generatorKey = attributeMapping.getGenerator();
             ProcessorConfigEntry.ConceptGenerator generatorEntry = pce.getAttributeGenerator(generatorKey);
             if (!matchStatement.toString().contains("has " + generatorEntry.getAttributeType())) {
                 return false;
             }
+            matchAttributes.add(generatorEntry.getAttributeType());
         }
-        // missing required insert attribute
         for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            if (!insertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType())) {
+            if (!matchInsertInsertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType()) &&
+                    !matchAttributes.contains(generatorEntry.getValue().getAttributeType())) {
                 return false;
             }
         }
