@@ -38,9 +38,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
         for (String row : rows) {
             try {
                 ThingVariable<?> temp = graknAttributeQueryFromRow(row, header, rowCounter + batchCount);
-                if (temp != null) {
-                    statements.getInserts().add(temp);
-                }
+                statements.getInserts().add(temp);
             } catch (Exception e) {
                 e.printStackTrace();
             }

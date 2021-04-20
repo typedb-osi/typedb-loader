@@ -2,10 +2,12 @@ package generator;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
+import graql.lang.pattern.variable.ThingVariable;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static test.TestUtil.getData;
@@ -23,19 +25,28 @@ public class AttributeInsertGeneratorTest {
     public void graknAttributeQueryFromRowTest() {
 
         AttributeInsertGenerator testAttributeInsertGenerator = new AttributeInsertGenerator(migrationConfig.getDataConfig().get("is-in-use"), genConf.get("processors").get(8), 0);
-
         ArrayList<String> rows = getData(file);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-
         GeneratorStatement results = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
 
-        String tc0 = "$a \"yes\" isa is-in-use";
-        Assert.assertEquals(tc0, results.getInserts().get(0).toString());
+        int idx = 0;
+        String tmp = "$a \"yes\" isa is-in-use";
+        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
 
-        String tc1 = "$a \"no\" isa is-in-use";
-        Assert.assertEquals(tc1, results.getInserts().get(1).toString());
+        idx += 1;
+        tmp = "$a \"no\" isa is-in-use";
+        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
 
-        Assert.assertEquals(2, results.getInserts().size());
+        idx += 1;
+        Assert.assertNull(results.getInserts().get(idx));
+
+        idx += 1;
+        tmp = "$a \"5\" isa is-in-use";
+        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+
+        Assert.assertEquals(4, results.getInserts().size());
+        results.getInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(3, results.getInserts().size());
     }
 }

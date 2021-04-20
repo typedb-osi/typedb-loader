@@ -2,10 +2,12 @@ package generator;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
+import graql.lang.pattern.variable.ThingVariable;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static test.TestUtil.concatMatches;
@@ -83,6 +85,16 @@ public class AppendAttributeGeneratorTest {
         idx += 1;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+
+        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(10, results.getMatchInserts().size());
+        int nullCount = 0;
+        for (int i = 0; i < results.getMatchInserts().size(); i++) {
+            if (results.getMatchInserts().get(i).getMatches() == null) {
+                nullCount++;
+            }
+        }
+        Assert.assertEquals(6, results.getMatchInserts().size() - nullCount);
     }
 
     @Test
@@ -125,6 +137,15 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
+        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(6, results.getMatchInserts().size());
+        int nullCount = 0;
+        for (int i = 0; i < results.getMatchInserts().size(); i++) {
+            if (results.getMatchInserts().get(i).getMatches() == null) {
+                nullCount++;
+            }
+        }
+        Assert.assertEquals(4, results.getMatchInserts().size() - nullCount);
     }
 
     @Test
@@ -173,5 +194,14 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
+        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(7, results.getMatchInserts().size());
+        int nullCount = 0;
+        for (int i = 0; i < results.getMatchInserts().size(); i++) {
+            if (results.getMatchInserts().get(i).getMatches() == null) {
+                nullCount++;
+            }
+        }
+        Assert.assertEquals(5, results.getMatchInserts().size() - nullCount);
     }
 }

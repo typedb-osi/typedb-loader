@@ -81,5 +81,15 @@ public class AppendOrInsertGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
         Assert.assertNull(results.getInserts().get(idx));
 
+        Assert.assertEquals(7, results.getInserts().size());
+        Assert.assertEquals(7, results.getMatchInserts().size());
+        int nullCount = 0;
+        for (int i = 0; i < results.getMatchInserts().size(); i++) {
+            if (results.getMatchInserts().get(i).getMatches() == null) {
+                nullCount++;
+            }
+        }
+        Assert.assertEquals(5, results.getMatchInserts().size() - nullCount);
+
     }
 }
