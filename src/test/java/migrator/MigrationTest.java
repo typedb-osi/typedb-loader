@@ -6,20 +6,20 @@ import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.ThingVariable.Relation;
+import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import static graql.lang.Graql.var;
 import static test.TestUtil.getDT;
 import static util.Util.getAbsPath;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 public class MigrationTest {
 
@@ -34,7 +34,7 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
         String gcp = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
+        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
         mig.migrate();
     }
@@ -48,7 +48,7 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
+        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
         mig.migrate();
 
@@ -145,7 +145,7 @@ public class MigrationTest {
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         Thing playerOne = Graql.var("p1").isa("person").has("phone-number", "+54 398 559 0423");
         Thing playerTwo = Graql.var("p2").isa("person").has("phone-number", "+48 195 624 2025");
-        Relation relation = Graql.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call","x").isa("communication-channel");
+        Relation relation = Graql.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
         ArrayList<ThingVariable<?>> statements = new ArrayList<>();
         statements.add(playerOne);
         statements.add(playerTwo);
@@ -253,7 +253,7 @@ public class MigrationTest {
 
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch getQuery = Graql.match(var("a").isa("is-in-use")).get("a");
-        Assert.assertEquals(2, read.query().match(getQuery).count());
+        Assert.assertEquals(3, read.query().match(getQuery).count());
 
         read = session.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("a").eq("yes").isa("is-in-use")).get("a");
@@ -277,7 +277,7 @@ public class MigrationTest {
     public void testInsertOrAppend(GraknSession session) {
         GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
         GraqlMatch getQuery = Graql.match(var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
-        Assert.assertEquals(7, read.query().match(getQuery).count());
+        Assert.assertEquals(8, read.query().match(getQuery).count());
 
         // test new ones present (middle and at end)
         read = session.transaction(GraknTransaction.Type.READ);
@@ -304,7 +304,7 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/bugfixing/issue10/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/bugfixing/issue10/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
+        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
         GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
         mig.migrate();
     }
