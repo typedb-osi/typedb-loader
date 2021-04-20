@@ -13,24 +13,23 @@ import static test.TestUtil.getData;
 import static util.Util.getAbsPath;
 
 public class AppendAttributeGeneratorTest {
-    //TODO NEED TO ADD TESTS
 
     private final String db = "grakn_migrator_test";
     private final String schema = getAbsPath("src/test/resources/phone-calls/schema-updated.gql");
     private final String dc = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
     private final String pc = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
-    private final String datafile = getAbsPath("src/test/resources/phone-calls/append-twitter-nickname.csv");
+    private final String datafileA = getAbsPath("src/test/resources/phone-calls/append-twitter-nickname.csv");
+    private final String datafileB = getAbsPath("src/test/resources/phone-calls/append-fb-preprocessed.csv");
+    private final String datafileC = getAbsPath("src/test/resources/phone-calls/append-call-rating.csv");
     private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", db, schema, dc, pc);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
 
     @Test
-    public void graknAttributeQueryFromRowTest() throws Exception {
+    public void graknAttributeQueryFromRowTestA() throws Exception {
         AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-twitter"), genConf.get("processors").get(5), 0);
-
-        ArrayList<String> rows = getData(datafile);
+        ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-
         GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
 
         int idx = 0;
@@ -84,5 +83,95 @@ public class AppendAttributeGeneratorTest {
         idx += 1;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+    }
+
+    @Test
+    public void graknAttributeQueryFromRowTestB() throws Exception {
+        AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-pp-fakebook"), genConf.get("processors").get(7), 0);
+        ArrayList<String> rows = getData(datafileB);
+        String header = rows.get(0);
+        rows = new ArrayList<>(rows.subList(1, rows.size()));
+        GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
+
+        int idx = 0;
+        String tmp = "$e isa person, has phone-number \"+36 318 105 5629\";";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has fakebook-link \"fakebook.com/personOne\"";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa person, has phone-number \"+63 808 497 1769\";";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has fakebook-link \"fakebook.com/person-Two\"";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa person, has phone-number \"+62 533 266 3426\";";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has fakebook-link \"fakebook.com/person_three\"";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa person, has phone-number \"+62 533 266 3426\";";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has fakebook-link \"insertedWithoutAppliedRegex\"";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
+        Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+
+        idx += 1;
+        Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
+        Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+
+    }
+
+    @Test
+    public void graknAttributeQueryFromRowTestC() throws Exception {
+        AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-call-rating"), genConf.get("processors").get(6), 0);
+        ArrayList<String> rows = getData(datafileC);
+        String header = rows.get(0);
+        rows = new ArrayList<>(rows.subList(1, rows.size()));
+        GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
+
+        int idx = 0;
+        String tmp = "$e isa call, has started-at 2018-09-19T01:00:38;";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has call-rating 5";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa call, has started-at 2018-09-24T03:16:48;";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has call-rating 5";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa call, has started-at 2018-09-26T19:47:20;";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has call-rating 1";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa call, has started-at 2018-09-26T23:47:19;";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has call-rating 2";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        tmp = "$e isa call, has started-at 2018-09-18T04:54:04;";
+        Assert.assertEquals(tmp, concatMatches(results.getMatchInserts().get(idx).getMatches()));
+        tmp = "$e has call-rating 4";
+        Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
+
+        idx += 1;
+        Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
+        Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+
+        idx += 1;
+        Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
+        Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
+
     }
 }

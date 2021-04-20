@@ -11,6 +11,10 @@ public class RegexPreprocessorTest {
         String test = "https://www.fakebook.com/personOne/";
         String res = "fakebook.com/personOne";
         Assert.assertEquals(res, rpp.applyProcessor(test));
+
+        test = "insertedWithoutAppliedRegex";
+        res = "insertedWithoutAppliedRegex";
+        Assert.assertEquals(res, rpp.applyProcessor(test));
     }
 
 }
