@@ -12,8 +12,24 @@ public class RegexPreprocessorTest {
         String res = "fakebook.com/personOne";
         Assert.assertEquals(res, rpp.applyProcessor(test));
 
+        test = "www.fakebook.com/personOne/";
+        res = "fakebook.com/personOne";
+        Assert.assertEquals(res, rpp.applyProcessor(test));
+
+        test = "fakebook.com/personOne/";
+        res = "fakebook.com/personOne";
+        Assert.assertEquals(res, rpp.applyProcessor(test));
+
+        test = "personOne/";
+        res = "personOne/";
+        Assert.assertEquals(res, rpp.applyProcessor(test));
+
         test = "insertedWithoutAppliedRegex";
         res = "insertedWithoutAppliedRegex";
+        Assert.assertEquals(res, rpp.applyProcessor(test));
+
+        test = "";
+        res = "";
         Assert.assertEquals(res, rpp.applyProcessor(test));
     }
 
