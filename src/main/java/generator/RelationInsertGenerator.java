@@ -41,11 +41,7 @@ public class RelationInsertGenerator extends InsertGenerator {
         int batchCounter = 1;
         for (String row : rows) {
             GeneratorStatement.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
-            if (tmp != null) {
-                if (tmp.getMatches() != null && tmp.getInsert() != null) {
-                    generatorStatement.getMatchInserts().add(tmp);
-                }
-            }
+            generatorStatement.getMatchInserts().add(tmp);
             batchCounter = batchCounter + 1;
         }
         return generatorStatement;
@@ -77,14 +73,15 @@ public class RelationInsertGenerator extends InsertGenerator {
                     return new GeneratorStatement.MatchInsert(matchStatements, assembledInsertStatement);
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                    return null;
+                    return new GeneratorStatement.MatchInsert(null, null);
                 }
             } else {
                 dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                return null;
+                return new GeneratorStatement.MatchInsert(null, null);
             }
         } else {
-            return null;
+            dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c empty.");
+            return new GeneratorStatement.MatchInsert(null, null);
         }
     }
 
