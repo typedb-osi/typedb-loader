@@ -27,17 +27,32 @@ public class GeneratorUtil {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
-    public static String[] tokenizeCSVStandard(String row, char fileSeparator) throws IOException {
+    public static String[] tokenizeCSVStandard(String row, char fileSeparator) {
         //TODO: allow for quote-based escaping + can escape actual quotes by double quotes (i.e. replace by \" for grakn)
         if (row != null && !row.isEmpty()) {
-            ArrayList<CSVRecord> returnList = (ArrayList<CSVRecord>) CSVParser.parse(row, CSVFormat.RFC4180.withDelimiter(fileSeparator)).getRecords();
-            String[] ret = new String[returnList.get(0).size()];
-            for (int i = 0; i < returnList.get(0).size(); i++) {
-                ret[i] = returnList.get(0).get(i);
+            try {
+                return parseCSVString(row, fileSeparator);
+            } catch (IOException ioe) {
+                System.out.println("row: <" + row + "> does not conform to RFC4180 - escaping all quotes and trying to insert again" + ioe);
+                String newRow = row.replace("\"", "\\\"");
+                System.out.println(newRow);
+                try {
+                    return parseCSVString(newRow, fileSeparator);
+                } catch (IOException ioe2) {
+                    dataLogger.error("CANNOT INSERT ROW - DOES NOT CONFORM TO RFC4180 and removing quotes didn't fix the issue..." + ioe2);
+                }
             }
-            return ret;
         }
         return new String[]{""};
+    }
+
+    private static String[] parseCSVString(String string, char fileSeparator) throws IOException {
+        ArrayList<CSVRecord> returnList = (ArrayList<CSVRecord>) CSVParser.parse(string, CSVFormat.RFC4180.withDelimiter(fileSeparator)).getRecords();
+        String[] ret = new String[returnList.get(0).size()];
+        for (int i = 0; i < returnList.get(0).size(); i++) {
+            ret[i] = returnList.get(0).get(i);
+        }
+        return ret;
     }
 
     public static String cleanToken(String token) {

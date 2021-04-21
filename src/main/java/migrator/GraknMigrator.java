@@ -278,52 +278,51 @@ public class GraknMigrator {
         int totalRecordCounter = 0;
         double timerStart = System.currentTimeMillis();
 
-        if (entityStream != null) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(entityStream))) {
-                while ((line = br.readLine()) != null) {
-                    totalRecordCounter++;
-                    // get header of file
-                    if (totalRecordCounter == 1) {
-                        header = line;
-                        continue;
-                    }
-
-                    // skip over all lines already added into KG
-                    if (totalRecordCounter <= conf.getMigratedRows()) {
-                        continue;
-                    }
-                    // insert Batch once chunk size is reached
-                    rows.add(line);
-                    batchSizeCounter++;
-                    //                    if (batchSizeCounter == dce.getBatchSize()) {
-                    if (batchSizeCounter == conf.getDce().getBatchSize() * conf.getDce().getThreads()) {
-                        System.out.print("+");
-                        System.out.flush();
-                        buildQueriesAndInsert(conf, session, rows, batchSizeCounter, totalRecordCounter, header);
-                        batchSizeCounter = 0;
-                        rows.clear();
-                    }
-                    // logging
-                    if (totalRecordCounter % 50000 == 0) {
-                        System.out.flush();
-                        appLogger.info("processed " + totalRecordCounter / 1000 + "k rows");
-                    }
+        assert entityStream != null;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(entityStream))) {
+            while ((line = br.readLine()) != null) {
+                totalRecordCounter++;
+                // get header of file
+                if (totalRecordCounter == 1) {
+                    header = line;
+                    continue;
                 }
-                //insert the rest when loop exits with less than batch size
-                if (!rows.isEmpty()) {
+
+                // skip over all lines already added into KG
+                if (totalRecordCounter <= conf.getMigratedRows()) {
+                    continue;
+                }
+                // insert Batch once chunk size is reached
+                rows.add(line);
+                batchSizeCounter++;
+                //                    if (batchSizeCounter == dce.getBatchSize()) {
+                if (batchSizeCounter == conf.getDce().getBatchSize() * conf.getDce().getThreads()) {
+                    System.out.print("+");
+                    System.out.flush();
                     buildQueriesAndInsert(conf, session, rows, batchSizeCounter, totalRecordCounter, header);
-                    if (totalRecordCounter % 50000 != 0) {
-                        System.out.flush();
-                    }
+                    batchSizeCounter = 0;
+                    rows.clear();
                 }
-
-                appLogger.info("final # rows processed: " + totalRecordCounter);
-                appLogger.info(logInsertRate(timerStart, totalRecordCounter));
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                // logging
+                if (totalRecordCounter % 50000 == 0) {
+                    System.out.flush();
+                    appLogger.info("processed " + totalRecordCounter / 1000 + "k rows");
+                }
             }
+            //insert the rest when loop exits with less than batch size
+            if (!rows.isEmpty()) {
+                buildQueriesAndInsert(conf, session, rows, batchSizeCounter, totalRecordCounter, header);
+                if (totalRecordCounter % 50000 != 0) {
+                    System.out.flush();
+                }
+            }
+
+            appLogger.info("final # rows processed: " + totalRecordCounter);
+            appLogger.info(logInsertRate(timerStart, totalRecordCounter));
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
