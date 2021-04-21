@@ -1,9 +1,11 @@
 package insert;
 
+import generator.GeneratorStatement;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
+import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDelete;
 import graql.lang.query.GraqlInsert;
 import graql.lang.query.GraqlMatch;
@@ -11,17 +13,21 @@ import org.junit.Assert;
 import org.junit.Test;
 import util.Util;
 
+import java.util.ArrayList;
+
 import static graql.lang.Graql.var;
 
 public class GraknInserterTest {
 
     GraknInserter gi;
-    String databaseName = "grakn_migrator_test";
+    GraknInserter pcgi;
+    String databaseName = "grakn_inserter_test";
     String schemaPath;
 
     public GraknInserterTest() {
         this.schemaPath = Util.getAbsPath("src/test/resources/genericTests/schema-test.gql");
         this.gi = new GraknInserter("localhost", "1729", schemaPath, databaseName);
+        this.pcgi = new GraknInserter("localhost", "1729", "src/test/resources/phone-calls/schema-updated.gql", databaseName);
     }
 
     @Test
@@ -38,7 +44,7 @@ public class GraknInserterTest {
         Assert.assertEquals(4, read.query().match(mq).count());
         read.close();
 
-         read = dataSession.transaction(GraknTransaction.Type.READ);
+        read = dataSession.transaction(GraknTransaction.Type.READ);
         mq = Graql.match(var("e").type("entity1")).get("e").limit(100);
         Assert.assertEquals(1, read.query().match(mq).count());
         read.close();
@@ -83,11 +89,7 @@ public class GraknInserterTest {
         //another test for our insert
         read = dataSession.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get("e").limit(100);
-        read.query().match(getQuery).forEach( answers -> {
-            answers.concepts().stream().forEach( entry -> {
-                Assert.assertTrue(entry.isEntity());
-            });
-        });
+        read.query().match(getQuery).forEach(answers -> answers.concepts().forEach(entry -> Assert.assertTrue(entry.isEntity())));
         read.close();
 
         //clean up:
@@ -104,37 +106,260 @@ public class GraknInserterTest {
     }
 
     @Test
-    public void threadedInsertGraknTest() {
+    public void threadedInsertGraknTest() throws InterruptedException {
 
-        GraknClient client = gi.getClient();
-        gi.cleanAndDefineSchemaToDatabase(client);
-        GraknSession dataSession = gi.getDataSession(client);
+        GraknClient client = pcgi.getClient();
+        pcgi.cleanAndDefineSchemaToDatabase(client);
+        GraknSession dataSession = pcgi.getDataSession(client);
 
+        ArrayList<ThingVariable<?>> singleThreadStatements = new ArrayList<>();
+        singleThreadStatements.add(null);
+        singleThreadStatements.add(var("person").isa("person").has("first-name", "first-first-name").has("phone-number", "+47 1234 1234 1"));
+        singleThreadStatements.add(null);
+        singleThreadStatements.add(var("person").isa("person").has("first-name", "second-first-name").has("phone-number", "+47 1234 1234 2"));
+        singleThreadStatements.add(null);
+        pcgi.insertThreadedInserting(singleThreadStatements, dataSession, 1, 1, null);
 
+        ArrayList<ThingVariable<?>> multiThreadStatements = new ArrayList<>();
+        multiThreadStatements.add(null);
+        multiThreadStatements.add(var("person").isa("person").has("first-name", "first-first-name-mt").has("phone-number", "+47 1234 1234 3"));
+        multiThreadStatements.add(null);
+        multiThreadStatements.add(var("person").isa("person").has("first-name", "second-first-name-mt").has("phone-number", "+47 1234 1234 4"));
+        multiThreadStatements.add(null);
+        pcgi.insertThreadedInserting(multiThreadStatements, dataSession, 4, 1, null);
+
+        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 1, 1, null);
+        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 4, 1, null);
+
+        GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
+
+        GraqlMatch getQuery = Graql.match(var("p").isa("person")).get("p").limit(1000);
+        Assert.assertEquals(4, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "first-first-name")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "second-first-name")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "first-first-name-mt")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("first-name", "first-first-name-mt")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 1")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 2")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 3")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 4")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read.close();
         dataSession.close();
         client.close();
     }
 
     @Test
-    public void threadedMatchInsertGraknTest() {
+    public void threadedMatchInsertGraknTest() throws InterruptedException {
 
-        GraknClient client = gi.getClient();
-        gi.cleanAndDefineSchemaToDatabase(client);
-        GraknSession dataSession = gi.getDataSession(client);
+        threadedInsertGraknTest();
 
+        GraknClient client = pcgi.getClient();
+        GraknSession dataSession = pcgi.getDataSession(client);
 
+        // single-thread inserting
+        GeneratorStatement singleThreadStatements = new GeneratorStatement();
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        ArrayList<ThingVariable<?>> curMatch = new ArrayList<>();
+        ThingVariable<?> curInsert;
+        curMatch.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
+        curMatch.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 2"));
+        curInsert = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatch, curInsert));
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        ArrayList<ThingVariable<?>> curMatchB = new ArrayList<>();
+        ThingVariable<?> curInsertB;
+        curMatchB.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 3"));
+        curMatchB.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 4"));
+        curInsertB = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchB, curInsertB));
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        pcgi.matchInsertThreadedInserting(singleThreadStatements, dataSession, 1, 1);
+
+        // multi-thread inserting
+        GeneratorStatement multiThreadStatements = new GeneratorStatement();
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        ArrayList<ThingVariable<?>> curMatchC = new ArrayList<>();
+        ThingVariable<?> curInsertC;
+        curMatchC.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
+        curMatchC.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 3"));
+        curInsertC = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchC, curInsertC));
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        ArrayList<ThingVariable<?>> curMatchD = new ArrayList<>();
+        ThingVariable<?> curInsertD;
+        curMatchD.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 2"));
+        curMatchD.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 4"));
+        curInsertD = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchD, curInsertD));
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+
+        pcgi.matchInsertThreadedInserting(multiThreadStatements, dataSession, 4, 1);
+
+        // pass nulls
+        pcgi.matchInsertThreadedInserting(new GeneratorStatement(), dataSession, 1, 1);
+        pcgi.matchInsertThreadedInserting(new GeneratorStatement(), dataSession, 4, 1);
+
+        // tests
+        GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
+
+        GraqlMatch getQuery = Graql.match(var("c").isa("call")).get("c").limit(1000);
+        Assert.assertEquals(4, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("caller", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 1")).get("c").limit(1000);
+        Assert.assertEquals(2, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("caller", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 3")).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("caller", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 2")).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("callee", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 2")).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("callee", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 3")).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("c").rel("callee", "p1").isa("call"),
+                var("p1").has("phone-number", "+47 1234 1234 4")).get("c").limit(1000);
+        Assert.assertEquals(2, read.query().match(getQuery).count());
+
+        read.close();
         dataSession.close();
         client.close();
     }
 
     @Test
-    public void threadedAppendOrInsertGraknTest() {
+    public void threadedAppendOrInsertGraknTest() throws InterruptedException {
 
-        GraknClient client = gi.getClient();
-        gi.cleanAndDefineSchemaToDatabase(client);
-        GraknSession dataSession = gi.getDataSession(client);
+        threadedInsertGraknTest();
 
+        GraknClient client = pcgi.getClient();
+        GraknSession dataSession = pcgi.getDataSession(client);
 
+        // single-thread inserting
+        GeneratorStatement singleThreadStatements = new GeneratorStatement();
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        singleThreadStatements.getInserts().add(null);
+
+        ArrayList<ThingVariable<?>> curMatch = new ArrayList<>();
+        ThingVariable<?> curInsert;
+        ThingVariable<?> dirInsert;
+        curMatch.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
+        curInsert = var("p1").has("nick-name", "appended-nick-name");
+        dirInsert = var("p1").isa("person").has("phone-number", "+47 1234 1234 1").has("nick-name", "appended-nick-name");
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatch, curInsert));
+        singleThreadStatements.getInserts().add(dirInsert);
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        singleThreadStatements.getInserts().add(null);
+
+        ArrayList<ThingVariable<?>> curMatchB = new ArrayList<>();
+        ThingVariable<?> curInsertB;
+        ThingVariable<?> dirInsertB;
+        curMatchB.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 5"));
+        curInsertB = var("p1").has("nick-name", "newly-inserted-nick-name");
+        dirInsertB = var("p1").isa("person").has("phone-number", "+47 1234 1234 5").has("nick-name", "newly-inserted-nick-name");
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchB, curInsertB));
+        singleThreadStatements.getInserts().add(dirInsertB);
+
+        singleThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        singleThreadStatements.getInserts().add(null);
+
+        pcgi.appendOrInsertThreadedInserting(singleThreadStatements, dataSession, 1, 1);
+
+        // multi-thread inserting
+        GeneratorStatement multiThreadStatements = new GeneratorStatement();
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        multiThreadStatements.getInserts().add(null);
+
+        ArrayList<ThingVariable<?>> curMatchC = new ArrayList<>();
+        ThingVariable<?> curInsertC;
+        ThingVariable<?> dirInsertC;
+        curMatchC.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 2"));
+        curInsertC = var("p1").has("nick-name", "appended-nick-name-2");
+        dirInsertC = var("p1").isa("person").has("phone-number", "+47 1234 1234 2").has("nick-name", "appended-nick-name-2");
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchC, curInsertC));
+        multiThreadStatements.getInserts().add(dirInsertC);
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        multiThreadStatements.getInserts().add(null);
+
+        ArrayList<ThingVariable<?>> curMatchD = new ArrayList<>();
+        ThingVariable<?> curInsertD;
+        ThingVariable<?> dirInsertD;
+        curMatchD.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 6"));
+        curInsertD = var("p1").has("nick-name", "newly-inserted-nick-name-2");
+        dirInsertD = var("p1").isa("person").has("phone-number", "+47 1234 1234 6").has("nick-name", "newly-inserted-nick-name-2");
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(curMatchD, curInsertD));
+        multiThreadStatements.getInserts().add(dirInsertD);
+
+        multiThreadStatements.getMatchInserts().add(new GeneratorStatement.MatchInsert(null, null));
+        multiThreadStatements.getInserts().add(null);
+
+        pcgi.appendOrInsertThreadedInserting(multiThreadStatements, dataSession, 4, 1);
+
+        // pass nulls
+        pcgi.appendOrInsertThreadedInserting(new GeneratorStatement(), dataSession, 1, 1);
+        pcgi.appendOrInsertThreadedInserting(new GeneratorStatement(), dataSession, 4, 1);
+
+        // tests
+        GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
+
+        GraqlMatch getQuery = Graql.match(var("p").isa("person")).get("p").limit(1000);
+        Assert.assertEquals(6, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("nick-name", var("nn"))).get("nn").limit(1000);
+        Assert.assertEquals(4, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 1").has("nick-name", var("v"))).get("v").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 2").has("nick-name", var("v"))).get("v").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 5").has("nick-name", var("v"))).get("v").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        getQuery = Graql.match(var("p").isa("person").has("phone-number", "+47 1234 1234 6").has("nick-name", var("v"))).get("v").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read.close();
         dataSession.close();
         client.close();
     }
