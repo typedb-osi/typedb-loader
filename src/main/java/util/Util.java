@@ -1,7 +1,6 @@
 package util;
 
 import java.io.*;
-import java.util.ArrayList;
 
 public class Util {
     public static String getAbsPath(String p) {
@@ -9,18 +8,8 @@ public class Util {
         return file.getAbsolutePath();
     }
 
-    public static int getListIndexOfShortestString(ArrayList<String> batchStrings) {
-        int shortest = 0;
-        for (String s : batchStrings) {
-            if (s.length() < batchStrings.get(shortest).length()) {
-                shortest = batchStrings.indexOf(s);
-            }
-        }
-        return shortest;
-    }
-
     public static String loadSchemaFromFile(String schemaPath) {
-        String schema="";
+        String schema = "";
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(schemaPath)));
             StringBuilder sb = new StringBuilder();
