@@ -1,0 +1,10 @@
+field1	field2	field3
+field1	field2	"field3	bridged"
+field1	field2	field3	field4 has "quotes"
+field1	field2	field3	field4 has \"quotes\"
+field1	"field2	field3"	field4 has "quotes"
+field1	"field2	field3"	field4 has \"quotes\"
+field1	field2	field3	"quotes" at beginning of field
+field1	field2	field3	\"quotes\" at beginning of field
+field1	"field2	field3"	"quotes" at beginning of field
+field1	"field2	field3"	\"quotes\" at beginning of field
