@@ -2,11 +2,10 @@ package generator;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
-import graql.lang.pattern.variable.ThingVariable.Thing;
-import graql.lang.pattern.variable.ThingVariable.Relation;
 import graql.lang.pattern.variable.ThingVariable.Attribute;
+import graql.lang.pattern.variable.ThingVariable.Relation;
+import graql.lang.pattern.variable.ThingVariable.Thing;
+import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import preprocessor.RegexPreprocessor;
@@ -61,12 +60,12 @@ public class GeneratorUtil {
     }
 
     public static Attribute addValue(String[] tokens,
-                                 UnboundVariable statement,
-                                 int lineNumber,
-                                 String[] columnNames,
-                                 DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
-                                 ProcessorConfigEntry pce,
-                                 DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                     UnboundVariable statement,
+                                     int lineNumber,
+                                     String[] columnNames,
+                                     DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
+                                     ProcessorConfigEntry pce,
+                                     DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String columnName = generatorMappingForAttribute.getColumnName();
@@ -76,7 +75,7 @@ public class GeneratorUtil {
         if (columnNameIndex == -1) {
             dataLogger.error("Column name: <" + columnName + "> was not found in file being processed");
         } else {
-            if ( columnNameIndex < tokens.length &&
+            if (columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeValueType = attributeGenerator.getValueType();
@@ -103,7 +102,7 @@ public class GeneratorUtil {
         if (columnNameIndex == -1) {
             dataLogger.error("Column name: <" + columnName + "> was not found in file being processed");
         } else {
-            if ( columnNameIndex < tokens.length &&
+            if (columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
@@ -116,12 +115,12 @@ public class GeneratorUtil {
     }
 
     public static Relation addAttribute(String[] tokens,
-                                     Relation statement,
-                                     String[] columnNames,
-                                     int lineNumber,
-                                     DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
-                                     ProcessorConfigEntry pce,
-                                     DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                        Relation statement,
+                                        String[] columnNames,
+                                        int lineNumber,
+                                        DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
+                                        ProcessorConfigEntry pce,
+                                        DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String columnListSeparator = generatorMappingForAttribute.getListSeparator();
@@ -131,7 +130,7 @@ public class GeneratorUtil {
         if (columnNameIndex == -1) {
             dataLogger.error("Column name: <" + columnName + "> was not found in file being processed");
         } else {
-            if ( columnNameIndex < tokens.length &&
+            if (columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
@@ -160,7 +159,7 @@ public class GeneratorUtil {
         if (columnNameIndex == -1) {
             dataLogger.error("Column name: <" + columnName + "> was not found in file being processed");
         } else {
-            if ( columnNameIndex < tokens.length &&
+            if (columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
@@ -180,7 +179,7 @@ public class GeneratorUtil {
                                         String listSeparator,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (listSeparator != null) {
-            for (String exploded: cleanedToken.split(listSeparator)) {
+            for (String exploded : cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
                     statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
@@ -193,14 +192,14 @@ public class GeneratorUtil {
     }
 
     public static Relation cleanExplodeAdd(Relation statement,
-                                        String cleanedToken,
-                                        String conceptType,
-                                        String valueType,
-                                        String listSeparator,
-            int lineNumber,
-                                        DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                           String cleanedToken,
+                                           String conceptType,
+                                           String valueType,
+                                           String listSeparator,
+                                           int lineNumber,
+                                           DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (listSeparator != null) {
-            for (String exploded: cleanedToken.split(listSeparator)) {
+            for (String exploded : cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
                     statement = addAttributeOfColumnType(statement, conceptType, valueType, cleanedExplodedToken, lineNumber, preprocessorConfig);
@@ -222,7 +221,7 @@ public class GeneratorUtil {
         Thing returnThing = null;
         if (listSeparator != null) {
             int count = 0;
-            for (String exploded: cleanedToken.split(listSeparator)) {
+            for (String exploded : cleanedToken.split(listSeparator)) {
                 String cleanedExplodedToken = cleanToken(exploded);
                 if (!cleanedExplodedToken.isEmpty()) {
                     if (count == 0) {
@@ -268,9 +267,9 @@ public class GeneratorUtil {
                 }
                 break;
             case "boolean":
-                if (cleanedValue.toLowerCase().equals("true")) {
+                if (cleanedValue.equalsIgnoreCase("true")) {
                     statement = statement.has(conceptType, true);
-                } else if (cleanedValue.toLowerCase().equals("false")) {
+                } else if (cleanedValue.equalsIgnoreCase("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
@@ -302,11 +301,11 @@ public class GeneratorUtil {
 
 
     public static Relation addAttributeOfColumnType(Relation statement,
-                                                 String conceptType,
-                                                 String valueType,
-                                                 String cleanedValue,
+                                                    String conceptType,
+                                                    String valueType,
+                                                    String cleanedValue,
                                                     int lineNumber,
-                                                 DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                    DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
         }
@@ -330,9 +329,9 @@ public class GeneratorUtil {
                 }
                 break;
             case "boolean":
-                if (cleanedValue.toLowerCase().equals("true")) {
+                if (cleanedValue.equalsIgnoreCase("true")) {
                     statement = statement.has(conceptType, true);
-                } else if (cleanedValue.toLowerCase().equals("false")) {
+                } else if (cleanedValue.equalsIgnoreCase("false")) {
                     statement = statement.has(conceptType, false);
                 } else {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
@@ -393,9 +392,9 @@ public class GeneratorUtil {
                 }
                 break;
             case "boolean":
-                if (cleanedValue.toLowerCase().equals("true")) {
+                if (cleanedValue.equalsIgnoreCase("true")) {
                     returnThing = statement.has(conceptType, true);
-                } else if (cleanedValue.toLowerCase().equals("false")) {
+                } else if (cleanedValue.equalsIgnoreCase("false")) {
                     returnThing = statement.has(conceptType, false);
                 } else {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
@@ -426,10 +425,10 @@ public class GeneratorUtil {
     }
 
     public static Attribute addAttributeValueOfType(UnboundVariable unboundVar,
-                                                String valueType,
-                                                String cleanedValue,
+                                                    String valueType,
+                                                    String cleanedValue,
                                                     int lineNumber,
-                                                DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                    DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
         }
@@ -454,10 +453,10 @@ public class GeneratorUtil {
                 }
                 break;
             case "boolean":
-                if (cleanedValue.toLowerCase().equals("true")) {
-                    att = unboundVar.eq( true);
-                } else if (cleanedValue.toLowerCase().equals("false")) {
-                    att = unboundVar.eq( false);
+                if (cleanedValue.equalsIgnoreCase("true")) {
+                    att = unboundVar.eq(true);
+                } else if (cleanedValue.equalsIgnoreCase("false")) {
+                    att = unboundVar.eq(false);
                 } else {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> with non-<boolean> value - skipping column", lineNumber));
                 }
