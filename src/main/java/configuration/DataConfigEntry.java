@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class DataConfigEntry {
     private String[] dataPath;
-    private String separator;
+    private Character separator;
     private String processor;
     private DataConfigGeneratorMapping[] attributes;
     private DataConfigGeneratorMapping[] players;
@@ -18,7 +18,7 @@ public class DataConfigEntry {
         return dataPath;
     }
 
-    public String getSeparator() {
+    public Character getSeparator() {
         return separator;
     }
 
@@ -56,7 +56,7 @@ public class DataConfigEntry {
 
     public ArrayList<DataConfigEntry.DataConfigGeneratorMapping> getMatchAttributes() {
         ArrayList<DataConfigEntry.DataConfigGeneratorMapping> matchAttributes = new ArrayList<>();
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping: getAttributes()) {
+        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : getAttributes()) {
             if (attributeMapping.isMatch()) {
                 matchAttributes.add(attributeMapping);
             }
@@ -66,7 +66,7 @@ public class DataConfigEntry {
 
     public ArrayList<String> getMatchAttributeGenerators() {
         ArrayList<String> matchAttributeGenerators = new ArrayList<>();
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping: getAttributes()) {
+        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : getAttributes()) {
             if (attributeMapping.isMatch()) {
                 matchAttributeGenerators.add(attributeMapping.getGenerator());
             }
@@ -100,13 +100,21 @@ public class DataConfigEntry {
             return listSeparator;
         }
 
-        public String[] getMatchByPlayers() { return matchByPlayers; }
+        public String[] getMatchByPlayers() {
+            return matchByPlayers;
+        }
 
-        public String getMatchByAttribute() { return matchByAttribute; }
+        public String getMatchByAttribute() {
+            return matchByAttribute;
+        }
 
-        public boolean isMatch() { return match; }
+        public boolean isMatch() {
+            return match;
+        }
 
-        public PreprocessorConfig getPreprocessor() { return preprocessor; }
+        public PreprocessorConfig getPreprocessor() {
+            return preprocessor;
+        }
 
         public static class PreprocessorConfig {
             private String type;

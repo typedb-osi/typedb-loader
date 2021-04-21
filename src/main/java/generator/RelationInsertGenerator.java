@@ -49,7 +49,7 @@ public class RelationInsertGenerator extends InsertGenerator {
 
     public GeneratorStatement.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
-        String[] columnNames = header.split(dce.getSeparator());
+        String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         GeneratorUtil.malformedRow(row, rowTokens, columnNames.length);
 

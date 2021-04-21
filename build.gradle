@@ -23,6 +23,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
     annotationProcessor 'info.picocli:picocli-codegen:4.5.1'
     compile 'info.picocli:picocli:4.5.1'
+    compile 'org.apache.commons:commons-csv:1.8'
 }
 
 mainClassName = 'cli.GramiCLI'

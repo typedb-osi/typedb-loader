@@ -52,7 +52,7 @@ public class EntityInsertGenerator extends InsertGenerator {
                                                  String header,
                                                  int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
-        String[] columnNames = header.split(dce.getSeparator());
+        String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 

@@ -6,15 +6,20 @@ import graql.lang.pattern.variable.ThingVariable.Attribute;
 import graql.lang.pattern.variable.ThingVariable.Relation;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.UnboundVariable;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import preprocessor.RegexPreprocessor;
 
+import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GeneratorUtil {
@@ -22,9 +27,17 @@ public class GeneratorUtil {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
-    public static String[] tokenizeCSVStandard(String row, String fileSeparator) {
+    public static String[] tokenizeCSVStandard(String row, char fileSeparator) throws IOException {
         //TODO: allow for quote-based escaping + can escape actual quotes by double quotes (i.e. replace by \" for grakn)
-        return row.split(fileSeparator);
+        if (row != null && !row.isEmpty()) {
+            ArrayList<CSVRecord> returnList = (ArrayList<CSVRecord>) CSVParser.parse(row, CSVFormat.RFC4180.withDelimiter(fileSeparator)).getRecords();
+            String[] ret = new String[returnList.get(0).size()];
+            for (int i = 0; i < returnList.get(0).size(); i++) {
+                ret[i] = returnList.get(0).get(i);
+            }
+            return ret;
+        }
+        return new String[]{""};
     }
 
     public static String cleanToken(String token) {

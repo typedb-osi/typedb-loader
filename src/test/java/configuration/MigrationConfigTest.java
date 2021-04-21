@@ -19,7 +19,7 @@ public class MigrationConfigTest {
         Assert.assertEquals(4, mg.getDataConfig().get("entity1").getThreads());
         Assert.assertEquals(3, mg.getDataConfig().get("entity1").getAttributes().length);
         Assert.assertEquals("entity1", mg.getDataConfig().get("entity1").getProcessor());
-        Assert.assertEquals("\t", mg.getDataConfig().get("entity1").getSeparator());
+        Assert.assertEquals('\t', mg.getDataConfig().get("entity1").getSeparator().charValue());
         Assert.assertEquals(1, mg.getDataConfig().get("entity1").getDataPath().length);
         Assert.assertNull(mg.getDataConfig().get("entity1").getAttributes()[0].getListSeparator());
         Assert.assertEquals("###", mg.getDataConfig().get("entity1").getAttributes()[1].getListSeparator());
