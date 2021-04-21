@@ -33,9 +33,8 @@ public class GeneratorUtil {
             try {
                 return parseCSVString(row, fileSeparator);
             } catch (IOException ioe) {
-                System.out.println("row: <" + row + "> does not conform to RFC4180 - escaping all quotes and trying to insert again" + ioe);
+                dataLogger.warn("row: <" + row + "> does not conform to RFC4180 - escaping all quotes and trying to insert again" + ioe);
                 String newRow = row.replace("\"", "\\\"");
-                System.out.println(newRow);
                 try {
                     return parseCSVString(newRow, fileSeparator);
                 } catch (IOException ioe2) {
