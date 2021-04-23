@@ -1,8 +1,7 @@
-package generator;
+package processor;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
-import graql.lang.pattern.variable.ThingVariable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,11 +27,11 @@ public class AppendAttributeGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTestA() throws Exception {
-        AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-twitter"), genConf.get("processors").get(5), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-twitter"), genConf.get("processors").get(5), 0);
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
+        ProcessorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+7 171 898 0853\";";
@@ -102,11 +101,11 @@ public class AppendAttributeGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTestB() throws Exception {
-        AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-pp-fakebook"), genConf.get("processors").get(7), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-pp-fakebook"), genConf.get("processors").get(7), 0);
         ArrayList<String> rows = getData(datafileB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
+        ProcessorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+36 318 105 5629\";";
@@ -156,11 +155,11 @@ public class AppendAttributeGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTestC() throws Exception {
-        AppendAttributeGenerator testGenerator = new AppendAttributeGenerator(migrationConfig.getDataConfig().get("append-call-rating"), genConf.get("processors").get(6), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-call-rating"), genConf.get("processors").get(6), 0);
         ArrayList<String> rows = getData(datafileC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
+        ProcessorStatement results = testGenerator.graknAppendAttributeInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa call, has started-at 2018-09-19T01:00:38;";

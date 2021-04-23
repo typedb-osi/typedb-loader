@@ -1,8 +1,8 @@
-package migrator;
+package configuration;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
-import generator.InsertGenerator;
+import processor.InsertProcessor;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
@@ -11,7 +11,6 @@ import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,16 +22,16 @@ public class EntryMigrationConfig {
     private final int dataPathIndex;
     private final String migrationStatusKey;
     private final Integer migratedRows;
-    private final InsertGenerator insertGenerator;
+    private final InsertProcessor insertProcessor;
     private final String schemaTypeKey;
 
-    public EntryMigrationConfig(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertGenerator insertGenerator, GraknInserter graknInserter) {
+    public EntryMigrationConfig(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertProcessor insertProcessor, GraknInserter graknInserter) {
         this.dce = dce;
         this.pce = pce;
         this.dataPathIndex = dataPathIndex;
         this.migrationStatusKey = migrationStatusKey;
         this.migratedRows = migratedRows;
-        this.insertGenerator = insertGenerator;
+        this.insertProcessor = insertProcessor;
         this.schemaTypeKey = getSchemaTypeKey(pce.getSchemaType(), graknInserter);
     }
 
@@ -56,8 +55,8 @@ public class EntryMigrationConfig {
         return migratedRows;
     }
 
-    public InsertGenerator getInsertGenerator() {
-        return insertGenerator;
+    public InsertProcessor getInsertGenerator() {
+        return insertProcessor;
     }
 
     private String getSchemaTypeKey(String schemaType, GraknInserter graknInserter) {

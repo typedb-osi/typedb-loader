@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -17,9 +17,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import static generator.GeneratorUtil.*;
+import static processor.ProcessorUtil.*;
 
-public class RelationInsertGenerator extends InsertGenerator {
+public class RelationInsertProcessor extends InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -27,7 +27,7 @@ public class RelationInsertGenerator extends InsertGenerator {
     public final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public RelationInsertGenerator(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
+    public RelationInsertProcessor(DataConfigEntry dce, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dce;
         this.pce = processorConfigEntry;
@@ -35,23 +35,23 @@ public class RelationInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public GeneratorStatement graknRelationInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
-        GeneratorStatement generatorStatement = new GeneratorStatement();
+    public ProcessorStatement graknRelationInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
+        ProcessorStatement processorStatement = new ProcessorStatement();
 
         int batchCounter = 1;
         for (String row : rows) {
-            GeneratorStatement.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
-            generatorStatement.getMatchInserts().add(tmp);
+            ProcessorStatement.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
+            processorStatement.getMatchInserts().add(tmp);
             batchCounter = batchCounter + 1;
         }
-        return generatorStatement;
+        return processorStatement;
     }
 
-    public GeneratorStatement.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
+    public ProcessorStatement.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
-        GeneratorUtil.malformedRow(row, rowTokens, columnNames.length);
+        ProcessorUtil.malformedRow(row, rowTokens, columnNames.length);
 
         ArrayList<ThingVariable<?>> miStatements = new ArrayList<>(createPlayerMatchAndInsert(rowTokens, columnNames, rowCounter));
 
@@ -70,18 +70,18 @@ public class RelationInsertGenerator extends InsertGenerator {
 
                 if (isValid(matchStatements, assembledInsertStatement)) {
                     appLogger.debug("valid query: <" + assembleQuery(matchStatements, assembledInsertStatement) + ">");
-                    return new GeneratorStatement.MatchInsert(matchStatements, assembledInsertStatement);
+                    return new ProcessorStatement.MatchInsert(matchStatements, assembledInsertStatement);
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                    return new GeneratorStatement.MatchInsert(null, null);
+                    return new ProcessorStatement.MatchInsert(null, null);
                 }
             } else {
                 dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                return new GeneratorStatement.MatchInsert(null, null);
+                return new ProcessorStatement.MatchInsert(null, null);
             }
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c empty.");
-            return new GeneratorStatement.MatchInsert(null, null);
+            return new ProcessorStatement.MatchInsert(null, null);
         }
     }
 

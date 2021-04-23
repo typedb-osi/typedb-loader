@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
@@ -13,7 +13,7 @@ import static test.TestUtil.concatMatches;
 import static test.TestUtil.getData;
 import static util.Util.getAbsPath;
 
-public class AppendOrInsertGeneratorTest {
+public class AppendOrInsertProcessorTest {
 
     private final String db = "grakn_migrator_test";
     private final String schema = getAbsPath("src/test/resources/phone-calls/schema-updated.gql");
@@ -25,11 +25,11 @@ public class AppendOrInsertGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTest() throws Exception {
-        AppendOrInsertGenerator testGenerator = new AppendOrInsertGenerator(migrationConfig.getDataConfig().get("person-insert-or-append"), genConf.get("processors").get(10), 0);
+        AppendOrInsertProcessor testGenerator = new AppendOrInsertProcessor(migrationConfig.getDataConfig().get("person-insert-or-append"), genConf.get("processors").get(10), 0);
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testGenerator.graknAppendOrInsertInsert(rows, header, 1);
+        ProcessorStatement results = testGenerator.graknAppendOrInsertInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+7 171 898 0853\";";

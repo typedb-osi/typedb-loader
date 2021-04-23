@@ -1,4 +1,4 @@
-package migrator;
+package schema;
 
 import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
@@ -8,8 +8,10 @@ import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
+import migrator.GraknMigrator;
 import org.junit.Assert;
 import org.junit.Test;
+import schema.SchemaUpdater;
 
 import java.io.IOException;
 

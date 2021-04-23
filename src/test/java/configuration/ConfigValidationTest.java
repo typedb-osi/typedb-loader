@@ -1,5 +1,6 @@
-package migrator;
+package configuration;
 
+import configuration.ConfigValidation;
 import configuration.MigrationConfig;
 import insert.GraknInserter;
 import org.junit.Assert;

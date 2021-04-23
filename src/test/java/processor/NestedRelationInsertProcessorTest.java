@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
@@ -13,7 +13,7 @@ import static test.TestUtil.concatMatches;
 import static test.TestUtil.getData;
 import static util.Util.getAbsPath;
 
-public class NestedRelationInsertGeneratorTest {
+public class NestedRelationInsertProcessorTest {
 
     private final String dc = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
     private final String pc = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
@@ -24,11 +24,11 @@ public class NestedRelationInsertGeneratorTest {
 
     @Test
     public void graknNestedRelationQueryFromRowTest() throws Exception {
-        RelationInsertGenerator testRelationInsertGenerator = new NestedRelationInsertGenerator(migrationConfig.getDataConfig().get("communication-channel"), gc.get("processors").get(4), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(migrationConfig.getDataConfig().get("communication-channel"), gc.get("processors").get(4), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$person-0 isa person, has phone-number \"+54 398 559 0423\";$person-1 isa person, has phone-number \"+48 195 624 2025\";$call-2 isa call, has started-at 2018-09-16T22:24:19;";
@@ -100,11 +100,11 @@ public class NestedRelationInsertGeneratorTest {
 
     @Test
     public void graknNestedRelationQueryFromRowPMTest() throws Exception {
-        RelationInsertGenerator testRelationInsertGenerator = new NestedRelationInsertGenerator(migrationConfig.getDataConfig().get("communication-channel-pm"), gc.get("processors").get(4), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(migrationConfig.getDataConfig().get("communication-channel-pm"), gc.get("processors").get(4), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         int idx = 0;
 //        String tmp = "$relplayer-player-0 isa person, has phone-number \"+81 308 988 7153\";$relplayer-player-1 isa person, has phone-number \"+351 515 605 7915\";$call-2 (caller: $relplayer-player-0, callee: $relplayer-player-1) isa call;";

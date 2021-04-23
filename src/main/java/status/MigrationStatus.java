@@ -1,4 +1,4 @@
-package configuration;
+package status;
 
 
 public class MigrationStatus {

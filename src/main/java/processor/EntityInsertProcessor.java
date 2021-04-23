@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import static generator.GeneratorUtil.*;
+import static processor.ProcessorUtil.*;
 
-public class EntityInsertGenerator extends InsertGenerator {
+public class EntityInsertProcessor extends InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -23,7 +23,7 @@ public class EntityInsertGenerator extends InsertGenerator {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public EntityInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
+    public EntityInsertProcessor(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dataConfigEntry;
         this.pce = processorConfigEntry;
@@ -31,21 +31,21 @@ public class EntityInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating EntityInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public GeneratorStatement graknEntityInsert(ArrayList<String> rows,
+    public ProcessorStatement graknEntityInsert(ArrayList<String> rows,
                                                 String header,
                                                 int rowCounter) throws IllegalArgumentException {
-        GeneratorStatement generatorStatement = new GeneratorStatement();
+        ProcessorStatement processorStatement = new ProcessorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {
                 ThingVariable<?> temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
-                generatorStatement.getInserts().add(temp);
+                processorStatement.getInserts().add(temp);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             batchCount = batchCount + 1;
         }
-        return generatorStatement;
+        return processorStatement;
     }
 
     public ThingVariable<?> graknEntityQueryFromRow(String row,

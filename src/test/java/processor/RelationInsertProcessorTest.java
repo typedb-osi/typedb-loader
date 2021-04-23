@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
@@ -13,7 +13,7 @@ import static test.TestUtil.concatMatches;
 import static test.TestUtil.getData;
 import static util.Util.getAbsPath;
 
-public class RelationInsertGeneratorTest {
+public class RelationInsertProcessorTest {
 
     private final String dc = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
     private final String dcPC = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
@@ -29,11 +29,11 @@ public class RelationInsertGeneratorTest {
 
     @Test
     public void graknRelationQueryFromRowTest() throws Exception {
-        RelationInsertGenerator testRelationInsertGenerator = new RelationInsertGenerator(migrationConfigA.getDataConfig().get("rel1"), gcA.get("processors").get(3), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigA.getDataConfig().get("rel1"), gcA.get("processors").get(3), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$entity1-0 isa entity1, has entity1-id \"entity1id1\";$entity2-1 isa entity2, has entity2-id \"entity2id1\";$entity3-2 isa entity3, has entity3-id \"entity3id1\";";
@@ -283,11 +283,11 @@ public class RelationInsertGeneratorTest {
 
     @Test
     public void graknRelationQueryFromRowCallTest() throws Exception {
-        RelationInsertGenerator testRelationInsertGenerator = new RelationInsertGenerator(migrationConfigB.getDataConfig().get("calls"), gcB.get("processors").get(3), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigB.getDataConfig().get("calls"), gcB.get("processors").get(3), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         int idx = 113;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
@@ -341,11 +341,11 @@ public class RelationInsertGeneratorTest {
 
     @Test
     public void graknRelationQueryFromRowContractTest() throws Exception {
-        RelationInsertGenerator testRelationInsertGenerator = new RelationInsertGenerator(migrationConfigB.getDataConfig().get("contract"), gcB.get("processors").get(2), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigB.getDataConfig().get("contract"), gcB.get("processors").get(2), 0);
         ArrayList<String> rows = getData(dataC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$company-0 isa company, has name \"Telecom\";$person-1 isa person, has phone-number \"+7 171 898 0853\";";

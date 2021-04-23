@@ -1,7 +1,8 @@
-package migrator;
+package configuration;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
+import processor.ProcessorTypes;
 
 import java.util.ArrayList;
 import java.util.HashMap;

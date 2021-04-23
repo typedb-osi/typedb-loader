@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.MigrationConfig;
 import configuration.ProcessorConfigEntry;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import static test.TestUtil.getData;
 import static util.Util.getAbsPath;
 
-public class EntityInsertGeneratorTest {
+public class EntityInsertProcessorTest {
 
     private final String db = "grakn_migrator_test";
     private final String schema = getAbsPath("src/test/resources/genericTests/schema-test.gql");
@@ -32,11 +32,11 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowTest() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa entity1, has entity1-id \"entity1id0\", has entity1-name \"entity1name0\", has entity1-exp \"entity1id0exp0\"";
@@ -134,11 +134,11 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowWithBoolAndDoubleTest() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa entity2, has entity2-id \"entity2id0\", has entity2-bool true, has entity2-double 0.0";
@@ -200,12 +200,12 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowWithLongTest() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2), 0);
         ArrayList<String> rows = getData(dataC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
         int idx = 0;
         String tmp = "$e isa entity3, has entity3-id \"entity3id0\", has entity3-int 0";
         Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
@@ -266,11 +266,11 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowPhoneCallsPerson() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfigPC.getDataConfig().get("person"), genConfPC.get("processors").get(0), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfigPC.getDataConfig().get("person"), genConfPC.get("processors").get(0), 0);
         ArrayList<String> rows = getData(dataD);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has first-name \"Melli\", has last-name \"Winchcum\", has phone-number \"+7 171 898 0853\", has city \"London\", has age 55";
@@ -426,11 +426,11 @@ public class EntityInsertGeneratorTest {
 
     @Test
     public void graknEntityQueryFromRowPhoneCallsCompany() {
-        EntityInsertGenerator testEntityInsertGenerator = new EntityInsertGenerator(migrationConfigPC.getDataConfig().get("company"), genConfPC.get("processors").get(1), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfigPC.getDataConfig().get("company"), genConfPC.get("processors").get(1), 0);
         ArrayList<String> rows = getData(dataE);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        GeneratorStatement results = testEntityInsertGenerator.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa company, has name \"Telecom\"";

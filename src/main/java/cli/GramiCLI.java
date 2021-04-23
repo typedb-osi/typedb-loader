@@ -3,7 +3,7 @@ package cli;
 import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
 import migrator.GraknMigrator;
-import migrator.SchemaUpdater;
+import schema.SchemaUpdater;
 import picocli.CommandLine;
 
 import java.io.IOException;

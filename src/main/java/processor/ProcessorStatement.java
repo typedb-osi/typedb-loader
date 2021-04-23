@@ -1,14 +1,14 @@
-package generator;
+package processor;
 
 import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.ArrayList;
 
-public class GeneratorStatement {
+public class ProcessorStatement {
     private final ArrayList<MatchInsert> matchInserts;
     private final ArrayList<ThingVariable<?>> inserts;
 
-    public GeneratorStatement() {
+    public ProcessorStatement() {
         this.matchInserts = new ArrayList<>();
         this.inserts = new ArrayList<>();
     }

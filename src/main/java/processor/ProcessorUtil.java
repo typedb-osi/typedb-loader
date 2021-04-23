@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class GeneratorUtil {
+public class ProcessorUtil {
 
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");

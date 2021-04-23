@@ -1,4 +1,4 @@
-package migrator;
+package schema;
 
 import configuration.SchemaUpdateConfig;
 import grakn.client.api.GraknClient;

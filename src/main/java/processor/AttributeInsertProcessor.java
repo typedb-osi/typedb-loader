@@ -1,4 +1,4 @@
-package generator;
+package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static generator.GeneratorUtil.*;
+import static processor.ProcessorUtil.*;
 
-public class AttributeInsertGenerator extends InsertGenerator {
+public class AttributeInsertProcessor extends InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -23,7 +23,7 @@ public class AttributeInsertGenerator extends InsertGenerator {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public AttributeInsertGenerator(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
+    public AttributeInsertProcessor(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
         super();
         this.dce = dataConfigEntry;
         this.pce = processorConfigEntry;
@@ -31,9 +31,9 @@ public class AttributeInsertGenerator extends InsertGenerator {
         appLogger.debug("Creating AttributeInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public GeneratorStatement graknAttributeInsert(ArrayList<String> rows,
+    public ProcessorStatement graknAttributeInsert(ArrayList<String> rows,
                                                    String header, int rowCounter) throws IllegalArgumentException {
-        GeneratorStatement statements = new GeneratorStatement();
+        ProcessorStatement statements = new ProcessorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {

@@ -1,4 +1,4 @@
-package migrator;
+package processor;
 
 public enum ProcessorTypes {
     entity,

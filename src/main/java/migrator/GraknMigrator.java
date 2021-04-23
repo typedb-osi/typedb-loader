@@ -2,17 +2,15 @@ package migrator;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import configuration.DataConfigEntry;
-import configuration.MigrationConfig;
-import configuration.MigrationStatus;
-import configuration.ProcessorConfigEntry;
-import generator.*;
+import configuration.*;
+import processor.*;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import insert.GraknInserter;
 import loader.DataLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import status.MigrationStatus;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -331,29 +329,29 @@ public class GraknMigrator {
         int threads = conf.getDce().getThreads();
         try {
             if (isOfProcessorType(conf.getDce().getProcessor(), "entity")) {
-                GeneratorStatement insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
+                ProcessorStatement insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + insertStatements.getInserts().size());
                 graknInserter.insertThreadedInserting(insertStatements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "nested-relation") ||
                     isOfProcessorType(conf.getDce().getProcessor(), "attribute-relation")) {
-                GeneratorStatement statements = conf.getInsertGenerator().graknRelationInsert(rows, header, rowCounter - lineCounter);
+                ProcessorStatement statements = conf.getInsertGenerator().graknRelationInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "append-or-insert")) {
-                GeneratorStatement statements = conf.getInsertGenerator().graknAppendOrInsertInsert(rows, header, rowCounter - lineCounter);
+                ProcessorStatement statements = conf.getInsertGenerator().graknAppendOrInsertInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "append-attribute")) {
-                GeneratorStatement statements = conf.getInsertGenerator().graknAppendAttributeInsert(rows, header, rowCounter - lineCounter);
+                ProcessorStatement statements = conf.getInsertGenerator().graknAppendAttributeInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
                 graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
 
             } else if (isOfProcessorType(conf.getDce().getProcessor(), "attribute")) {
-                GeneratorStatement statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
+                ProcessorStatement statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
                 appLogger.trace("number of generated insert Statements: " + statements.getInserts().size());
                 graknInserter.insertThreadedInserting(statements.getInserts(), session, threads, conf.getDce().getBatchSize(), conf);
             } else {
@@ -422,30 +420,30 @@ public class GraknMigrator {
         }
     }
 
-    private InsertGenerator getProcessor(DataConfigEntry dce, int dataPathIndex) {
+    private InsertProcessor getProcessor(DataConfigEntry dce, int dataPathIndex) {
         ProcessorConfigEntry gce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getProcessorConfig());
 
         if (gce != null) {
             switch (gce.getProcessorType()) {
                 case "entity":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new EntityInsertGenerator(dce, gce, dataPathIndex);
+                    return new EntityInsertProcessor(dce, gce, dataPathIndex);
                 case "relation":
                 case "attribute-relation":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new RelationInsertGenerator(dce, gce, dataPathIndex);
+                    return new RelationInsertProcessor(dce, gce, dataPathIndex);
                 case "nested-relation":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new NestedRelationInsertGenerator(dce, gce, dataPathIndex);
+                    return new NestedRelationInsertProcessor(dce, gce, dataPathIndex);
                 case "append-attribute":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new AppendAttributeGenerator(dce, gce, dataPathIndex);
+                    return new AppendAttributeProcessor(dce, gce, dataPathIndex);
                 case "attribute":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new AttributeInsertGenerator(dce, gce, dataPathIndex);
+                    return new AttributeInsertProcessor(dce, gce, dataPathIndex);
                 case "append-or-insert":
                     appLogger.debug("selected generator: " + gce.getProcessor() + " of type: " + gce.getProcessorType() + " based on dataConfig.generator: " + dce.getProcessor());
-                    return new AppendOrInsertGenerator(dce, gce, dataPathIndex);
+                    return new AppendOrInsertProcessor(dce, gce, dataPathIndex);
                 default:
                     throw new IllegalArgumentException(String.format("Invalid/No generator provided for: %s", dce.getProcessor()));
             }

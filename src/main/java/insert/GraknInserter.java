@@ -1,6 +1,6 @@
 package insert;
 
-import generator.GeneratorStatement;
+import processor.ProcessorStatement;
 import grakn.client.Grakn;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
@@ -10,7 +10,7 @@ import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
-import migrator.EntryMigrationConfig;
+import configuration.EntryMigrationConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 import static util.Util.loadSchemaFromFile;
 
 public class GraknInserter {
+
+    //TODO replace sout with proper logging
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private final String schemaPath;
@@ -59,7 +61,7 @@ public class GraknInserter {
         appLogger.info("Defined schema to database <" + databaseName + ">");
     }
 
-    public void matchInsertThreadedInserting(GeneratorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void matchInsertThreadedInserting(ProcessorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -124,7 +126,7 @@ public class GraknInserter {
         }
     }
 
-    public void appendOrInsertThreadedInserting(GeneratorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void appendOrInsertThreadedInserting(ProcessorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
