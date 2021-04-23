@@ -2,6 +2,7 @@ package configuration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import processor.ProcessorType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +26,12 @@ public class ProcessorConfigEntry {
         return processor;
     }
 
-    public String getProcessorType() {
-        return processorType;
+    public ProcessorType getProcessorType() {
+        try {
+            return ProcessorType.valueOf(processorType.toUpperCase().replaceAll("-", "_"));
+        } catch (IllegalArgumentException illegalArgumentException) {
+            return ProcessorType.INVALID;
+        }
     }
 
     public String getSchemaType() {
@@ -81,7 +86,7 @@ public class ProcessorConfigEntry {
 
     public HashMap<String, ConceptGenerator> getRelationRequiredPlayers() {
         HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation") || processorType.equals("nested-relation") || processorType.equals("attribute-relation")) {
+        if (processorType.equals(ProcessorType.RELATION.toString()) || processorType.equals(ProcessorType.NESTED_RELATION.toString()) || processorType.equals(ProcessorType.ATTRIBUTE_RELATION.toString())) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
             for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
                 if (pg.getValue().isRequired()) {
@@ -102,7 +107,7 @@ public class ProcessorConfigEntry {
 
     public HashMap<String, ConceptGenerator> getRelationPlayers() {
         HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
-        if (processorType.equals("relation")) {
+        if (processorType.equals(ProcessorType.RELATION.toString())) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
             for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
                 relationPlayers.put(pg.getKey(), pg.getValue());

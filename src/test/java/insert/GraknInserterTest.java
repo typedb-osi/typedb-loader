@@ -118,7 +118,7 @@ public class GraknInserterTest {
         singleThreadStatements.add(null);
         singleThreadStatements.add(var("person").isa("person").has("first-name", "second-first-name").has("phone-number", "+47 1234 1234 2"));
         singleThreadStatements.add(null);
-        pcgi.insertThreadedInserting(singleThreadStatements, dataSession, 1, 1, null);
+        pcgi.insertThreadedInserting(singleThreadStatements, dataSession, 1, 1);
 
         ArrayList<ThingVariable<?>> multiThreadStatements = new ArrayList<>();
         multiThreadStatements.add(null);
@@ -126,10 +126,10 @@ public class GraknInserterTest {
         multiThreadStatements.add(null);
         multiThreadStatements.add(var("person").isa("person").has("first-name", "second-first-name-mt").has("phone-number", "+47 1234 1234 4"));
         multiThreadStatements.add(null);
-        pcgi.insertThreadedInserting(multiThreadStatements, dataSession, 4, 1, null);
+        pcgi.insertThreadedInserting(multiThreadStatements, dataSession, 4, 1);
 
-        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 1, 1, null);
-        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 4, 1, null);
+        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 1, 1);
+        pcgi.insertThreadedInserting(new ArrayList<>(), dataSession, 4, 1);
 
         GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
 

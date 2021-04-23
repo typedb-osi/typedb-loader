@@ -1,5 +1,7 @@
 package configuration;
 
+import processor.ProcessorType;
+
 import java.util.ArrayList;
 
 public class DataConfigEntry {

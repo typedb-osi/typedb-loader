@@ -2,6 +2,7 @@ package configuration;
 
 import org.junit.Assert;
 import org.junit.Test;
+import processor.ProcessorType;
 
 import static util.Util.getAbsPath;
 
@@ -26,7 +27,7 @@ public class MigrationConfigTest {
 
         // generatorconfig tests
         Assert.assertEquals("entity1", mg.getProcessorConfig().get("processors").get(0).getProcessor());
-        Assert.assertEquals("entity", mg.getProcessorConfig().get("processors").get(0).getProcessorType());
+        Assert.assertEquals(ProcessorType.ENTITY, mg.getProcessorConfig().get("processors").get(0).getProcessorType());
         Assert.assertEquals("entity1", mg.getProcessorConfig().get("processors").get(0).getSchemaType());
         Assert.assertEquals(3, mg.getProcessorConfig().get("processors").get(0).getAttributes().size());
         Assert.assertEquals("entity1-id", mg.getProcessorConfig().get("processors").get(0).getAttributeGenerator("entity1-id").getAttributeType());

@@ -1,6 +1,6 @@
 package configuration;
 
-import processor.ProcessorTypes;
+import processor.ProcessorType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,9 +122,9 @@ public class ConfigValidation {
 //
 //    }
 
-    private static String processorTypeExists(String processorType) {
-        for (ProcessorTypes proctype : ProcessorTypes.values()) {
-            if (proctype.toString().equals(processorType)) {
+    private static String processorTypeExists(ProcessorType processorType) {
+        for (ProcessorType existingProcessorType : ProcessorType.values()) {
+            if (processorType.equals(existingProcessorType) && !processorType.equals(ProcessorType.INVALID)) {
                 return "";
             }
         }
