@@ -208,17 +208,20 @@ public class RelationInsertProcessor extends InsertProcessor {
                         }
                     }
 
-                    int maxColumnIndex = Arrays.stream(columnNameIndices).max().getAsInt();
-                    if (rowTokens.length > maxColumnIndex) {
-//                        String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
-                        String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
-                        String playerRole = playerGenerator.getRoleType();
-                        players.addAll(createRelationPlayerMatchStatementByPlayers(rowTokens, rowCounter, columnNameIndices, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
-                        ArrayList<String> rel = new ArrayList<>();
-                        rel.add(playerRole);
-                        rel.add(playerVariable);
-                        relationStrings.add(rel);
-                        playerCounter++;
+                    if (Arrays.stream(columnNameIndices).max().isPresent()) {
+                        int maxColumnIndex = Arrays.stream(columnNameIndices).max().getAsInt();
+                        if (rowTokens.length > maxColumnIndex) {
+                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
+                            String playerRole = playerGenerator.getRoleType();
+                            players.addAll(createRelationPlayerMatchStatementByPlayers(rowTokens, rowCounter, columnNameIndices, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
+                            ArrayList<String> rel = new ArrayList<>();
+                            rel.add(playerRole);
+                            rel.add(playerVariable);
+                            relationStrings.add(rel);
+                            playerCounter++;
+                        }
+                    } else {
+                        appLogger.error("ColumnNameIndices are empty - this should NEVER happen, please report bug on github...");
                     }
                 } else {
                     appLogger.error("Your config entry for column header: " + generatorMappingForRelationPlayer.getColumnName() + "needs to specify matching either by player/s or by an attribute");

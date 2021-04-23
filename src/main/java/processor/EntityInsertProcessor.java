@@ -49,8 +49,8 @@ public class EntityInsertProcessor extends InsertProcessor {
     }
 
     public ThingVariable<?> graknEntityQueryFromRow(String row,
-                                                 String header,
-                                                 int rowCounter) throws Exception {
+                                                    String header,
+                                                    int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));

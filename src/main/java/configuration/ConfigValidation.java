@@ -1,7 +1,5 @@
 package configuration;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
 import processor.ProcessorTypes;
 
 import java.util.ArrayList;
@@ -22,14 +20,14 @@ public class ConfigValidation {
 
         ArrayList<String> errors = new ArrayList<>();
 
-        for (Map.Entry<String, ArrayList<ProcessorConfigEntry>> entry: procConfig.entrySet()) {
+        for (Map.Entry<String, ArrayList<ProcessorConfigEntry>> entry : procConfig.entrySet()) {
             ArrayList<ProcessorConfigEntry> processors = entry.getValue();
             int processorIndex = 0;
             for (ProcessorConfigEntry processor : processors) {
                 String curError;
 
                 String processorName = processor.getProcessor();
-                if(processorName.isEmpty()) {
+                if (processorName.isEmpty()) {
                     errors.add("ProcessorConfigEntry at index " + processorIndex + " has an empty \"processor\" field");
                 }
 
@@ -125,7 +123,7 @@ public class ConfigValidation {
 //    }
 
     private static String processorTypeExists(String processorType) {
-        for (ProcessorTypes proctype: ProcessorTypes.values()) {
+        for (ProcessorTypes proctype : ProcessorTypes.values()) {
             if (proctype.toString().equals(processorType)) {
                 return "";
             }

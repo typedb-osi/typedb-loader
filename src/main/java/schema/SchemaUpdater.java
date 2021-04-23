@@ -8,8 +8,8 @@ import org.apache.logging.log4j.Logger;
 
 public class SchemaUpdater {
 
-    private final GraknInserter gm;
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
+    private final GraknInserter gm;
 
     public SchemaUpdater(SchemaUpdateConfig suConfig) {
         this.gm = new GraknInserter(suConfig.getGraknURI().split(":")[0],

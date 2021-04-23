@@ -115,13 +115,12 @@ public class AppendOrInsertProcessor extends InsertProcessor {
     }
 
     private boolean validateDataConfigEntry() {
-        boolean containsMatchAttribute = false;
         for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getAttributes()) {
             if (attributeMapping.isMatch()) {
-                containsMatchAttribute = true;
+                return true;
             }
         }
-        return containsMatchAttribute;
+        return false;
     }
 
     private Thing addEntityToMatchPattern() {
@@ -177,7 +176,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         return true;
     }
 
-    private boolean isValid(ThingVariable<?> insertStatement){
+    private boolean isValid(ThingVariable<?> insertStatement) {
         // missing required insert attribute
         if (insertStatement == null) return false;
         for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {

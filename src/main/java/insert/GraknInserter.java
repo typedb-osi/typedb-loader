@@ -1,6 +1,5 @@
 package insert;
 
-import processor.ProcessorStatement;
 import grakn.client.Grakn;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
@@ -10,9 +9,9 @@ import graql.lang.Graql;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
-import configuration.EntryMigrationConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import processor.ProcessorStatement;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -95,7 +94,7 @@ public class GraknInserter {
         }
     }
 
-    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, GraknSession session, int threads, int batchSize, EntryMigrationConfig conf) throws InterruptedException {
+    public void insertThreadedInserting(ArrayList<ThingVariable<?>> statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -145,18 +144,18 @@ public class GraknInserter {
                                     if (directInsert != null) {
                                         GraqlInsert query = Graql.insert(directInsert);
                                         tx.query().insert(query);
-                                        System.out.println("Direct Insert finished because getMatches is null: " + query.toString());
+                                        System.out.println("Direct Insert finished because getMatches is null: " + query);
                                     }
                                 } else {
                                     // else try to insert match-insert - if the result is 0, do direct insert
-                                    if(matchInsertMatches != null && matchInsertInsert != null) {
+                                    if (matchInsertMatches != null && matchInsertInsert != null) {
                                         GraqlInsert query = Graql.match(matchInsertMatches).insert(matchInsertInsert);
                                         final Stream<ConceptMap> insertedStream = tx.query().insert(query);
                                         if (insertedStream.count() == 0) {
                                             if (directInsert != null) {
                                                 query = Graql.insert(directInsert);
                                                 tx.query().insert(query);
-                                                System.out.println("Failed match insert query. Inserted using direct insert: " + query.toString());
+                                                System.out.println("Failed match insert query. Inserted using direct insert: " + query);
                                             }
                                         } else {
                                             System.out.println("Inserted using match insert query. Query was: " + query.toString());

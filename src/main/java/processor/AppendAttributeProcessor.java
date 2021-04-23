@@ -134,7 +134,8 @@ public class AppendAttributeProcessor extends InsertProcessor {
         for (ThingVariable<?> st : matchStatements) {
             ret.append(st.toString());
         }
-        if (insertStatement != null) ret.append(insertStatement.toString()); else ret.append("matchInsertStatement is null");
+        if (insertStatement != null) ret.append(insertStatement);
+        else ret.append("matchInsertStatement is null");
         return ret.toString();
     }
 

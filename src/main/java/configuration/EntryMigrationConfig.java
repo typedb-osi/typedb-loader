@@ -1,8 +1,5 @@
 package configuration;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
-import processor.InsertProcessor;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
@@ -10,6 +7,7 @@ import grakn.client.api.concept.type.AttributeType;
 import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
 import insert.GraknInserter;
+import processor.InsertProcessor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +33,9 @@ public class EntryMigrationConfig {
         this.schemaTypeKey = getSchemaTypeKey(pce.getSchemaType(), graknInserter);
     }
 
-    public String getSchemaTypeKey() { return schemaTypeKey; }
+    public String getSchemaTypeKey() {
+        return schemaTypeKey;
+    }
 
     public DataConfigEntry getDce() {
         return dce;
@@ -45,7 +45,9 @@ public class EntryMigrationConfig {
         return pce;
     }
 
-    public int getDataPathIndex() { return dataPathIndex; }
+    public int getDataPathIndex() {
+        return dataPathIndex;
+    }
 
     public String getMigrationStatusKey() {
         return migrationStatusKey;
@@ -66,14 +68,12 @@ public class EntryMigrationConfig {
         GraknTransaction tx = session.transaction(GraknTransaction.Type.READ);
 
         GraqlMatch getQuery = Graql.match(var("st").type(schemaType)).get("st").limit(1000);
-        tx.query().match(getQuery).forEach( answers -> {
-            answers.concepts().forEach(entry -> {
-                List<AttributeType> keys = entry.asRemote(tx).asThingType().getOwns(true).collect(Collectors.toList());
-                if (keys.size() > 0) {
-                    key[0] = keys.get(0).getLabel().name();
-                }
-            });
-        });
+        tx.query().match(getQuery).forEach(answers -> answers.concepts().forEach(entry -> {
+            List<AttributeType> keys = entry.asRemote(tx).asThingType().getOwns(true).collect(Collectors.toList());
+            if (keys.size() > 0) {
+                key[0] = keys.get(0).getLabel().name();
+            }
+        }));
         tx.close();
 
         session.close();

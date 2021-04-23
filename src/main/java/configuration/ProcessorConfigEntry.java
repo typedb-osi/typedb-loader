@@ -1,4 +1,5 @@
 package configuration;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,6 +33,10 @@ public class ProcessorConfigEntry {
         return schemaType;
     }
 
+    public void setSchemaType(String schemaType) {
+        this.schemaType = schemaType;
+    }
+
     public String getReferenceProcessor() {
         return referenceProcessor;
     }
@@ -40,16 +45,12 @@ public class ProcessorConfigEntry {
         return conceptGenerators;
     }
 
-    public void setSchemaType(String schemaType) {
-        this.schemaType = schemaType;
-    }
-
     public void setConceptGenerators(HashMap<String, HashMap<String, ConceptGenerator>> conceptGenerators) {
         this.conceptGenerators = conceptGenerators;
     }
 
     public ConceptGenerator getAttributeGenerator(String key) {
-        if(getConceptGenerators().get("attributes") == null) {
+        if (getConceptGenerators().get("attributes") == null) {
             throw new RuntimeException("You have specified the attribute [" + key + "] in your dataConfig file - but there are no attributeGenerators specified in the corresponding processor.");
         }
         for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("attributes").entrySet()) {
@@ -78,18 +79,18 @@ public class ProcessorConfigEntry {
         throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
     }
 
-    public HashMap<String,ConceptGenerator> getRelationRequiredPlayers() {
-        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
+    public HashMap<String, ConceptGenerator> getRelationRequiredPlayers() {
+        HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
         if (processorType.equals("relation") || processorType.equals("nested-relation") || processorType.equals("attribute-relation")) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
-            for (Map.Entry<String, ConceptGenerator> pg: playerGenerators.entrySet()) {
+            for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
                 if (pg.getValue().isRequired()) {
                     relationPlayers.put(pg.getKey(), pg.getValue());
                 }
             }
             if (getConceptGenerators().get("relationPlayers") != null) {
                 HashMap<String, ConceptGenerator> relationPlayerGenerators = getConceptGenerators().get("relationPlayers");
-                for (Map.Entry<String, ConceptGenerator> pg: relationPlayerGenerators.entrySet()) {
+                for (Map.Entry<String, ConceptGenerator> pg : relationPlayerGenerators.entrySet()) {
                     if (pg.getValue().isRequired()) {
                         relationPlayers.put(pg.getKey(), pg.getValue());
                     }
@@ -99,8 +100,8 @@ public class ProcessorConfigEntry {
         return relationPlayers;
     }
 
-    public HashMap<String,ConceptGenerator> getRelationPlayers() {
-        HashMap<String,ConceptGenerator> relationPlayers = new HashMap<>();
+    public HashMap<String, ConceptGenerator> getRelationPlayers() {
+        HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
         if (processorType.equals("relation")) {
             HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
             for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
@@ -110,20 +111,20 @@ public class ProcessorConfigEntry {
         return relationPlayers;
     }
 
-    public HashMap<String,ConceptGenerator> getAttributes() {
-        HashMap<String,ConceptGenerator> attributes = new HashMap<>();
+    public HashMap<String, ConceptGenerator> getAttributes() {
+        HashMap<String, ConceptGenerator> attributes = new HashMap<>();
         HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
-        for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
+        for (Map.Entry<String, ConceptGenerator> ag : attGenerators.entrySet()) {
             attributes.put(ag.getKey(), ag.getValue());
         }
         return attributes;
     }
 
-    public HashMap<String,ConceptGenerator> getRequiredAttributes() {
-        HashMap<String,ConceptGenerator> requiredAttributes = new HashMap<>();
+    public HashMap<String, ConceptGenerator> getRequiredAttributes() {
+        HashMap<String, ConceptGenerator> requiredAttributes = new HashMap<>();
         HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
         if (attGenerators != null) {
-            for (Map.Entry<String, ConceptGenerator> ag: attGenerators.entrySet()) {
+            for (Map.Entry<String, ConceptGenerator> ag : attGenerators.entrySet()) {
                 if (ag.getValue().isRequired()) {
                     requiredAttributes.put(ag.getKey(), ag.getValue());
                 }
@@ -179,7 +180,9 @@ public class ProcessorConfigEntry {
             return idValueType;
         }
 
-        public HashMap<String, MatchBy> getMatchByPlayer() { return matchByPlayer; }
+        public HashMap<String, MatchBy> getMatchByPlayer() {
+            return matchByPlayer;
+        }
 
         public HashMap<String, MatchBy> getMatchByAttribute() {
             return matchByAttribute;

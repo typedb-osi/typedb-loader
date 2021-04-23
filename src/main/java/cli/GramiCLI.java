@@ -3,12 +3,12 @@ package cli;
 import configuration.MigrationConfig;
 import configuration.SchemaUpdateConfig;
 import migrator.GraknMigrator;
-import schema.SchemaUpdater;
 import picocli.CommandLine;
+import schema.SchemaUpdater;
 
 import java.io.IOException;
 
-@CommandLine.Command(description="Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.1", mixinStandardHelpOptions = true)
+@CommandLine.Command(description = "Welcome to the CLI of GraMi - your grakn data migration tool", name = "grami", version = "0.1.1", mixinStandardHelpOptions = true)
 public class GramiCLI {
 
     public static void main(String[] args) {
@@ -23,7 +23,8 @@ public class GramiCLI {
 
 @CommandLine.Command(name = "migrate", description = "run a migration", mixinStandardHelpOptions = true)
 class MigrateCommand implements Runnable {
-    @CommandLine.Spec CommandLine.Model.CommandSpec spec;
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-dc", "--dataConfigFile"}, description = "data config file in JSON format", required = true)
     private String dataConfigFilePath;
@@ -71,7 +72,8 @@ class MigrateCommand implements Runnable {
 
 @CommandLine.Command(name = "schema-update", description = "update a schema using a .gql file", mixinStandardHelpOptions = true)
 class SchemaUpdateCommand implements Runnable {
-    @CommandLine.Spec CommandLine.Model.CommandSpec spec;
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
 
     @CommandLine.Option(names = {"-s", "--schemaFile"}, description = "your schema file as .gql", required = true)
     private String schemaFilePath;
