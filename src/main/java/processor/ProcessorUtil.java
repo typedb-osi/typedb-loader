@@ -28,7 +28,6 @@ public class ProcessorUtil {
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
     public static String[] tokenizeCSVStandard(String row, char fileSeparator) {
-        //TODO: allow for quote-based escaping + can escape actual quotes by double quotes (i.e. replace by \" for grakn)
         if (row != null && !row.isEmpty()) {
             try {
                 return parseCSVString(row, fileSeparator);
@@ -105,7 +104,7 @@ public class ProcessorUtil {
             if (columnNameIndex < tokens.length &&
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
-                String attributeValueType = attributeGenerator.getValueType();
+                AttributeValueType attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
                 att = addAttributeValueOfType(statement, attributeValueType, cleanedToken, lineNumber, preprocessorConfig);
             }
@@ -133,7 +132,7 @@ public class ProcessorUtil {
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
-                String attributeValueType = attributeGenerator.getValueType();
+                AttributeValueType attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
                 statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, lineNumber, columnListSeparator, preprocessorConfig);
             }
@@ -161,7 +160,7 @@ public class ProcessorUtil {
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
-                String attributeValueType = attributeGenerator.getValueType();
+                AttributeValueType attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
                 statement = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, lineNumber, preprocessorConfig);
             }
@@ -190,7 +189,7 @@ public class ProcessorUtil {
                     tokens[columnNameIndex] != null &&
                     !cleanToken(tokens[columnNameIndex]).isEmpty()) {
                 String attributeType = attributeGenerator.getAttributeType();
-                String attributeValueType = attributeGenerator.getValueType();
+                AttributeValueType attributeValueType = attributeGenerator.getValueType();
                 String cleanedToken = cleanToken(tokens[columnNameIndex]);
                 returnThing = cleanExplodeAdd(statement, cleanedToken, attributeType, attributeValueType, columnListSeparator, lineNumber, preprocessorConfig);
             }
@@ -201,7 +200,7 @@ public class ProcessorUtil {
     public static Thing cleanExplodeAdd(Thing statement,
                                         String cleanedToken,
                                         String conceptType,
-                                        String valueType,
+                                        AttributeValueType valueType,
                                         int lineNumber,
                                         String listSeparator,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -221,7 +220,7 @@ public class ProcessorUtil {
     public static Relation cleanExplodeAdd(Relation statement,
                                            String cleanedToken,
                                            String conceptType,
-                                           String valueType,
+                                           AttributeValueType valueType,
                                            String listSeparator,
                                            int lineNumber,
                                            DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -241,7 +240,7 @@ public class ProcessorUtil {
     public static Thing cleanExplodeAdd(UnboundVariable statement,
                                         String cleanedToken,
                                         String conceptType,
-                                        String valueType,
+                                        AttributeValueType valueType,
                                         String listSeparator,
                                         int lineNumber,
                                         DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -267,7 +266,7 @@ public class ProcessorUtil {
 
     public static Thing addAttributeOfColumnType(Thing statement,
                                                  String conceptType,
-                                                 String valueType,
+                                                 AttributeValueType valueType,
                                                  String cleanedValue,
                                                  int lineNumber,
                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -276,24 +275,24 @@ public class ProcessorUtil {
         }
 
         switch (valueType) {
-            case "string":
+            case STRING:
                 statement = statement.has(conceptType, cleanedValue);
                 break;
-            case "long":
+            case LONG:
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "double":
+            case DOUBLE:
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "boolean":
+            case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
                     statement = statement.has(conceptType, true);
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
@@ -302,7 +301,7 @@ public class ProcessorUtil {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
-            case "datetime":
+            case DATETIME:
                 try {
                     DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_DATE;
                     String[] dt = cleanedValue.split("T");
@@ -329,7 +328,7 @@ public class ProcessorUtil {
 
     public static Relation addAttributeOfColumnType(Relation statement,
                                                     String conceptType,
-                                                    String valueType,
+                                                    AttributeValueType valueType,
                                                     String cleanedValue,
                                                     int lineNumber,
                                                     DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -338,24 +337,24 @@ public class ProcessorUtil {
         }
 
         switch (valueType) {
-            case "string":
+            case STRING:
                 statement = statement.has(conceptType, cleanedValue);
                 break;
-            case "long":
+            case LONG:
                 try {
                     statement = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "double":
+            case DOUBLE:
                 try {
                     statement = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "boolean":
+            case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
                     statement = statement.has(conceptType, true);
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
@@ -364,7 +363,7 @@ public class ProcessorUtil {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
-            case "datetime":
+            case DATETIME:
                 try {
                     DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_DATE;
                     String[] dt = cleanedValue.split("T");
@@ -390,7 +389,7 @@ public class ProcessorUtil {
 
     public static Thing addAttributeOfColumnType(UnboundVariable statement,
                                                  String conceptType,
-                                                 String valueType,
+                                                 AttributeValueType valueType,
                                                  String cleanedValue,
                                                  int lineNumber,
                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -401,24 +400,24 @@ public class ProcessorUtil {
         Thing returnThing = null;
 
         switch (valueType) {
-            case "string":
+            case STRING:
                 returnThing = statement.has(conceptType, cleanedValue);
                 break;
-            case "long":
+            case LONG:
                 try {
                     returnThing = statement.has(conceptType, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "double":
+            case DOUBLE:
                 try {
                     returnThing = statement.has(conceptType, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, conceptType, numberFormatException.getMessage()));
                 }
                 break;
-            case "boolean":
+            case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
                     returnThing = statement.has(conceptType, true);
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
@@ -427,7 +426,7 @@ public class ProcessorUtil {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, conceptType));
                 }
                 break;
-            case "datetime":
+            case DATETIME:
                 try {
                     DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_DATE;
                     String[] dt = cleanedValue.split("T");
@@ -452,7 +451,7 @@ public class ProcessorUtil {
     }
 
     public static Attribute addAttributeValueOfType(UnboundVariable unboundVar,
-                                                    String valueType,
+                                                    AttributeValueType valueType,
                                                     String cleanedValue,
                                                     int lineNumber,
                                                     DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
@@ -462,24 +461,24 @@ public class ProcessorUtil {
         Attribute att = null;
 
         switch (valueType) {
-            case "string":
+            case STRING:
                 att = unboundVar.eq(cleanedValue);
                 break;
-            case "long":
+            case LONG:
                 try {
                     att = unboundVar.eq(Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <long> with non-<long> value - skipping column - < %s >", lineNumber, numberFormatException.getMessage()));
                 }
                 break;
-            case "double":
+            case DOUBLE:
                 try {
                     att = unboundVar.eq(Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <double> with non-<double> value - skipping column - < %s >", lineNumber, numberFormatException.getMessage()));
                 }
                 break;
-            case "boolean":
+            case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
                     att = unboundVar.eq(true);
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
@@ -488,7 +487,7 @@ public class ProcessorUtil {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> with non-<boolean> value - skipping column", lineNumber));
                 }
                 break;
-            case "datetime":
+            case DATETIME:
                 try {
                     DateTimeFormatter isoDateFormatter = DateTimeFormatter.ISO_DATE;
                     String[] dt = cleanedValue.split("T");

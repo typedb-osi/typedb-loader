@@ -2,6 +2,7 @@ package configuration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import processor.AttributeValueType;
 import processor.ProcessorType;
 
 import java.util.HashMap;
@@ -165,8 +166,8 @@ public class ProcessorConfigEntry {
             return attributeType;
         }
 
-        public String getValueType() {
-            return valueType;
+        public AttributeValueType getValueType() {
+            return AttributeValueType.valueOf(valueType.toUpperCase());
         }
 
         public String getPlayerType() {
@@ -181,8 +182,8 @@ public class ProcessorConfigEntry {
             return uniquePlayerId;
         }
 
-        public String getIdValueType() {
-            return idValueType;
+        public AttributeValueType getIdValueType() {
+            return AttributeValueType.valueOf(idValueType.toUpperCase());
         }
 
         public HashMap<String, MatchBy> getMatchByPlayer() {
@@ -215,8 +216,12 @@ public class ProcessorConfigEntry {
                 return attributeType;
             }
 
-            public String getValueType() {
-                return valueType;
+            public AttributeValueType getValueType() {
+                try {
+                    return AttributeValueType.valueOf(valueType.toUpperCase());
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    return AttributeValueType.INVALID;
+                }
             }
 
             public String getPlayerType() {
@@ -231,8 +236,12 @@ public class ProcessorConfigEntry {
                 return uniquePlayerId;
             }
 
-            public String getIdValueType() {
-                return idValueType;
+            public AttributeValueType getIdValueType() {
+                try {
+                    return AttributeValueType.valueOf(idValueType.toUpperCase());
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    return AttributeValueType.INVALID;
+                }
             }
         }
     }

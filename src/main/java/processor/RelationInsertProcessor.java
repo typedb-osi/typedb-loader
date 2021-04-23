@@ -249,7 +249,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getUniquePlayerId();
-        String attributeValueType = playerGenerator.getIdValueType();
+        AttributeValueType attributeValueType = playerGenerator.getIdValueType();
         ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig);
         return ms;
     }
@@ -274,7 +274,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getAttributeType();
-        String attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
+        AttributeValueType attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
         ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor());
         return ms;
     }
@@ -292,7 +292,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 String relationPlayerPlayerVariable = "relplayer-player-" + i;
                 String relationPlayerPlayerType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getPlayerType();
                 String relationPlayerPlayerAttributeType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getUniquePlayerId();
-                String relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
+                AttributeValueType relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
 
                 Thing relationPlayerCurrentPlayerMatchStatement = Graql.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
                 relationPlayerCurrentPlayerMatchStatement = addAttributeOfColumnType(relationPlayerCurrentPlayerMatchStatement, relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor());
