@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class ProcessorUtilTest {
 
     @Test
-    public void generatorUtilTestParser() throws IOException {
+    public void processorUtilParserTest() throws IOException {
 
         // csv
         InputStream csvStream = DataLoader.getInputStream("src/test/resources/generatorutil/test.csv");
@@ -105,5 +105,145 @@ public class ProcessorUtilTest {
         test = new String[]{""};
         Assert.assertArrayEquals(test, ProcessorUtil.tokenizeCSVStandard(row, '\t'));
 
+    }
+
+    @Test
+    public void processorUtilAddAttributeConstraintTest() {
+
+        Assert.assertEquals("has attributeSchemaType \"attributeValue\"",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.STRING,
+                        "attributeValue",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType 5",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.LONG,
+                        "5",
+                        5,
+                        null)).toString());
+
+        Assert.assertNull(
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.LONG,
+                        "5.2",
+                        5,
+                        null)));
+
+        Assert.assertNull(
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.LONG,
+                        "fail",
+                        5,
+                        null)));
+
+        Assert.assertEquals("has attributeSchemaType 5.2",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DOUBLE,
+                        "5.2",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType 5.0",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DOUBLE,
+                        "5",
+                        5,
+                        null)).toString());
+
+        Assert.assertNull(
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DOUBLE,
+                        "fail",
+                        5,
+                        null)));
+
+        Assert.assertEquals("has attributeSchemaType true",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "true",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType true",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "TRUE",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType true",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "TrUe",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType false",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "false",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType false",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "FALSE",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType false",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "FalSe",
+                        5,
+                        null)).toString());
+
+        Assert.assertNull(
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.BOOLEAN,
+                        "fail",
+                        5,
+                        null)));
+
+        Assert.assertEquals("has attributeSchemaType 2018-09-13T22:10:34",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DATETIME,
+                        "2018-09-13T22:10:34",
+                        5,
+                        null)).toString());
+
+        Assert.assertEquals("has attributeSchemaType 2021-04-23T12:44:55",
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DATETIME,
+                        "2021-04-23T12:44:55+03:00",
+                        5,
+                        null)).toString());
+
+        Assert.assertNull(
+                ProcessorUtil.valueToHasConstraint("attributeSchemaType", ProcessorUtil.generateValueConstraint(
+                        "attributeSchemaType",
+                        AttributeValueType.DATETIME,
+                        "fail",
+                        5,
+                        null)));
     }
 }

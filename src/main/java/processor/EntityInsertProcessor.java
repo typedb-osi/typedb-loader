@@ -4,6 +4,7 @@ import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +60,10 @@ public class EntityInsertProcessor extends InsertProcessor {
         Thing entityInsertStatement = addEntityToStatement();
 
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+//            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+                entityInsertStatement.constrain(hasConstraint);
+            }
         }
 
         if (isValid(entityInsertStatement)) {

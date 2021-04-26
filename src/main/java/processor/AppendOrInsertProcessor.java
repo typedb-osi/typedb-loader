@@ -4,6 +4,7 @@ import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.UnboundVariable;
@@ -65,24 +66,26 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         Thing matchStatement = addEntityToMatchPattern();
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()) {
-                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+//                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor())) {
+                    matchStatement.constrain(hasConstraint);
+                }
             }
         }
         matchStatements.add(matchStatement);
 
         // get all attributes that are !isMatch() --> construct insert clause
-        UnboundVariable tmpMI = addEntityToInsertPattern();
-        Thing matchInsertStatement = null;
-        boolean first = true;
+        UnboundVariable unboundMatchInsertStatement = addUnboundVarToInsertPattern();
+        ThingVariable<?> matchInsertStatement = null;
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
-                if (first) {
-                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
-                    if (matchInsertStatement != null) {
-                        first = false;
+//                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor())) {
+                    if (matchInsertStatement == null) {
+                        matchInsertStatement = unboundMatchInsertStatement.constrain(hasConstraint);
+                    } else {
+                        matchInsertStatement.constrain(hasConstraint);
                     }
-                } else {
-                    matchInsertStatement = addAttribute(rowTokens, matchInsertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
                 }
             }
         }
@@ -90,7 +93,10 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         // construct insertStatement
         Thing insertStatement = addEntityToMatchPattern();
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
-            insertStatement = addAttribute(rowTokens, insertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+//            insertStatement = addAttribute(rowTokens, insertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor())) {
+                insertStatement.constrain(hasConstraint);
+            }
         }
 
         if (isValid(matchStatements, matchInsertStatement)) {
@@ -131,7 +137,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         }
     }
 
-    private UnboundVariable addEntityToInsertPattern() {
+    private UnboundVariable addUnboundVarToInsertPattern() {
         if (pce.getSchemaType() != null) {
             return Graql.var("e");
         } else {

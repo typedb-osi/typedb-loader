@@ -4,6 +4,7 @@ import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Attribute;
 import graql.lang.pattern.variable.ThingVariable.Relation;
@@ -64,7 +65,10 @@ public class RelationInsertProcessor extends InsertProcessor {
 
                 if (dce.getAttributes() != null) {
                     for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-                        assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+//                        assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
+                        for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+                            assembledInsertStatement.constrain(hasConstraint);
+                        }
                     }
                 }
 
@@ -250,7 +254,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getUniquePlayerId();
         AttributeValueType attributeValueType = playerGenerator.getIdValueType();
-        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig);
+        ms = ms.constrain(valueToHasConstraint(attributeType, generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig)));
         return ms;
     }
 
@@ -260,7 +264,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                                                                  String playerVariable,
                                                                  DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
         UnboundVariable uv = Graql.var(playerVariable);
-        Attribute ms = addAttributeValueOfType(uv, playerGenerator.getIdValueType(), cleanedToken, rowCounter, preprocessorConfig);
+        Attribute ms = uv.constrain(generateValueConstraint(playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedToken, rowCounter, preprocessorConfig));
         ms = ms.isa(playerGenerator.getPlayerType());
         return ms;
     }
@@ -275,7 +279,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 .isa(playerGenerator.getPlayerType());
         String attributeType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getAttributeType();
         AttributeValueType attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
-        ms = addAttributeOfColumnType(ms, attributeType, attributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor());
+        ms = ms.constrain(valueToHasConstraint(attributeType, generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor())));
         return ms;
     }
 
@@ -295,7 +299,7 @@ public class RelationInsertProcessor extends InsertProcessor {
                 AttributeValueType relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
 
                 Thing relationPlayerCurrentPlayerMatchStatement = Graql.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
-                relationPlayerCurrentPlayerMatchStatement = addAttributeOfColumnType(relationPlayerCurrentPlayerMatchStatement, relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor());
+                relationPlayerCurrentPlayerMatchStatement = relationPlayerCurrentPlayerMatchStatement.constrain(valueToHasConstraint(relationPlayerPlayerAttributeType, generateValueConstraint(relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor())));
                 assembledMatchStatements.add(relationPlayerCurrentPlayerMatchStatement);
 
                 // here add the matched player to the relation statement (i.e.: (role: $variable)):

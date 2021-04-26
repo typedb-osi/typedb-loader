@@ -4,9 +4,9 @@ import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
+import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Attribute;
-import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,41 +47,38 @@ public class AttributeInsertProcessor extends InsertProcessor {
         return statements;
     }
 
-    public ThingVariable<Attribute> graknAttributeQueryFromRow(String row,
-                                                               String header,
-                                                               int rowCounter) throws Exception {
+    public ThingVariable<?> graknAttributeQueryFromRow(String row,
+                                                       String header,
+                                                       int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
-        UnboundVariable attributeInitialStatement = addAttributeToStatement();
-        Attribute attributeInsertStatement = null;
-
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-            attributeInsertStatement = addValue(rowTokens, attributeInitialStatement, rowCounter, columnNames, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
-        }
-
-        if (attributeInsertStatement != null) {
-            attributeInsertStatement = attributeInsertStatement.isa(pce.getSchemaType());
-
-            if (isValid(attributeInsertStatement)) {
-                appLogger.debug("valid query: <insert " + attributeInsertStatement + ";>");
-                return attributeInsertStatement;
+        if (dce.getAttributes().length > 1) {
+            //TODO: need to move into validation
+            appLogger.error("the dataconfig entry for inserting independent attribute <" + pce.getSchemaType() + "> lists more than one column - this is not allowed");
+            return null;
+        } else {
+            Attribute attributeInsertStatement = null;
+            for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+                for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+                    attributeInsertStatement = Graql.var("a").constrain(valueConstraint);
+                }
+            }
+            if (attributeInsertStatement != null) {
+                attributeInsertStatement.isa(pce.getSchemaType());
+                if (isValid(attributeInsertStatement)) {
+                    appLogger.debug("valid query: <insert " + attributeInsertStatement + ";>");
+                    return attributeInsertStatement;
+                } else {
+                    dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
+                    return null;
+                }
             } else {
-                dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
                 return null;
             }
-        } else {
-            return null;
-        }
-    }
 
-    private UnboundVariable addAttributeToStatement() {
-        if (pce.getSchemaType() != null) {
-            return Graql.var("a");
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
         }
     }
 
