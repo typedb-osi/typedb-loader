@@ -2,9 +2,7 @@ package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
-import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +22,9 @@ public class EntityInsertProcessor implements InsertProcessor {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public EntityInsertProcessor(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex) {
+    public EntityInsertProcessor(DataConfigEntry dce,
+                                 ProcessorConfigEntry pce,
+                                 int dataPathIndex) {
         super();
         this.dce = dce;
         this.pce = pce;
@@ -32,20 +32,20 @@ public class EntityInsertProcessor implements InsertProcessor {
         appLogger.debug("Creating EntityInsertGenerator for processor " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
-                                                String header,
-                                                int rowCounter) throws IllegalArgumentException {
-        ProcessorStatement processorStatement = new ProcessorStatement();
+    public InsertQueries typeDBInsert(ArrayList<String> rows,
+                                      String header,
+                                      int rowCounter) throws IllegalArgumentException {
+        InsertQueries insertQueries = new InsertQueries();
         int batchCount = 1;
         for (String row : rows) {
             try {
-                processorStatement.getInserts().add(graknEntityQueryFromRow(row, header, rowCounter + batchCount));
+                insertQueries.getDirectInserts().add(graknEntityQueryFromRow(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
             batchCount = batchCount + 1;
         }
-        return processorStatement;
+        return insertQueries;
     }
 
     public ThingVariable<?> graknEntityQueryFromRow(String row,
@@ -56,41 +56,14 @@ public class EntityInsertProcessor implements InsertProcessor {
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
-        Thing entityInsertStatement = addEntityToStatement();
+        Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
 
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce)) {
-                entityInsertStatement.constrain(hasConstraint);
-            }
-        }
-
-        if (isValid(entityInsertStatement)) {
-            appLogger.debug("valid query: <insert " + entityInsertStatement + ";>");
-            return entityInsertStatement;
+        if (isValidDirectInsert(directInsertStatement, pce)) {
+            appLogger.debug("valid query: <insert " + directInsertStatement + ";>");
+            return directInsertStatement;
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
             return null;
         }
-    }
-
-    private Thing addEntityToStatement() {
-        if (pce.getSchemaType() != null) {
-            return Graql.var("e").isa(pce.getSchemaType());
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
-        }
-    }
-
-    private boolean isValid(Pattern insertStatement) {
-        String patternAsString = insertStatement.toString();
-        if (!patternAsString.contains("isa " + pce.getSchemaType())) {
-            return false;
-        }
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> con : pce.getRequiredAttributes().entrySet()) {
-            if (!patternAsString.contains("has " + con.getValue().getAttributeType())) {
-                return false;
-            }
-        }
-        return true;
     }
 }

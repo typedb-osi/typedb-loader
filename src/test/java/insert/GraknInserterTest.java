@@ -1,6 +1,6 @@
 package insert;
 
-import processor.ProcessorStatement;
+import processor.InsertQueries;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
@@ -174,58 +174,58 @@ public class GraknInserterTest {
         GraknSession dataSession = pcgi.getDataSession(client);
 
         // single-thread inserting
-        ProcessorStatement singleThreadStatements = new ProcessorStatement();
+        InsertQueries singleThreadStatements = new InsertQueries();
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         ArrayList<ThingVariable<?>> curMatch = new ArrayList<>();
         ThingVariable<?> curInsert;
         curMatch.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
         curMatch.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 2"));
         curInsert = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatch, curInsert));
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatch, curInsert));
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         ArrayList<ThingVariable<?>> curMatchB = new ArrayList<>();
         ThingVariable<?> curInsertB;
         curMatchB.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 3"));
         curMatchB.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 4"));
         curInsertB = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchB, curInsertB));
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchB, curInsertB));
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         pcgi.matchInsertThreadedInserting(singleThreadStatements, dataSession, 1, 1);
 
         // multi-thread inserting
-        ProcessorStatement multiThreadStatements = new ProcessorStatement();
+        InsertQueries multiThreadStatements = new InsertQueries();
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         ArrayList<ThingVariable<?>> curMatchC = new ArrayList<>();
         ThingVariable<?> curInsertC;
         curMatchC.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
         curMatchC.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 3"));
         curInsertC = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchC, curInsertC));
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchC, curInsertC));
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         ArrayList<ThingVariable<?>> curMatchD = new ArrayList<>();
         ThingVariable<?> curInsertD;
         curMatchD.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 2"));
         curMatchD.add(var("p2").isa("person").has("phone-number", "+47 1234 1234 4"));
         curInsertD = var("rel").rel("caller", "p1").rel("callee", "p2").isa("call");
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchD, curInsertD));
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchD, curInsertD));
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
 
         pcgi.matchInsertThreadedInserting(multiThreadStatements, dataSession, 4, 1);
 
         // pass nulls
-        pcgi.matchInsertThreadedInserting(new ProcessorStatement(), dataSession, 1, 1);
-        pcgi.matchInsertThreadedInserting(new ProcessorStatement(), dataSession, 4, 1);
+        pcgi.matchInsertThreadedInserting(new InsertQueries(), dataSession, 1, 1);
+        pcgi.matchInsertThreadedInserting(new InsertQueries(), dataSession, 4, 1);
 
         // tests
         GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
@@ -271,10 +271,10 @@ public class GraknInserterTest {
         GraknSession dataSession = pcgi.getDataSession(client);
 
         // single-thread inserting
-        ProcessorStatement singleThreadStatements = new ProcessorStatement();
+        InsertQueries singleThreadStatements = new InsertQueries();
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        singleThreadStatements.getInserts().add(null);
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        singleThreadStatements.getDirectInserts().add(null);
 
         ArrayList<ThingVariable<?>> curMatch = new ArrayList<>();
         ThingVariable<?> curInsert;
@@ -282,11 +282,11 @@ public class GraknInserterTest {
         curMatch.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 1"));
         curInsert = var("p1").has("nick-name", "appended-nick-name");
         dirInsert = var("p1").isa("person").has("phone-number", "+47 1234 1234 1").has("nick-name", "appended-nick-name");
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatch, curInsert));
-        singleThreadStatements.getInserts().add(dirInsert);
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatch, curInsert));
+        singleThreadStatements.getDirectInserts().add(dirInsert);
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        singleThreadStatements.getInserts().add(null);
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        singleThreadStatements.getDirectInserts().add(null);
 
         ArrayList<ThingVariable<?>> curMatchB = new ArrayList<>();
         ThingVariable<?> curInsertB;
@@ -294,19 +294,19 @@ public class GraknInserterTest {
         curMatchB.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 5"));
         curInsertB = var("p1").has("nick-name", "newly-inserted-nick-name");
         dirInsertB = var("p1").isa("person").has("phone-number", "+47 1234 1234 5").has("nick-name", "newly-inserted-nick-name");
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchB, curInsertB));
-        singleThreadStatements.getInserts().add(dirInsertB);
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchB, curInsertB));
+        singleThreadStatements.getDirectInserts().add(dirInsertB);
 
-        singleThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        singleThreadStatements.getInserts().add(null);
+        singleThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        singleThreadStatements.getDirectInserts().add(null);
 
         pcgi.appendOrInsertThreadedInserting(singleThreadStatements, dataSession, 1, 1);
 
         // multi-thread inserting
-        ProcessorStatement multiThreadStatements = new ProcessorStatement();
+        InsertQueries multiThreadStatements = new InsertQueries();
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        multiThreadStatements.getInserts().add(null);
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        multiThreadStatements.getDirectInserts().add(null);
 
         ArrayList<ThingVariable<?>> curMatchC = new ArrayList<>();
         ThingVariable<?> curInsertC;
@@ -314,11 +314,11 @@ public class GraknInserterTest {
         curMatchC.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 2"));
         curInsertC = var("p1").has("nick-name", "appended-nick-name-2");
         dirInsertC = var("p1").isa("person").has("phone-number", "+47 1234 1234 2").has("nick-name", "appended-nick-name-2");
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchC, curInsertC));
-        multiThreadStatements.getInserts().add(dirInsertC);
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchC, curInsertC));
+        multiThreadStatements.getDirectInserts().add(dirInsertC);
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        multiThreadStatements.getInserts().add(null);
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        multiThreadStatements.getDirectInserts().add(null);
 
         ArrayList<ThingVariable<?>> curMatchD = new ArrayList<>();
         ThingVariable<?> curInsertD;
@@ -326,17 +326,17 @@ public class GraknInserterTest {
         curMatchD.add(var("p1").isa("person").has("phone-number", "+47 1234 1234 6"));
         curInsertD = var("p1").has("nick-name", "newly-inserted-nick-name-2");
         dirInsertD = var("p1").isa("person").has("phone-number", "+47 1234 1234 6").has("nick-name", "newly-inserted-nick-name-2");
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(curMatchD, curInsertD));
-        multiThreadStatements.getInserts().add(dirInsertD);
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(curMatchD, curInsertD));
+        multiThreadStatements.getDirectInserts().add(dirInsertD);
 
-        multiThreadStatements.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
-        multiThreadStatements.getInserts().add(null);
+        multiThreadStatements.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
+        multiThreadStatements.getDirectInserts().add(null);
 
         pcgi.appendOrInsertThreadedInserting(multiThreadStatements, dataSession, 4, 1);
 
         // pass nulls
-        pcgi.appendOrInsertThreadedInserting(new ProcessorStatement(), dataSession, 1, 1);
-        pcgi.appendOrInsertThreadedInserting(new ProcessorStatement(), dataSession, 4, 1);
+        pcgi.appendOrInsertThreadedInserting(new InsertQueries(), dataSession, 1, 1);
+        pcgi.appendOrInsertThreadedInserting(new InsertQueries(), dataSession, 4, 1);
 
         // tests
         GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);

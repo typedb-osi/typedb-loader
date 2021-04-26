@@ -31,7 +31,7 @@ public class AppendAttributeGeneratorTest {
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+7 171 898 0853\";";
@@ -85,9 +85,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
-        Assert.assertEquals(0, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(0, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getDirectInserts().size());
 
         Assert.assertEquals(10, results.getMatchInserts().size());
         int nullCount = 0;
@@ -105,7 +105,7 @@ public class AppendAttributeGeneratorTest {
         ArrayList<String> rows = getData(datafileB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+36 318 105 5629\";";
@@ -139,9 +139,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
-        Assert.assertEquals(0, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(0, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getDirectInserts().size());
 
         Assert.assertEquals(6, results.getMatchInserts().size());
         int nullCount = 0;
@@ -159,7 +159,7 @@ public class AppendAttributeGeneratorTest {
         ArrayList<String> rows = getData(datafileC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa call, has started-at 2018-09-19T01:00:38;";
@@ -199,9 +199,9 @@ public class AppendAttributeGeneratorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
-        Assert.assertEquals(0, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(0, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getDirectInserts().size());
 
         Assert.assertEquals(7, results.getMatchInserts().size());
         int nullCount = 0;

@@ -21,7 +21,7 @@ public class ProcessorConfigEntry {
     // top-level HashMap has single entry "conceptGenerators"
     // second-level HashMap has two entries: "attributes" and "players" (for relations only)
     // third level HashMap has one entry per attribute/player generator
-    private HashMap<String, HashMap<String, ConceptGenerator>> conceptGenerators;
+    private HashMap<String, HashMap<String, ConceptProcessor>> conceptProcessors;
 
     public String getProcessor() {
         return processor;
@@ -47,19 +47,19 @@ public class ProcessorConfigEntry {
         return referenceProcessor;
     }
 
-    public HashMap<String, HashMap<String, ConceptGenerator>> getConceptGenerators() {
-        return conceptGenerators;
+    public HashMap<String, HashMap<String, ConceptProcessor>> getConceptProcessors() {
+        return conceptProcessors;
     }
 
-    public void setConceptGenerators(HashMap<String, HashMap<String, ConceptGenerator>> conceptGenerators) {
-        this.conceptGenerators = conceptGenerators;
+    public void setConceptProcessors(HashMap<String, HashMap<String, ConceptProcessor>> conceptProcessors) {
+        this.conceptProcessors = conceptProcessors;
     }
 
-    public ConceptGenerator getAttributeGenerator(String key) {
-        if (getConceptGenerators().get("attributes") == null) {
+    public ConceptProcessor getAttributeGenerator(String key) {
+        if (getConceptProcessors().get("attributes") == null) {
             throw new RuntimeException("You have specified the attribute [" + key + "] in your dataConfig file - but there are no attributeGenerators specified in the corresponding processor.");
         }
-        for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("attributes").entrySet()) {
+        for (Map.Entry<String, ConceptProcessor> entry : getConceptProcessors().get("attributes").entrySet()) {
             if (entry.getKey().equals(key)) {
                 return entry.getValue();
             }
@@ -67,8 +67,8 @@ public class ProcessorConfigEntry {
         throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><attributes> in processor: " + getProcessor());
     }
 
-    public ConceptGenerator getPlayerGenerator(String key) {
-        for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("players").entrySet()) {
+    public ConceptProcessor getPlayerGenerator(String key) {
+        for (Map.Entry<String, ConceptProcessor> entry : getConceptProcessors().get("players").entrySet()) {
             if (entry.getKey().equals(key)) {
                 return entry.getValue();
             }
@@ -76,8 +76,8 @@ public class ProcessorConfigEntry {
         throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
     }
 
-    public ConceptGenerator getRelationPlayerGenerator(String key) {
-        for (Map.Entry<String, ConceptGenerator> entry : getConceptGenerators().get("relationPlayers").entrySet()) {
+    public ConceptProcessor getRelationPlayerGenerator(String key) {
+        for (Map.Entry<String, ConceptProcessor> entry : getConceptProcessors().get("relationPlayers").entrySet()) {
             if (entry.getKey().equals(key)) {
                 return entry.getValue();
             }
@@ -85,18 +85,18 @@ public class ProcessorConfigEntry {
         throw new IllegalArgumentException("cannot find <" + key + "> under <conceptGenerators><players> in processor: " + getProcessor());
     }
 
-    public HashMap<String, ConceptGenerator> getRelationRequiredPlayers() {
-        HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
+    public HashMap<String, ConceptProcessor> getRelationRequiredPlayers() {
+        HashMap<String, ConceptProcessor> relationPlayers = new HashMap<>();
         if (processorType.equals(ProcessorType.RELATION.toString()) || processorType.equals(ProcessorType.NESTED_RELATION.toString()) || processorType.equals(ProcessorType.ATTRIBUTE_RELATION.toString())) {
-            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
-            for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
+            HashMap<String, ConceptProcessor> playerGenerators = getConceptProcessors().get("players");
+            for (Map.Entry<String, ConceptProcessor> pg : playerGenerators.entrySet()) {
                 if (pg.getValue().isRequired()) {
                     relationPlayers.put(pg.getKey(), pg.getValue());
                 }
             }
-            if (getConceptGenerators().get("relationPlayers") != null) {
-                HashMap<String, ConceptGenerator> relationPlayerGenerators = getConceptGenerators().get("relationPlayers");
-                for (Map.Entry<String, ConceptGenerator> pg : relationPlayerGenerators.entrySet()) {
+            if (getConceptProcessors().get("relationPlayers") != null) {
+                HashMap<String, ConceptProcessor> relationPlayerGenerators = getConceptProcessors().get("relationPlayers");
+                for (Map.Entry<String, ConceptProcessor> pg : relationPlayerGenerators.entrySet()) {
                     if (pg.getValue().isRequired()) {
                         relationPlayers.put(pg.getKey(), pg.getValue());
                     }
@@ -106,31 +106,31 @@ public class ProcessorConfigEntry {
         return relationPlayers;
     }
 
-    public HashMap<String, ConceptGenerator> getRelationPlayers() {
-        HashMap<String, ConceptGenerator> relationPlayers = new HashMap<>();
+    public HashMap<String, ConceptProcessor> getRelationPlayers() {
+        HashMap<String, ConceptProcessor> relationPlayers = new HashMap<>();
         if (processorType.equals(ProcessorType.RELATION.toString())) {
-            HashMap<String, ConceptGenerator> playerGenerators = getConceptGenerators().get("players");
-            for (Map.Entry<String, ConceptGenerator> pg : playerGenerators.entrySet()) {
+            HashMap<String, ConceptProcessor> playerGenerators = getConceptProcessors().get("players");
+            for (Map.Entry<String, ConceptProcessor> pg : playerGenerators.entrySet()) {
                 relationPlayers.put(pg.getKey(), pg.getValue());
             }
         }
         return relationPlayers;
     }
 
-    public HashMap<String, ConceptGenerator> getAttributes() {
-        HashMap<String, ConceptGenerator> attributes = new HashMap<>();
-        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
-        for (Map.Entry<String, ConceptGenerator> ag : attGenerators.entrySet()) {
+    public HashMap<String, ConceptProcessor> getAttributes() {
+        HashMap<String, ConceptProcessor> attributes = new HashMap<>();
+        HashMap<String, ConceptProcessor> attGenerators = getConceptProcessors().get("attributes");
+        for (Map.Entry<String, ConceptProcessor> ag : attGenerators.entrySet()) {
             attributes.put(ag.getKey(), ag.getValue());
         }
         return attributes;
     }
 
-    public HashMap<String, ConceptGenerator> getRequiredAttributes() {
-        HashMap<String, ConceptGenerator> requiredAttributes = new HashMap<>();
-        HashMap<String, ConceptGenerator> attGenerators = getConceptGenerators().get("attributes");
+    public HashMap<String, ConceptProcessor> getRequiredAttributes() {
+        HashMap<String, ConceptProcessor> requiredAttributes = new HashMap<>();
+        HashMap<String, ConceptProcessor> attGenerators = getConceptProcessors().get("attributes");
         if (attGenerators != null) {
-            for (Map.Entry<String, ConceptGenerator> ag : attGenerators.entrySet()) {
+            for (Map.Entry<String, ConceptProcessor> ag : attGenerators.entrySet()) {
                 if (ag.getValue().isRequired()) {
                     requiredAttributes.put(ag.getKey(), ag.getValue());
                 }
@@ -139,7 +139,7 @@ public class ProcessorConfigEntry {
         return requiredAttributes;
     }
 
-    public static class ConceptGenerator {
+    public static class ConceptProcessor {
 
         // for attributes and players:
         private boolean required;

@@ -11,7 +11,7 @@ import graql.lang.query.GraqlDefine;
 import graql.lang.query.GraqlInsert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import processor.ProcessorStatement;
+import processor.InsertQueries;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,7 +60,7 @@ public class GraknInserter {
         appLogger.info("Defined schema to database <" + databaseName + ">");
     }
 
-    public void matchInsertThreadedInserting(ProcessorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void matchInsertThreadedInserting(InsertQueries statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -125,7 +125,7 @@ public class GraknInserter {
         }
     }
 
-    public void appendOrInsertThreadedInserting(ProcessorStatement statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
+    public void appendOrInsertThreadedInserting(InsertQueries statements, GraknSession session, int threads, int batchSize) throws InterruptedException {
 
         AtomicInteger queryIndex = new AtomicInteger(0);
         Thread[] ts = new Thread[threads];
@@ -136,7 +136,7 @@ public class GraknInserter {
                         try (GraknTransaction tx = session.transaction(GraknTransaction.Type.WRITE)) {
                             int q;
                             for (int i = 0; i < batchSize && (q = queryIndex.getAndIncrement()) < statements.getMatchInserts().size(); i++) {
-                                ThingVariable<?> directInsert = statements.getInserts().get(q);
+                                ThingVariable<?> directInsert = statements.getDirectInserts().get(q);
                                 ArrayList<ThingVariable<?>> matchInsertMatches = statements.getMatchInserts().get(q).getMatches();
                                 ThingVariable<?> matchInsertInsert = statements.getMatchInserts().get(q).getInsert();
                                 // if matchInserts contains nulls - do direct insert

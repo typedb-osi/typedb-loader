@@ -1,16 +1,14 @@
 package configuration;
 
-import processor.ProcessorType;
-
 import java.util.ArrayList;
 
 public class DataConfigEntry {
     private String[] dataPath;
     private Character separator;
     private String processor;
-    private DataConfigGeneratorMapping[] attributes;
-    private DataConfigGeneratorMapping[] players;
-    private DataConfigGeneratorMapping[] relationPlayers;
+    private ConceptProcessorMapping[] attributes;
+    private ConceptProcessorMapping[] players;
+    private ConceptProcessorMapping[] relationPlayers;
     private int batchSize;
     private int threads;
     private Integer orderBefore;
@@ -28,15 +26,15 @@ public class DataConfigEntry {
         return processor;
     }
 
-    public DataConfigGeneratorMapping[] getAttributes() {
+    public ConceptProcessorMapping[] getAttributeProcessorMappings() {
         return attributes;
     }
 
-    public DataConfigGeneratorMapping[] getPlayers() {
+    public ConceptProcessorMapping[] getPlayerProcessorMappings() {
         return players;
     }
 
-    public DataConfigGeneratorMapping[] getRelationPlayers() {
+    public ConceptProcessorMapping[] getRelationPlayerProcessorMappings() {
         return relationPlayers;
     }
 
@@ -56,9 +54,9 @@ public class DataConfigEntry {
         return orderAfter;
     }
 
-    public ArrayList<DataConfigEntry.DataConfigGeneratorMapping> getMatchAttributes() {
-        ArrayList<DataConfigEntry.DataConfigGeneratorMapping> matchAttributes = new ArrayList<>();
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : getAttributes()) {
+    public ArrayList<ConceptProcessorMapping> getMatchAttributes() {
+        ArrayList<ConceptProcessorMapping> matchAttributes = new ArrayList<>();
+        for (ConceptProcessorMapping attributeMapping : getAttributeProcessorMappings()) {
             if (attributeMapping.isMatch()) {
                 matchAttributes.add(attributeMapping);
             }
@@ -66,17 +64,7 @@ public class DataConfigEntry {
         return matchAttributes;
     }
 
-    public ArrayList<String> getMatchAttributeGenerators() {
-        ArrayList<String> matchAttributeGenerators = new ArrayList<>();
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : getAttributes()) {
-            if (attributeMapping.isMatch()) {
-                matchAttributeGenerators.add(attributeMapping.getGenerator());
-            }
-        }
-        return matchAttributeGenerators;
-    }
-
-    public static class DataConfigGeneratorMapping {
+    public static class ConceptProcessorMapping {
         private String columnName;
         private String[] columnNames;
         private String generator;

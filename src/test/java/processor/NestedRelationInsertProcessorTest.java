@@ -28,7 +28,7 @@ public class NestedRelationInsertProcessorTest {
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$person-0 isa person, has phone-number \"+54 398 559 0423\";$person-1 isa person, has phone-number \"+48 195 624 2025\";$call-2 isa call, has started-at 2018-09-16T22:24:19;";
@@ -84,9 +84,9 @@ public class NestedRelationInsertProcessorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
-        Assert.assertEquals(0, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(0, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getDirectInserts().size());
 
         Assert.assertEquals(11, results.getMatchInserts().size());
         int nullCount = 0;
@@ -104,7 +104,7 @@ public class NestedRelationInsertProcessorTest {
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
 //        String tmp = "$relplayer-player-0 isa person, has phone-number \"+81 308 988 7153\";$relplayer-player-1 isa person, has phone-number \"+351 515 605 7915\";$call-2 (caller: $relplayer-player-0, callee: $relplayer-player-1) isa call;";
@@ -139,9 +139,9 @@ public class NestedRelationInsertProcessorTest {
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
 
-        Assert.assertEquals(0, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(0, results.getInserts().size());
+        Assert.assertEquals(0, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(0, results.getDirectInserts().size());
 
         Assert.assertEquals(7, results.getMatchInserts().size());
         int nullCount = 0;

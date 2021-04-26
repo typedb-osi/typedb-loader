@@ -4,7 +4,7 @@
       "processor": "person",
       "processorType": "entity",
       "schemaType": "person",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "first-name": {
             "attributeType": "first-name",
@@ -43,7 +43,7 @@
       "processor": "company",
       "processorType": "entity",
       "schemaType": "company",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "name": {
             "attributeType": "name",
@@ -57,7 +57,7 @@
       "processor": "contract",
       "processorType": "relation",
       "schemaType": "contract",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "provider": {
             "playerType": "company",
@@ -80,7 +80,7 @@
       "processor": "call",
       "processorType": "relation",
       "schemaType": "call",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "caller": {
             "playerType": "person",
@@ -115,7 +115,7 @@
       "processor": "communication-channel",
       "processorType": "nested-relation",
       "schemaType": "communication-channel",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "peer": {
             "playerType": "person",
@@ -160,7 +160,7 @@
       "processor": "append-twitter-to-person",
       "processorType": "append-attribute",
       "schemaType": "person",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "phone-number": {
             "attributeType": "phone-number",
@@ -178,7 +178,7 @@
       "processor": "append-call-rating-to-call",
       "processorType": "append-attribute",
       "schemaType": "call",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "started-at": {
             "attributeType": "started-at",
@@ -196,7 +196,7 @@
       "processor": "append-pp-fb-to-person",
       "processorType": "append-attribute",
       "schemaType": "person",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "phone-number": {
             "attributeType": "phone-number",
@@ -214,7 +214,7 @@
       "processor": "is-in-use",
       "processorType": "attribute",
       "schemaType": "is-in-use",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "is-in-use": {
             "attributeType": "is-in-use",
@@ -227,7 +227,7 @@
       "processor": "in-use",
       "processorType": "attribute-relation",
       "schemaType": "in-use",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "account": {
             "playerType": "phone-number",

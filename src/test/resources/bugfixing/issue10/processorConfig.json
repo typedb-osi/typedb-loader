@@ -5,7 +5,7 @@
       "processor": "text",
       "processorType": "entity",
       "schemaType": "text",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "uid": {
             "attributeType": "uid",
@@ -19,7 +19,7 @@
       "processor": "label",
       "processorType": "entity",
       "schemaType": "label",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "name": {
             "attributeType": "name",
@@ -33,7 +33,7 @@
       "processor": "tag",
       "processorType": "relation",
       "schemaType": "tag",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "tagger": {
             "playerType": "label",

@@ -36,19 +36,19 @@ public class RelationInsertProcessor implements InsertProcessor {
         appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement typeDBInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
-        ProcessorStatement processorStatement = new ProcessorStatement();
+    public InsertQueries typeDBInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
+        InsertQueries insertQueries = new InsertQueries();
 
         int batchCounter = 1;
         for (String row : rows) {
-            ProcessorStatement.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
-            processorStatement.getMatchInserts().add(tmp);
+            InsertQueries.MatchInsert tmp = graknRelationshipQueryFromRow(row, header, rowCounter + batchCounter);
+            insertQueries.getMatchInserts().add(tmp);
             batchCounter = batchCounter + 1;
         }
-        return processorStatement;
+        return insertQueries;
     }
 
-    public ProcessorStatement.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
+    public InsertQueries.MatchInsert graknRelationshipQueryFromRow(String row, String header, int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
@@ -63,8 +63,8 @@ public class RelationInsertProcessor implements InsertProcessor {
                 ThingVariable<?> playersInsertStatement = miStatements.subList(miStatements.size() - 1, miStatements.size()).get(0);
                 Relation assembledInsertStatement = relationInsert((Relation) playersInsertStatement);
 
-                if (dce.getAttributes() != null) {
-                    for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
+                if (dce.getAttributeProcessorMappings() != null) {
+                    for (DataConfigEntry.ConceptProcessorMapping generatorMappingForAttribute : dce.getAttributeProcessorMappings()) {
                         for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce)) {
                             assembledInsertStatement.constrain(hasConstraint);
                         }
@@ -73,18 +73,18 @@ public class RelationInsertProcessor implements InsertProcessor {
 
                 if (isValid(matchStatements, assembledInsertStatement)) {
                     appLogger.debug("valid query: <" + assembleQuery(matchStatements, assembledInsertStatement) + ">");
-                    return new ProcessorStatement.MatchInsert(matchStatements, assembledInsertStatement);
+                    return new InsertQueries.MatchInsert(matchStatements, assembledInsertStatement);
                 } else {
                     dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c does not have a proper <isa> statement or is missing required players or attributes. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                    return new ProcessorStatement.MatchInsert(null, null);
+                    return new InsertQueries.MatchInsert(null, null);
                 }
             } else {
                 dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c has 0 players. Faulty tokenized row: " + Arrays.toString(rowTokens));
-                return new ProcessorStatement.MatchInsert(null, null);
+                return new InsertQueries.MatchInsert(null, null);
             }
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: skipped row " + rowCounter + " b/c empty.");
-            return new ProcessorStatement.MatchInsert(null, null);
+            return new InsertQueries.MatchInsert(null, null);
         }
     }
 
@@ -107,9 +107,9 @@ public class RelationInsertProcessor implements InsertProcessor {
         int playerCounter = 0;
 
         // add Entity Players:
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForPlayer : dce.getPlayers()) {
+        for (DataConfigEntry.ConceptProcessorMapping generatorMappingForPlayer : dce.getPlayerProcessorMappings()) {
             String generatorKey = generatorMappingForPlayer.getGenerator();
-            ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getPlayerGenerator(generatorKey);
+            ProcessorConfigEntry.ConceptProcessor playerGenerator = pce.getPlayerGenerator(generatorKey);
             String columnName = generatorMappingForPlayer.getColumnName();
             int columnNameIndex = idxOf(columnNames, columnName);
 
@@ -156,10 +156,10 @@ public class RelationInsertProcessor implements InsertProcessor {
             }
         }
         // add Relation Players
-        if (dce.getRelationPlayers() != null) {
-            for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForRelationPlayer : dce.getRelationPlayers()) {
+        if (dce.getRelationPlayerProcessorMappings() != null) {
+            for (DataConfigEntry.ConceptProcessorMapping generatorMappingForRelationPlayer : dce.getRelationPlayerProcessorMappings()) {
                 String generatorKey = generatorMappingForRelationPlayer.getGenerator();
-                ProcessorConfigEntry.ConceptGenerator playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
+                ProcessorConfigEntry.ConceptProcessor playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
 
                 // if matching RelationPlayer by Attribute:
                 if (generatorMappingForRelationPlayer.getMatchByAttribute() != null) {
@@ -245,9 +245,9 @@ public class RelationInsertProcessor implements InsertProcessor {
 
     private ThingVariable<?> createEntityPlayerMatchStatement(String cleanedToken,
                                                               int rowCounter,
-                                                              ProcessorConfigEntry.ConceptGenerator playerGenerator,
+                                                              ProcessorConfigEntry.ConceptProcessor playerGenerator,
                                                               String playerVariable,
-                                                              DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                              DataConfigEntry.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
         Thing ms = Graql
                 .var(playerVariable)
                 .isa(playerGenerator.getPlayerType());
@@ -259,9 +259,9 @@ public class RelationInsertProcessor implements InsertProcessor {
 
     private ThingVariable<?> createAttributePlayerMatchStatement(String cleanedToken,
                                                                  int rowCounter,
-                                                                 ProcessorConfigEntry.ConceptGenerator playerGenerator,
+                                                                 ProcessorConfigEntry.ConceptProcessor playerGenerator,
                                                                  String playerVariable,
-                                                                 DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                                 DataConfigEntry.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
         UnboundVariable uv = Graql.var(playerVariable);
         Attribute ms = uv.constrain(generateValueConstraint(playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedToken, rowCounter, preprocessorConfig));
         ms = ms.isa(playerGenerator.getPlayerType());
@@ -270,8 +270,8 @@ public class RelationInsertProcessor implements InsertProcessor {
 
     private ThingVariable<?> createRelationPlayerMatchStatementByAttribute(String cleanedToken,
                                                                            int rowCounter,
-                                                                           ProcessorConfigEntry.ConceptGenerator playerGenerator,
-                                                                           DataConfigEntry.DataConfigGeneratorMapping dcm,
+                                                                           ProcessorConfigEntry.ConceptProcessor playerGenerator,
+                                                                           DataConfigEntry.ConceptProcessorMapping dcm,
                                                                            String playerVariable) {
         Thing ms = Graql
                 .var(playerVariable)
@@ -282,7 +282,7 @@ public class RelationInsertProcessor implements InsertProcessor {
         return ms;
     }
 
-    private ArrayList<ThingVariable<?>> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int rowCounter, int[] columnNameIndices, ProcessorConfigEntry.ConceptGenerator playerGenerator, DataConfigEntry.DataConfigGeneratorMapping dcm, String playerVariable) {
+    private ArrayList<ThingVariable<?>> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int rowCounter, int[] columnNameIndices, ProcessorConfigEntry.ConceptProcessor playerGenerator, DataConfigEntry.ConceptProcessorMapping dcm, String playerVariable) {
         ArrayList<ThingVariable<?>> assembledMatchStatements = new ArrayList<>();
         UnboundVariable relVariable = Graql.var(playerVariable);
         ArrayList<ArrayList<String>> relationStrings = new ArrayList<>();
@@ -343,7 +343,7 @@ public class RelationInsertProcessor implements InsertProcessor {
             matchStatement.append(st.toString());
         }
         // missing required players
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRelationRequiredPlayers().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptProcessor> generatorEntry : pce.getRelationRequiredPlayers().entrySet()) {
             if (!matchStatement.toString().contains("isa " + generatorEntry.getValue().getPlayerType())) {
                 return false;
             }
@@ -352,7 +352,7 @@ public class RelationInsertProcessor implements InsertProcessor {
             }
         }
         // missing required attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ProcessorConfigEntry.ConceptProcessor> generatorEntry : pce.getRequiredAttributes().entrySet()) {
             if (!insertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType())) {
                 return false;
             }

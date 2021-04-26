@@ -4,21 +4,21 @@ import graql.lang.pattern.variable.ThingVariable;
 
 import java.util.ArrayList;
 
-public class ProcessorStatement {
+public class InsertQueries {
     private final ArrayList<MatchInsert> matchInserts;
-    private final ArrayList<ThingVariable<?>> inserts;
+    private final ArrayList<ThingVariable<?>> directInserts;
 
-    public ProcessorStatement() {
+    public InsertQueries() {
         this.matchInserts = new ArrayList<>();
-        this.inserts = new ArrayList<>();
+        this.directInserts = new ArrayList<>();
     }
 
     public ArrayList<MatchInsert> getMatchInserts() {
         return matchInserts;
     }
 
-    public ArrayList<ThingVariable<?>> getInserts() {
-        return inserts;
+    public ArrayList<ThingVariable<?>> getDirectInserts() {
+        return directInserts;
     }
 
     public static class MatchInsert {

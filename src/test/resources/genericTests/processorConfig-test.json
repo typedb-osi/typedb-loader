@@ -5,7 +5,7 @@
       "processor": "entity1",
       "processorType": "entity",
       "schemaType": "entity1",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "entity1-id": {
             "attributeType": "entity1-id",
@@ -29,7 +29,7 @@
       "processor": "entity2",
       "processorType": "entity",
       "schemaType": "entity2",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "entity2-id": {
             "attributeType": "entity2-id",
@@ -53,7 +53,7 @@
       "processor": "entity3",
       "processorType": "entity",
       "schemaType": "entity3",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "attributes": {
           "entity3-id": {
             "attributeType": "entity3-id",
@@ -72,7 +72,7 @@
       "processor": "rel1",
       "processorType": "relation",
       "schemaType": "rel1",
-      "conceptGenerators": {
+      "conceptProcessors": {
         "players": {
           "player-one": {
             "playerType": "entity1",

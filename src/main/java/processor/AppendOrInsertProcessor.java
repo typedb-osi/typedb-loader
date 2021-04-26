@@ -2,18 +2,13 @@ package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
-import graql.lang.Graql;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
-import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static processor.ProcessorUtil.*;
 
@@ -35,22 +30,22 @@ public class AppendOrInsertProcessor implements InsertProcessor {
         appLogger.debug("Creating AppendOrInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
-                                                        String header, int rowCounter) throws Exception {
-        ProcessorStatement processorStatement = new ProcessorStatement();
+    public InsertQueries typeDBInsert(ArrayList<String> rows,
+                                      String header, int rowCounter) throws Exception {
+        InsertQueries insertQueries = new InsertQueries();
 
         int batchCounter = 1;
         for (String row : rows) {
-            graknAppendAttributeQueryFromRow(processorStatement, row, header, rowCounter + batchCounter);
+            generateInsertQueries(insertQueries, row, header, rowCounter + batchCounter);
             batchCounter = batchCounter + 1;
         }
-        return processorStatement;
+        return insertQueries;
     }
 
-    public void graknAppendAttributeQueryFromRow(ProcessorStatement processorStatement,
-                                                 String row,
-                                                 String header,
-                                                 int rowCounter) throws Exception {
+    public void generateInsertQueries(InsertQueries insertQueries,
+                                      String row,
+                                      String header,
+                                      int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
@@ -61,137 +56,38 @@ public class AppendOrInsertProcessor implements InsertProcessor {
             throw new IllegalArgumentException("data config entry for " + dce.getDataPath()[dataPathIndex] + " is incomplete - it needs at least one attribute used for matching (\"match\": true)");
         }
 
-        // get all attributes that are isMatch() --> construct match clause
-        ArrayList<ThingVariable<?>> matchStatements = new ArrayList<>();
-        Thing matchStatement = addEntityToMatchPattern();
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
-            if (generatorMappingForMatchAttribute.isMatch()) {
-//                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
-                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForMatchAttribute, pce)) {
-                    matchStatement.constrain(hasConstraint);
-                }
-            }
-        }
-        matchStatements.add(matchStatement);
+        ArrayList<ThingVariable<?>> matchStatements = generateMatchStatementsFromMatchAttributes(rowTokens, columnNames, rowCounter, dce, pce);
+        ThingVariable<?> matchInsertStatement = generateInsertStatementsWithoutMatchAttributes(rowTokens, columnNames, rowCounter, dce, pce);
+        Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
 
-        // get all attributes that are !isMatch() --> construct insert clause
-        UnboundVariable unboundMatchInsertStatement = addUnboundVarToInsertPattern();
-        ThingVariable<?> matchInsertStatement = null;
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
-            if (!generatorMappingForAppendAttribute.isMatch()) {
-//                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
-                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce)) {
-                    if (matchInsertStatement == null) {
-                        matchInsertStatement = unboundMatchInsertStatement.constrain(hasConstraint);
-                    } else {
-                        matchInsertStatement.constrain(hasConstraint);
-                    }
-                }
-            }
-        }
-
-        // construct insertStatement
-        Thing insertStatement = addEntityToMatchPattern();
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
-//            insertStatement = addAttribute(rowTokens, insertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
-            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce)) {
-                insertStatement.constrain(hasConstraint);
-            }
-        }
-
-        if (isValid(matchStatements, matchInsertStatement)) {
-            appLogger.debug("valid match-insert query: <" + assembleQuery(matchStatements, matchInsertStatement) + ">");
-            processorStatement.getMatchInserts().add(new ProcessorStatement.MatchInsert(matchStatements, matchInsertStatement));
+        if (isValidMatchAppend(matchStatements, matchInsertStatement, dce, pce)) {
+            appLogger.debug("valid match-insert query: <" + matchInsertQueriesToString(matchStatements, matchInsertStatement) + ">");
+            insertQueries.getMatchInserts().add(new InsertQueries.MatchInsert(matchStatements, matchInsertStatement));
         } else {
             dataLogger.trace("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
                     + "  does not contain at least one match attribute and one insert attribute. Tokenized row: " + Arrays.toString(rowTokens)
-                    + " - invalid query: " + assembleQuery(matchStatements, matchInsertStatement) + " - will insert without doing match first");
-            processorStatement.getMatchInserts().add(new ProcessorStatement.MatchInsert(null, null));
+                    + " - invalid query: " + matchInsertQueriesToString(matchStatements, matchInsertStatement) + " - will insert without doing match first");
+            insertQueries.getMatchInserts().add(new InsertQueries.MatchInsert(null, null));
         }
 
-        if (isValid(insertStatement)) {
-            appLogger.debug("valid insert query: <" + insertStatement + ">");
-            processorStatement.getInserts().add(insertStatement);
+        if (isValidDirectInsert(directInsertStatement, pce)) {
+            appLogger.debug("valid insert query: <" + directInsertStatement + ">");
+            insertQueries.getDirectInserts().add(directInsertStatement);
         } else {
             dataLogger.warn("in datapath <" + dce.getDataPath()[dataPathIndex] + ">: row " + rowCounter
                     + " does not contain at least one match attribute and one insert attribute. Skipping faulty tokenized row: " + Arrays.toString(rowTokens)
-                    + " - invalid query: " + insertStatement.toString());
-            processorStatement.getInserts().add(null);
+                    + " - invalid query: " + directInsertStatement.toString());
+            insertQueries.getDirectInserts().add(null);
         }
     }
 
     private boolean validateDataConfigEntry() {
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getAttributes()) {
+        for (DataConfigEntry.ConceptProcessorMapping attributeMapping : dce.getAttributeProcessorMappings()) {
             if (attributeMapping.isMatch()) {
                 return true;
             }
         }
         return false;
     }
-
-    private Thing addEntityToMatchPattern() {
-        if (pce.getSchemaType() != null) {
-            return Graql.var("e").isa(pce.getSchemaType());
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
-        }
-    }
-
-    private UnboundVariable addUnboundVarToInsertPattern() {
-        if (pce.getSchemaType() != null) {
-            return Graql.var("e");
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
-        }
-    }
-
-    private String assembleQuery(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> insertStatement) {
-        StringBuilder ret = new StringBuilder();
-        for (ThingVariable<?> st : matchStatements) {
-            ret.append(st.toString());
-        }
-        ret.append(insertStatement.toString());
-        return ret.toString();
-    }
-
-    private boolean isValid(ArrayList<ThingVariable<?>> matchStatements, ThingVariable<?> matchInsertInsertStatement) {
-
-        // Match-Insert pairs:
-        // missing match attribute
-        if (matchInsertInsertStatement == null) return false;
-        StringBuilder matchStatement = new StringBuilder();
-        for (Pattern st : matchStatements) {
-            matchStatement.append(st.toString());
-        }
-        ArrayList<String> matchAttributes = new ArrayList<>();
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getMatchAttributes()) {
-            String generatorKey = attributeMapping.getGenerator();
-            ProcessorConfigEntry.ConceptGenerator generatorEntry = pce.getAttributeGenerator(generatorKey);
-            if (!matchStatement.toString().contains("has " + generatorEntry.getAttributeType())) {
-                return false;
-            }
-            matchAttributes.add(generatorEntry.getAttributeType());
-        }
-        // missing required insert attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            if (!matchInsertInsertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType()) &&
-                    !matchAttributes.contains(generatorEntry.getValue().getAttributeType())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isValid(ThingVariable<?> insertStatement) {
-        // missing required insert attribute
-        if (insertStatement == null) return false;
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            if (!insertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
 }

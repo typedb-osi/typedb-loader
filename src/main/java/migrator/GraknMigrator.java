@@ -336,11 +336,11 @@ public class GraknMigrator {
     private void buildQueriesAndInsert(EntryMigrationConfig conf, GraknSession session, ArrayList<String> rows, int lineCounter, int rowCounter, String header) throws IOException {
         int threads = conf.getDce().getThreads();
         try {
-            ProcessorStatement statements = conf.getInsertGenerator().typeDBInsert(rows, header, rowCounter - lineCounter);
+            InsertQueries statements = conf.getInsertGenerator().typeDBInsert(rows, header, rowCounter - lineCounter);
             if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ENTITY) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE)) {
-                appLogger.trace("number of generated insert Statements: " + statements.getInserts().size());
-                graknInserter.insertThreadedInserting(statements.getInserts(), session, threads, conf.getDce().getBatchSize());
+                appLogger.trace("number of generated insert Statements: " + statements.getDirectInserts().size());
+                graknInserter.insertThreadedInserting(statements.getDirectInserts(), session, threads, conf.getDce().getBatchSize());
             } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.RELATION) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.NESTED_RELATION) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE_RELATION) ||

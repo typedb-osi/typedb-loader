@@ -27,26 +27,26 @@ public class AttributeInsertProcessorTest {
         ArrayList<String> rows = getData(file);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testAttributeInsertGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testAttributeInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$a \"yes\" isa is-in-use";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         tmp = "$a \"no\" isa is-in-use";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
-        Assert.assertNull(results.getInserts().get(idx));
+        Assert.assertNull(results.getDirectInserts().get(idx));
 
         idx += 1;
         tmp = "$a \"5\" isa is-in-use";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
-        Assert.assertEquals(4, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(3, results.getInserts().size());
+        Assert.assertEquals(4, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(3, results.getDirectInserts().size());
 
         Assert.assertEquals(0, results.getMatchInserts().size());
         int nullCount = 0;

@@ -18,12 +18,12 @@ public class MigrationConfigTest {
         // dataconfig tests
         Assert.assertEquals(8, mg.getDataConfig().get("entity1").getBatchSize());
         Assert.assertEquals(4, mg.getDataConfig().get("entity1").getThreads());
-        Assert.assertEquals(3, mg.getDataConfig().get("entity1").getAttributes().length);
+        Assert.assertEquals(3, mg.getDataConfig().get("entity1").getAttributeProcessorMappings().length);
         Assert.assertEquals("entity1", mg.getDataConfig().get("entity1").getProcessor());
         Assert.assertEquals('\t', mg.getDataConfig().get("entity1").getSeparator().charValue());
         Assert.assertEquals(1, mg.getDataConfig().get("entity1").getDataPath().length);
-        Assert.assertNull(mg.getDataConfig().get("entity1").getAttributes()[0].getListSeparator());
-        Assert.assertEquals("###", mg.getDataConfig().get("entity1").getAttributes()[1].getListSeparator());
+        Assert.assertNull(mg.getDataConfig().get("entity1").getAttributeProcessorMappings()[0].getListSeparator());
+        Assert.assertEquals("###", mg.getDataConfig().get("entity1").getAttributeProcessorMappings()[1].getListSeparator());
 
         // generatorconfig tests
         Assert.assertEquals("entity1", mg.getProcessorConfig().get("processors").get(0).getProcessor());

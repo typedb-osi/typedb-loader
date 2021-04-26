@@ -29,7 +29,7 @@ public class AppendOrInsertProcessorTest {
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testGenerator.typeDBInsert(rows, header, 1);
+        InsertQueries results = testGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+7 171 898 0853\";";
@@ -37,13 +37,13 @@ public class AppendOrInsertProcessorTest {
         tmp = "$e has first-name \"Melli\", has last-name \"Winchcum\", has city \"London\", has age 55, has nick-name \"Mel\"";
         Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
         tmp = "$e isa person, has first-name \"Melli\", has last-name \"Winchcum\", has phone-number \"+7 171 898 0853\", has city \"London\", has age 55, has nick-name \"Mel\"";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
         tmp = "$e isa person, has first-name \"Sakura\", has city \"Fire Village\", has age 13";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         tmp = "$e isa person, has phone-number \"+7 690 597 4443\";";
@@ -51,7 +51,7 @@ public class AppendOrInsertProcessorTest {
         tmp = "$e has first-name \"Xylina\", has last-name \"D'Alesco\", has city \"Cambridge\", has age 51, has nick-name \"Xyl\"";
         Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
         tmp = "$e isa person, has first-name \"Xylina\", has last-name \"D'Alesco\", has phone-number \"+7 690 597 4443\", has city \"Cambridge\", has age 51, has nick-name \"Xyl\"";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         tmp = "$e isa person, has phone-number \"+62 107 666 3334\";";
@@ -59,7 +59,7 @@ public class AppendOrInsertProcessorTest {
         tmp = "$e has first-name \"Sasuke\", has city \"Fire Village\", has age 13";
         Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
         tmp = "$e isa person, has first-name \"Sasuke\", has phone-number \"+62 107 666 3334\", has city \"Fire Village\", has age 13";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         tmp = "$e isa person, has phone-number \"+62 107 530 7500\";";
@@ -67,7 +67,7 @@ public class AppendOrInsertProcessorTest {
         tmp = "$e has first-name \"Elenore\", has last-name \"Stokey\", has city \"Oxford\", has age 35, has nick-name \"Elen\"";
         Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
         tmp = "$e isa person, has first-name \"Elenore\", has last-name \"Stokey\", has phone-number \"+62 107 530 7500\", has city \"Oxford\", has age 35, has nick-name \"Elen\"";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         tmp = "$e isa person, has phone-number \"+62 107 321 3333\";";
@@ -75,16 +75,16 @@ public class AppendOrInsertProcessorTest {
         tmp = "$e has first-name \"Naruto\", has last-name \"Uzamaki\", has city \"Fire Village\", has age 12";
         Assert.assertEquals(tmp, results.getMatchInserts().get(idx).getInsert().toString());
         tmp = "$e isa person, has first-name \"Naruto\", has last-name \"Uzamaki\", has phone-number \"+62 107 321 3333\", has city \"Fire Village\", has age 12";
-        Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
+        Assert.assertEquals(tmp, results.getDirectInserts().get(idx).toString());
 
         idx += 1;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
         Assert.assertNull(results.getMatchInserts().get(idx).getInsert());
-        Assert.assertNull(results.getInserts().get(idx));
+        Assert.assertNull(results.getDirectInserts().get(idx));
 
-        Assert.assertEquals(7, results.getInserts().size());
-        results.getInserts().removeAll(Collections.singleton(null));
-        Assert.assertEquals(6, results.getInserts().size());
+        Assert.assertEquals(7, results.getDirectInserts().size());
+        results.getDirectInserts().removeAll(Collections.singleton(null));
+        Assert.assertEquals(6, results.getDirectInserts().size());
 
         Assert.assertEquals(7, results.getMatchInserts().size());
         int nullCount = 0;

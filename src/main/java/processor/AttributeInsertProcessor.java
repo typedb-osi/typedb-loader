@@ -23,7 +23,9 @@ public class AttributeInsertProcessor implements InsertProcessor {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public AttributeInsertProcessor(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex) {
+    public AttributeInsertProcessor(DataConfigEntry dce,
+                                    ProcessorConfigEntry pce,
+                                    int dataPathIndex) {
         super();
         this.dce = dce;
         this.pce = pce;
@@ -31,14 +33,14 @@ public class AttributeInsertProcessor implements InsertProcessor {
         appLogger.debug("Creating AttributeInsertGenerator for processor " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
-                                           String header,
-                                           int rowCounter) throws IllegalArgumentException {
-        ProcessorStatement statements = new ProcessorStatement();
+    public InsertQueries typeDBInsert(ArrayList<String> rows,
+                                      String header,
+                                      int rowCounter) throws IllegalArgumentException {
+        InsertQueries statements = new InsertQueries();
         int batchCount = 1;
         for (String row : rows) {
             try {
-                statements.getInserts().add(graknAttributeQueryFromRow(row, header, rowCounter + batchCount));
+                statements.getDirectInserts().add(graknAttributeQueryFromRow(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -56,15 +58,15 @@ public class AttributeInsertProcessor implements InsertProcessor {
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
-        if (dce.getAttributes().length > 1) {
+        if (dce.getAttributeProcessorMappings().length > 1) {
             //TODO: need to move into validation
             appLogger.error("the dataconfig entry for inserting independent attribute <" + pce.getSchemaType() + "> lists more than one column - this is not allowed");
             return null;
         } else {
             Attribute attributeInsertStatement = null;
-            for (DataConfigEntry.DataConfigGeneratorMapping attributeGeneratorMapping : dce.getAttributes()) {
+            for (DataConfigEntry.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
                 //TODO: check that no list sep in this attributeGeneratorMapping in validation - because otherwise statement produced will be invalid
-                for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, attributeGeneratorMapping, pce)) {
+                for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, cpm, pce)) {
                     attributeInsertStatement = Graql.var("a").constrain(valueConstraint);
                 }
             }

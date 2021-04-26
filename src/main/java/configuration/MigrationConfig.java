@@ -74,7 +74,7 @@ public class MigrationConfig {
                 ProcessorConfigEntry referencedPCE = getReferenceProcessorConfigEntry(pce.getReferenceProcessor());
                 if (referencedPCE != null) {
                     pce.setSchemaType(referencedPCE.getSchemaType());
-                    pce.setConceptGenerators(referencedPCE.getConceptGenerators());
+                    pce.setConceptProcessors(referencedPCE.getConceptProcessors());
                 } else {
                     appLogger.error("the referenced processor <" + pce.getReferenceProcessor() + "> does not exist in the processor configuration file.");
                 }
