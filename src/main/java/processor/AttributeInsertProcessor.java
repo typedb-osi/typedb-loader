@@ -40,7 +40,7 @@ public class AttributeInsertProcessor implements InsertProcessor {
         int batchCount = 1;
         for (String row : rows) {
             try {
-                statements.getDirectInserts().add(graknAttributeQueryFromRow(row, header, rowCounter + batchCount));
+                statements.getDirectInserts().add(generateInsertQueries(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -49,9 +49,9 @@ public class AttributeInsertProcessor implements InsertProcessor {
         return statements;
     }
 
-    public ThingVariable<?> graknAttributeQueryFromRow(String row,
-                                                       String header,
-                                                       int rowCounter) throws Exception {
+    public ThingVariable<?> generateInsertQueries(String row,
+                                                  String header,
+                                                  int rowCounter) throws Exception {
         //TODO use CSVFormat datastructure
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());

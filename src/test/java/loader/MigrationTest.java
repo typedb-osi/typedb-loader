@@ -1,4 +1,4 @@
-package migrator;
+package loader;
 
 import configuration.MigrationConfig;
 import grakn.client.api.GraknClient;
@@ -10,7 +10,7 @@ import graql.lang.pattern.variable.ThingVariable.Relation;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import graql.lang.pattern.variable.UnboundVariable;
 import graql.lang.query.GraqlMatch;
-import insert.GraknInserter;
+import write.TypeDBWriter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class MigrationTest {
         String gcp = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
+        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
         mig.migrate();
     }
 
@@ -43,16 +43,16 @@ public class MigrationTest {
     public void migratePhoneCallsTest() throws IOException {
 
         String databaseName = "grami_phone_call_test";
-        String asp = getAbsPath("src/test/resources/phone-calls/schema.gql");
-        String msp = getAbsPath("src/test/resources/phone-calls/migrationStatus.json");
-        String adcp = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
-        String gcp = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
+        String asp = getAbsPath("src/test/resources/phoneCalls/schema.gql");
+        String msp = getAbsPath("src/test/resources/phoneCalls/migrationStatus.json");
+        String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
+        String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
+        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
         mig.migrate();
 
-        GraknInserter gi = new GraknInserter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
+        TypeDBWriter gi = new TypeDBWriter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
         GraknClient client = gi.getClient();
         GraknSession session = gi.getDataSession(client);
         testEntities(session);
@@ -232,7 +232,7 @@ public class MigrationTest {
         GraqlMatch.Limited getQuery = Graql.match(var("p").isa("person").has("twitter-username", var("x"))).get("p").limit(1000);
         Assert.assertEquals(6, read.query().match(getQuery).count());
 
-        // Count multi-insert using listSeparator
+        // Count multi-write using listSeparator
         getQuery = Graql.match(var("p").isa("person").has("phone-number", "+263 498 495 0617").has("twitter-username", var("x"))).get("x").limit(1000);
         Assert.assertEquals(2, read.query().match(getQuery).count());
 
@@ -240,7 +240,7 @@ public class MigrationTest {
         getQuery = Graql.match(var("c").isa("call").has("call-rating", var("cr"))).get("c").limit(1000);
         Assert.assertEquals(5, read.query().match(getQuery).count());
 
-        // specific relation insert
+        // specific relation write
         getQuery = Graql.match(var("c").isa("call").has("started-at", getDT("2018-09-24T03:16:48")).has("call-rating", var("cr"))).get("cr").limit(1000);
         read.query().match(getQuery).forEach(answer -> {
             Assert.assertEquals(5L, answer.get("cr").asAttribute().getValue());
@@ -305,7 +305,7 @@ public class MigrationTest {
         String gcp = getAbsPath("src/test/resources/bugfixing/issue10/processorConfig.json");
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
+        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
         mig.migrate();
     }
 }

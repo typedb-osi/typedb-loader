@@ -1,8 +1,8 @@
 {
   "person": {
     "dataPath": [
-      "src/test/resources/phone-calls/person.csv",
-      "src/test/resources/phone-calls/person_nextfile.csv"
+      "src/test/resources/phoneCalls/person.csv",
+      "src/test/resources/phoneCalls/person_nextfile.csv"
     ],
     "separator": ",",
     "processor": "person",
@@ -36,7 +36,7 @@
       }]
   },
   "company": {
-    "dataPath": ["src/test/resources/phone-calls/company.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/company.csv"],
     "separator": ",",
     "processor": "company",
     "attributes": [
@@ -48,7 +48,7 @@
     "threads": 1
   },
   "contract": {
-    "dataPath": ["src/test/resources/phone-calls/contract.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/contract.csv"],
     "separator": ",",
     "processor": "contract",
     "players": [
@@ -66,7 +66,7 @@
     "threads": 4
   },
   "calls": {
-    "dataPath": ["src/test/resources/phone-calls/call.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/call.csv"],
     "separator": ",",
     "processor": "call",
     "players": [
@@ -93,7 +93,7 @@
     "threads": 4
   },
   "communication-channel": {
-    "dataPath": ["src/test/resources/phone-calls/communication-channel.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/communication-channel.csv"],
     "separator": ",",
     "processor": "communication-channel",
     "batchSize": 100,
@@ -118,7 +118,7 @@
     ]
   },
   "communication-channel-pm": {
-    "dataPath": ["src/test/resources/phone-calls/communication-channel-pm.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/communication-channel-pm.csv"],
     "separator": ",",
     "processor": "communication-channel",
     "batchSize": 100,
@@ -142,7 +142,7 @@
     ]
   },
   "append-twitter": {
-    "dataPath": ["src/test/resources/phone-calls/append-twitter-nickname.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/append-twitter-nickname.csv"],
     "separator": ",",
     "processor": "append-twitter-to-person",
     "attributes": [
@@ -165,7 +165,7 @@
     "threads": 4
   },
   "append-call-rating": {
-    "dataPath": ["src/test/resources/phone-calls/append-call-rating.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/append-call-rating.csv"],
     "separator": ",",
     "processor": "append-call-rating-to-call",
     "attributes": [
@@ -183,7 +183,7 @@
     "threads": 4
   },
   "append-pp-fakebook": {
-    "dataPath": ["src/test/resources/phone-calls/append-fb-preprocessed.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/append-fb-preprocessed.csv"],
     "separator": ",",
     "processor": "append-pp-fb-to-person",
     "attributes": [
@@ -209,7 +209,7 @@
     "threads": 4
   },
   "is-in-use": {
-    "dataPath": ["src/test/resources/phone-calls/is-in-use.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/is-in-use.csv"],
     "separator": ",",
     "processor": "is-in-use",
     "batchSize": 50,
@@ -222,7 +222,7 @@
     ]
   },
   "in-use": {
-    "dataPath": ["src/test/resources/phone-calls/in-use.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/in-use.csv"],
     "separator": ",",
     "processor": "in-use",
     "batchSize": 50,
@@ -240,7 +240,7 @@
   },
   "person-order3": {
     "orderAfter": 3,
-    "dataPath": ["src/test/resources/phone-calls/person3.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/person3.csv"],
     "separator": ",",
     "processor": "person",
     "batchSize": 50,
@@ -274,7 +274,7 @@
   },
   "person-order1": {
     "orderAfter": 1,
-    "dataPath": ["src/test/resources/phone-calls/person1.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/person1.csv"],
     "separator": ",",
     "processor": "person",
     "batchSize": 50,
@@ -308,7 +308,7 @@
   },
   "person-order2": {
     "orderAfter": 2,
-    "dataPath": ["src/test/resources/phone-calls/person2.csv"],
+    "dataPath": ["src/test/resources/phoneCalls/person2.csv"],
     "separator": ",",
     "processor": "person",
     "batchSize": 50,
@@ -342,7 +342,7 @@
   },
   "person-insert-or-append": {
     "dataPath": [
-      "src/test/resources/phone-calls/person-append-or-insert.csv"
+      "src/test/resources/phoneCalls/person-append-or-insert.csv"
     ],
     "separator": ",",
     "processor": "person-append-or-insert",

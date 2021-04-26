@@ -92,7 +92,7 @@ public class ProcessorUtil {
                                                                                int lineNumber,
                                                                                DataConfigEntry.ConceptProcessorMapping generatorMappingForAttribute,
                                                                                ProcessorConfigEntry pce) {
-        ProcessorConfigEntry.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(generatorMappingForAttribute.getGenerator());
+        ProcessorConfigEntry.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(generatorMappingForAttribute.getConceptProcessor());
         int columnNameIndex = idxOf(columnNames, generatorMappingForAttribute.getColumnName());
         ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
 
@@ -133,7 +133,7 @@ public class ProcessorUtil {
         ArrayList<ThingConstraint.Has> hasConstraints = new ArrayList<>();
         ArrayList<ThingConstraint.Value<?>> valueConstraints = generateValueConstraints(tokens, columnNames, lineNumber, generatorMappingForAttribute, pce);
 
-        String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
+        String attributeGeneratorKey = generatorMappingForAttribute.getConceptProcessor();
         ProcessorConfigEntry.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String attributeSchemaType = attributeGenerator.getAttributeType();
         for (ThingConstraint.Value<?> valueConstraint : valueConstraints) {
@@ -240,7 +240,7 @@ public class ProcessorUtil {
         }
         ArrayList<String> matchAttributes = new ArrayList<>();
         for (DataConfigEntry.ConceptProcessorMapping attributeMapping : dce.getMatchAttributes()) {
-            String generatorKey = attributeMapping.getGenerator();
+            String generatorKey = attributeMapping.getConceptProcessor();
             ProcessorConfigEntry.ConceptProcessor generatorEntry = pce.getAttributeGenerator(generatorKey);
             if (!matchStatement.toString().contains("has " + generatorEntry.getAttributeType())) {
                 return false;

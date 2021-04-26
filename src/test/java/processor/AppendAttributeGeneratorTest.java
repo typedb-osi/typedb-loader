@@ -16,12 +16,12 @@ import static util.Util.getAbsPath;
 public class AppendAttributeGeneratorTest {
 
     private final String db = "grakn_migrator_test";
-    private final String schema = getAbsPath("src/test/resources/phone-calls/schema-updated.gql");
-    private final String dc = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
-    private final String pc = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
-    private final String datafileA = getAbsPath("src/test/resources/phone-calls/append-twitter-nickname.csv");
-    private final String datafileB = getAbsPath("src/test/resources/phone-calls/append-fb-preprocessed.csv");
-    private final String datafileC = getAbsPath("src/test/resources/phone-calls/append-call-rating.csv");
+    private final String schema = getAbsPath("src/test/resources/phoneCalls/schema-updated.gql");
+    private final String dc = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
+    private final String pc = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
+    private final String datafileA = getAbsPath("src/test/resources/phoneCalls/append-twitter-nickname.csv");
+    private final String datafileB = getAbsPath("src/test/resources/phoneCalls/append-fb-preprocessed.csv");
+    private final String datafileC = getAbsPath("src/test/resources/phoneCalls/append-call-rating.csv");
     private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", db, schema, dc, pc);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
 

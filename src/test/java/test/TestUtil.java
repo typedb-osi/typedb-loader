@@ -1,7 +1,7 @@
 package test;
 
 import graql.lang.pattern.variable.ThingVariable;
-import io.DataLoader;
+import io.FileToInputStream;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ public class TestUtil {
 
     public static ArrayList<String> getData(String path) {
         ArrayList<String> rows = new ArrayList<>();
-        InputStream es = DataLoader.getInputStream(path);
+        InputStream es = FileToInputStream.getInputStream(path);
         if (es != null) {
             String line;
             try (BufferedReader br = new BufferedReader(new InputStreamReader(es))) {

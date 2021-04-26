@@ -82,7 +82,7 @@ public class DataConfigEntry {
             return columnNames;
         }
 
-        public String getGenerator() {
+        public String getConceptProcessor() {
             return generator;
         }
 

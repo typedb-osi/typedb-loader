@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-public class DataLoader {
+public class FileToInputStream {
 
     public static InputStream getInputStream(String filepath) {
         try {

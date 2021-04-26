@@ -1,4 +1,4 @@
-package insert;
+package write;
 
 import processor.InsertQueries;
 import grakn.client.api.GraknClient;
@@ -17,17 +17,17 @@ import java.util.ArrayList;
 
 import static graql.lang.Graql.var;
 
-public class GraknInserterTest {
+public class TypeDBWriterTest {
 
-    GraknInserter gi;
-    GraknInserter pcgi;
+    TypeDBWriter gi;
+    TypeDBWriter pcgi;
     String databaseName = "grakn_inserter_test";
     String schemaPath;
 
-    public GraknInserterTest() {
+    public TypeDBWriterTest() {
         this.schemaPath = Util.getAbsPath("src/test/resources/genericTests/schema-test.gql");
-        this.gi = new GraknInserter("localhost", "1729", schemaPath, databaseName);
-        this.pcgi = new GraknInserter("localhost", "1729", "src/test/resources/phone-calls/schema-updated.gql", databaseName);
+        this.gi = new TypeDBWriter("localhost", "1729", schemaPath, databaseName);
+        this.pcgi = new TypeDBWriter("localhost", "1729", "src/test/resources/phoneCalls/schema-updated.gql", databaseName);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class GraknInserterTest {
         write.commit();
         write.close();
 
-        //ensure graph contains our insert
+        //ensure graph contains our write
         GraknTransaction read = dataSession.transaction(GraknTransaction.Type.READ);
         GraqlMatch.Limited getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get("e").limit(100);
         Assert.assertEquals(1, read.query().match(getQuery).count());
@@ -86,7 +86,7 @@ public class GraknInserterTest {
         Assert.assertEquals(0, read.query().match(getQuery).count());
         read.close();
 
-        //another test for our insert
+        //another test for our write
         read = dataSession.transaction(GraknTransaction.Type.READ);
         getQuery = Graql.match(var("e").isa("entity1").has("entity1-id", "ide1")).get("e").limit(100);
         read.query().match(getQuery).forEach(answers -> answers.concepts().forEach(entry -> Assert.assertTrue(entry.isEntity())));

@@ -14,9 +14,9 @@ import static util.Util.getAbsPath;
 
 public class AttributeInsertProcessorTest {
 
-    private final String adcp = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
-    private final String gcp = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
-    private final String file = getAbsPath("src/test/resources/phone-calls/is-in-use.csv");
+    private final String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
+    private final String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
+    private final String file = getAbsPath("src/test/resources/phoneCalls/is-in-use.csv");
     private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "null", "null", adcp, gcp);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
 

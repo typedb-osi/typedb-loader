@@ -15,10 +15,10 @@ import static util.Util.getAbsPath;
 
 public class NestedRelationInsertProcessorTest {
 
-    private final String dc = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
-    private final String pc = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
-    private final String dataA = getAbsPath("src/test/resources/phone-calls/communication-channel.csv");
-    private final String dataB = getAbsPath("src/test/resources/phone-calls/communication-channel-pm.csv");
+    private final String dc = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
+    private final String pc = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
+    private final String dataA = getAbsPath("src/test/resources/phoneCalls/communication-channel.csv");
+    private final String dataB = getAbsPath("src/test/resources/phoneCalls/communication-channel-pm.csv");
     private final MigrationConfig migrationConfig = new MigrationConfig(null, null, null, dc, pc);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> gc = migrationConfig.getProcessorConfig();
 

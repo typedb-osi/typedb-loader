@@ -7,11 +7,10 @@ import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
 import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
-import insert.GraknInserter;
-import migrator.GraknMigrator;
+import write.TypeDBWriter;
+import loader.TypeDBLoader;
 import org.junit.Assert;
 import org.junit.Test;
-import schema.SchemaUpdater;
 
 import java.io.IOException;
 
@@ -27,18 +26,18 @@ public class SchemaUpdaterTest {
     public void updateSchemaTest() throws IOException {
 
         String databaseName = "grami_phone_call_test_su";
-        String asp = getAbsPath("src/test/resources/phone-calls/schema.gql");
-        String msp = getAbsPath("src/test/resources/phone-calls/migrationStatus.json");
-        String adcp = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
-        String gcp = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
+        String asp = getAbsPath("src/test/resources/phoneCalls/schema.gql");
+        String msp = getAbsPath("src/test/resources/phoneCalls/migrationStatus.json");
+        String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
+        String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
 
         MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
-        GraknMigrator mig = new GraknMigrator(migrationConfig, msp, true);
+        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
         mig.migrate();
 
-        GraknInserter gi = new GraknInserter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
+        TypeDBWriter gi = new TypeDBWriter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
 
-        asp = getAbsPath("src/test/resources/phone-calls/schema-updated.gql");
+        asp = getAbsPath("src/test/resources/phoneCalls/schema-updated.gql");
         SchemaUpdateConfig suConfig = new SchemaUpdateConfig(graknURI,databaseName, asp);
         SchemaUpdater su = new SchemaUpdater(suConfig);
         su.updateSchema();
@@ -46,7 +45,7 @@ public class SchemaUpdaterTest {
         postUpdateSchemaTests(gi);
     }
 
-    private void postUpdateSchemaTests(GraknInserter gi) {
+    private void postUpdateSchemaTests(TypeDBWriter gi) {
         GraknClient client = gi.getClient();
         GraknSession session = gi.getDataSession(client);
 

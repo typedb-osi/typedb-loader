@@ -6,7 +6,7 @@ import grakn.client.api.GraknTransaction;
 import grakn.client.api.concept.type.AttributeType;
 import graql.lang.Graql;
 import graql.lang.query.GraqlMatch;
-import insert.GraknInserter;
+import write.TypeDBWriter;
 import processor.InsertProcessor;
 
 import java.util.List;
@@ -23,14 +23,14 @@ public class EntryMigrationConfig {
     private final InsertProcessor insertProcessor;
     private final String schemaTypeKey;
 
-    public EntryMigrationConfig(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertProcessor insertProcessor, GraknInserter graknInserter) {
+    public EntryMigrationConfig(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertProcessor insertProcessor, TypeDBWriter typeDBWriter) {
         this.dce = dce;
         this.pce = pce;
         this.dataPathIndex = dataPathIndex;
         this.migrationStatusKey = migrationStatusKey;
         this.migratedRows = migratedRows;
         this.insertProcessor = insertProcessor;
-        this.schemaTypeKey = getSchemaTypeKey(pce.getSchemaType(), graknInserter);
+        this.schemaTypeKey = getSchemaTypeKey(pce.getSchemaType(), typeDBWriter);
     }
 
     public String getSchemaTypeKey() {
@@ -61,10 +61,10 @@ public class EntryMigrationConfig {
         return insertProcessor;
     }
 
-    private String getSchemaTypeKey(String schemaType, GraknInserter graknInserter) {
+    private String getSchemaTypeKey(String schemaType, TypeDBWriter typeDBWriter) {
         final String[] key = {null};
-        GraknClient client = graknInserter.getClient();
-        GraknSession session = graknInserter.getSchemaSession(client);
+        GraknClient client = typeDBWriter.getClient();
+        GraknSession session = typeDBWriter.getSchemaSession(client);
         GraknTransaction tx = session.transaction(GraknTransaction.Type.READ);
 
         GraqlMatch getQuery = Graql.match(var("st").type(schemaType)).get("st").limit(1000);

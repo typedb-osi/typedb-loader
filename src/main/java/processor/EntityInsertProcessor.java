@@ -2,7 +2,6 @@ package processor;
 
 import configuration.DataConfigEntry;
 import configuration.ProcessorConfigEntry;
-import graql.lang.pattern.Pattern;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
@@ -10,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static processor.ProcessorUtil.*;
 
@@ -39,7 +37,7 @@ public class EntityInsertProcessor implements InsertProcessor {
         int batchCount = 1;
         for (String row : rows) {
             try {
-                insertQueries.getDirectInserts().add(graknEntityQueryFromRow(row, header, rowCounter + batchCount));
+                insertQueries.getDirectInserts().add(generateInsertQueries(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -48,9 +46,9 @@ public class EntityInsertProcessor implements InsertProcessor {
         return insertQueries;
     }
 
-    public ThingVariable<?> graknEntityQueryFromRow(String row,
-                                                    String header,
-                                                    int rowCounter) throws Exception {
+    public ThingVariable<?> generateInsertQueries(String row,
+                                                  String header,
+                                                  int rowCounter) throws Exception {
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));

@@ -1,4 +1,4 @@
-package insert;
+package write;
 
 import grakn.client.Grakn;
 import grakn.client.api.GraknClient;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 import static util.Util.loadSchemaFromFile;
 
-public class GraknInserter {
+public class TypeDBWriter {
 
     //TODO replace sout with proper logging
 
@@ -28,7 +28,7 @@ public class GraknInserter {
     private final String databaseName;
     private final String graknURI;
 
-    public GraknInserter(String graknURI, String port, String schemaPath, String databaseName) {
+    public TypeDBWriter(String graknURI, String port, String schemaPath, String databaseName) {
         this.schemaPath = schemaPath;
         this.databaseName = databaseName;
         this.graknURI = String.format("%s:%s", graknURI, port);
@@ -139,7 +139,7 @@ public class GraknInserter {
                                 ThingVariable<?> directInsert = statements.getDirectInserts().get(q);
                                 ArrayList<ThingVariable<?>> matchInsertMatches = statements.getMatchInserts().get(q).getMatches();
                                 ThingVariable<?> matchInsertInsert = statements.getMatchInserts().get(q).getInsert();
-                                // if matchInserts contains nulls - do direct insert
+                                // if matchInserts contains nulls - do direct write
                                 if (statements.getMatchInserts().get(q).getMatches() == null) {
                                     if (directInsert != null) {
                                         GraqlInsert query = Graql.insert(directInsert);
@@ -147,7 +147,7 @@ public class GraknInserter {
                                         System.out.println("Direct Insert finished because getMatches is null: " + query);
                                     }
                                 } else {
-                                    // else try to insert match-insert - if the result is 0, do direct insert
+                                    // else try to write match-write - if the result is 0, do direct write
                                     if (matchInsertMatches != null && matchInsertInsert != null) {
                                         GraqlInsert query = Graql.match(matchInsertMatches).insert(matchInsertInsert);
                                         final Stream<ConceptMap> insertedStream = tx.query().insert(query);

@@ -1,12 +1,12 @@
-package migrator;
+package loader;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import configuration.*;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
-import insert.GraknInserter;
-import io.DataLoader;
+import write.TypeDBWriter;
+import io.FileToInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import processor.*;
@@ -22,31 +22,31 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class GraknMigrator {
+public class TypeDBLoader {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private final HashMap<String, DataConfigEntry> dataConfig;
     private final String migrationStatePath;
-    private final GraknInserter graknInserter;
+    private final TypeDBWriter typeDBWriter;
     private final MigrationConfig migrationConfig;
     private boolean cleanAndMigrate = false;
     private HashMap<String, MigrationStatus> migrationStatus;
 
-    public GraknMigrator(MigrationConfig migrationConfig,
-                         String migrationStatePath) {
+    public TypeDBLoader(MigrationConfig migrationConfig,
+                        String migrationStatePath) {
         this.dataConfig = migrationConfig.getDataConfig();
         this.migrationStatePath = migrationStatePath;
         this.migrationConfig = migrationConfig;
-        this.graknInserter = new GraknInserter(migrationConfig.getGraknURI().split(":")[0],
+        this.typeDBWriter = new TypeDBWriter(migrationConfig.getGraknURI().split(":")[0],
                 migrationConfig.getGraknURI().split(":")[1],
                 migrationConfig.getSchemaPath(),
                 migrationConfig.getKeyspace()
         );
     }
 
-    public GraknMigrator(MigrationConfig migrationConfig,
-                         String migrationStatePath,
-                         boolean cleanAndMigrate) throws IOException {
+    public TypeDBLoader(MigrationConfig migrationConfig,
+                        String migrationStatePath,
+                        boolean cleanAndMigrate) throws IOException {
         this(migrationConfig, migrationStatePath);
         if (cleanAndMigrate) {
             this.cleanAndMigrate = true;
@@ -57,10 +57,10 @@ public class GraknMigrator {
     public void migrate() throws IOException {
 
         initializeMigrationStatus();
-        GraknClient client = graknInserter.getClient();
+        GraknClient client = typeDBWriter.getClient();
 
         if (cleanAndMigrate) {
-            graknInserter.cleanAndDefineSchemaToDatabase(client);
+            typeDBWriter.cleanAndDefineSchemaToDatabase(client);
             appLogger.info("cleaned database and migrate schema...");
         } else {
             appLogger.info("using existing DB and schema to continue previous migration...");
@@ -80,7 +80,7 @@ public class GraknMigrator {
             System.exit(1);
         }
 
-        GraknSession dataSession = graknInserter.getDataSession(client);
+        GraknSession dataSession = typeDBWriter.getDataSession(client);
         migrateThingsInOrder(dataSession);
 
         dataSession.close();
@@ -135,7 +135,7 @@ public class GraknMigrator {
         }
         appLogger.info("migration of nested-relations completed");
 
-        // append-or-insert things
+        // append-or-write things
         appLogger.info("migrating append-or-insert things...");
         migrationBatch = getEntryMigrationConfigsByProcessorType(ProcessorType.APPEND_OR_INSERT);
         for (EntryMigrationConfig conf : migrationBatch) {
@@ -198,14 +198,14 @@ public class GraknMigrator {
                             appLogger.info("previous migration status found for: [" + migrationStatusKey + "]");
                             if (!migrationStatus.get(migrationStatusKey).isCompleted()) {
                                 appLogger.info(migrationStatusKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(migrationStatusKey).getMigratedRows());
-                                EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), graknInserter);
+                                EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), typeDBWriter);
                                 entries.add(entry);
                             } else { // migration already completed
                                 appLogger.info(migrationStatusKey + " is already completely migrated - moving on...");
                             }
                         } else { // no previous migration
                             appLogger.info("nothing previously migrated for [" + migrationStatusKey + "] - starting from row 0");
-                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), graknInserter);
+                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), typeDBWriter);
                             entries.add(entry);
                         }
                     }
@@ -233,14 +233,14 @@ public class GraknMigrator {
                             appLogger.info("previous migration status found for ordered entry: [" + migrationStatusKey + "]");
                             if (!migrationStatus.get(migrationStatusKey).isCompleted()) {
                                 appLogger.info(migrationStatusKey + " not completely migrated yet, rows already migrated: " + migrationStatus.get(migrationStatusKey).getMigratedRows());
-                                EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), graknInserter);
+                                EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, migrationStatus.get(migrationStatusKey).getMigratedRows(), getProcessor(dce, dataPathIndex), typeDBWriter);
                                 entries.add(entry);
                             } else { // migration already completed
                                 appLogger.info(migrationStatusKey + " is already completely migrated - moving on...");
                             }
                         } else { // no previous migration
                             appLogger.info("nothing previously migrated for ordered entry [" + migrationStatusKey + "] - starting with row 0");
-                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), graknInserter);
+                            EntryMigrationConfig entry = new EntryMigrationConfig(dce, pce, dataPathIndex, migrationStatusKey, 0, getProcessor(dce, dataPathIndex), typeDBWriter);
                             entries.add(entry);
                         }
                     }
@@ -276,7 +276,7 @@ public class GraknMigrator {
 
         appLogger.info("inserting using " + conf.getDce().getThreads() + " threads" + " with thread commit size of " + conf.getDce().getBatchSize() + " rows");
 
-        InputStream entityStream = DataLoader.getInputStream(conf.getDce().getDataPath()[conf.getDataPathIndex()]);
+        InputStream entityStream = FileToInputStream.getInputStream(conf.getDce().getDataPath()[conf.getDataPathIndex()]);
         String header = "";
         ArrayList<String> rows = new ArrayList<>();
         String line;
@@ -298,7 +298,7 @@ public class GraknMigrator {
                 if (totalRecordCounter <= conf.getMigratedRows()) {
                     continue;
                 }
-                // insert Batch once chunk size is reached
+                // write Batch once chunk size is reached
                 rows.add(line);
                 batchSizeCounter++;
                 //                    if (batchSizeCounter == dce.getBatchSize()) {
@@ -315,7 +315,7 @@ public class GraknMigrator {
                     appLogger.info("processed " + totalRecordCounter / 1000 + "k rows");
                 }
             }
-            //insert the rest when loop exits with less than batch size
+            //write the rest when loop exits with less than batch size
             if (!rows.isEmpty()) {
                 buildQueriesAndInsert(conf, session, rows, batchSizeCounter, totalRecordCounter, header);
                 if (totalRecordCounter % 50000 != 0) {
@@ -340,16 +340,16 @@ public class GraknMigrator {
             if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ENTITY) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE)) {
                 appLogger.trace("number of generated insert Statements: " + statements.getDirectInserts().size());
-                graknInserter.insertThreadedInserting(statements.getDirectInserts(), session, threads, conf.getDce().getBatchSize());
+                typeDBWriter.insertThreadedInserting(statements.getDirectInserts(), session, threads, conf.getDce().getBatchSize());
             } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.RELATION) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.NESTED_RELATION) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE_RELATION) ||
                     isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_ATTRIBUTE)) {
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
-                graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
+                typeDBWriter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
             } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_OR_INSERT)) {
                 appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
-                graknInserter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
+                typeDBWriter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
             } else {
                 throw new IllegalArgumentException("the processor <" + conf.getDce().getProcessor() + "> is not known - please check your processor config");
             }

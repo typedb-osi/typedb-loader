@@ -1,6 +1,6 @@
 package processor;
 
-import io.DataLoader;
+import io.FileToInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class ProcessorUtilTest {
     public void processorUtilParserTest() throws IOException {
 
         // csv
-        InputStream csvStream = DataLoader.getInputStream("src/test/resources/generatorutil/test.csv");
+        InputStream csvStream = FileToInputStream.getInputStream("src/test/resources/processorUtil/test.csv");
         ArrayList<String> csvLines = new ArrayList<>();
         String csvLine;
         assert csvStream != null;
@@ -57,7 +57,7 @@ public class ProcessorUtilTest {
         Assert.assertArrayEquals(test, ProcessorUtil.tokenizeCSVStandard(csvLines.get(9), ','));
 
         // tsv
-        InputStream tsvStream = DataLoader.getInputStream("src/test/resources/generatorutil/test.tsv");
+        InputStream tsvStream = FileToInputStream.getInputStream("src/test/resources/processorUtil/test.tsv");
         ArrayList<String> tsvLines = new ArrayList<>();
         String tsvLine;
         assert tsvStream != null;

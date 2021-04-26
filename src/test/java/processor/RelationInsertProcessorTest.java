@@ -16,12 +16,12 @@ import static util.Util.getAbsPath;
 public class RelationInsertProcessorTest {
 
     private final String dc = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
-    private final String dcPC = getAbsPath("src/test/resources/phone-calls/dataConfig.json");
+    private final String dcPC = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
     private final String pc = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
-    private final String pcPC = getAbsPath("src/test/resources/phone-calls/processorConfig.json");
+    private final String pcPC = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
     private final String dataA = getAbsPath("src/test/resources/genericTests/rel1-test-data.tsv");
-    private final String dataB = getAbsPath("src/test/resources/phone-calls/call.csv");
-    private final String dataC = getAbsPath("src/test/resources/phone-calls/contract.csv");
+    private final String dataB = getAbsPath("src/test/resources/phoneCalls/call.csv");
+    private final String dataC = getAbsPath("src/test/resources/phoneCalls/contract.csv");
     private final MigrationConfig migrationConfigA = new MigrationConfig(null, null, null, dc, pc);
     private final HashMap<String, ArrayList<ProcessorConfigEntry>> gcA = migrationConfigA.getProcessorConfig();
     private final MigrationConfig migrationConfigB = new MigrationConfig(null, null, null, dcPC, pcPC);
