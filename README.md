@@ -107,10 +107,10 @@ public class Migration {
     private static final String graknURI = "127.0.0.1:1729";               // defines which grakn server to migrate into
     private static final String databaseName = "yourFavoriteDatabase";      // defines which keyspace to migrate into
 
-    private static final MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
+    private static final MigrationConfig loaderLoadConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
 
     public static void main(String[] args) throws IOException {
-        GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
+        GraknMigrator mig = new GraknMigrator(loaderLoadConfig, migrationStatus, true);
         mig.migrate();
     }
 }

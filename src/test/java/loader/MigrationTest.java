@@ -1,6 +1,6 @@
 package loader;
 
-import configuration.MigrationConfig;
+import configuration.LoaderLoadConfig;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
@@ -34,8 +34,8 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
         String gcp = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
+        LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(graknURI, databaseName, asp, adcp, gcp);
+        TypeDBLoader mig = new TypeDBLoader(loaderLoadConfig, msp, true);
         mig.migrate();
     }
 
@@ -48,8 +48,8 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
+        LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(graknURI, databaseName, asp, adcp, gcp);
+        TypeDBLoader mig = new TypeDBLoader(loaderLoadConfig, msp, true);
         mig.migrate();
 
         TypeDBWriter gi = new TypeDBWriter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
@@ -304,8 +304,8 @@ public class MigrationTest {
         String adcp = getAbsPath("src/test/resources/bugfixing/issue10/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/bugfixing/issue10/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, asp, adcp, gcp);
-        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
+        LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(graknURI, databaseName, asp, adcp, gcp);
+        TypeDBLoader mig = new TypeDBLoader(loaderLoadConfig, msp, true);
         mig.migrate();
     }
 }

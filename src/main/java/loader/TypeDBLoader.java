@@ -25,29 +25,29 @@ import java.util.List;
 public class TypeDBLoader {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
-    private final HashMap<String, DataConfigEntry> dataConfig;
+    private final HashMap<String, ConfigEntryData> dataConfig;
     private final String migrationStatePath;
     private final TypeDBWriter typeDBWriter;
-    private final MigrationConfig migrationConfig;
+    private final LoaderLoadConfig loaderLoadConfig;
     private boolean cleanAndMigrate = false;
     private HashMap<String, MigrationStatus> migrationStatus;
 
-    public TypeDBLoader(MigrationConfig migrationConfig,
+    public TypeDBLoader(LoaderLoadConfig loaderLoadConfig,
                         String migrationStatePath) {
-        this.dataConfig = migrationConfig.getDataConfig();
+        this.dataConfig = loaderLoadConfig.getDataConfig();
         this.migrationStatePath = migrationStatePath;
-        this.migrationConfig = migrationConfig;
-        this.typeDBWriter = new TypeDBWriter(migrationConfig.getGraknURI().split(":")[0],
-                migrationConfig.getGraknURI().split(":")[1],
-                migrationConfig.getSchemaPath(),
-                migrationConfig.getKeyspace()
+        this.loaderLoadConfig = loaderLoadConfig;
+        this.typeDBWriter = new TypeDBWriter(loaderLoadConfig.getGraknURI().split(":")[0],
+                loaderLoadConfig.getGraknURI().split(":")[1],
+                loaderLoadConfig.getSchemaPath(),
+                loaderLoadConfig.getKeyspace()
         );
     }
 
-    public TypeDBLoader(MigrationConfig migrationConfig,
+    public TypeDBLoader(LoaderLoadConfig loaderLoadConfig,
                         String migrationStatePath,
                         boolean cleanAndMigrate) throws IOException {
-        this(migrationConfig, migrationStatePath);
+        this(loaderLoadConfig, migrationStatePath);
         if (cleanAndMigrate) {
             this.cleanAndMigrate = true;
             clearMigrationStatusFile();
@@ -66,7 +66,7 @@ public class TypeDBLoader {
             appLogger.info("using existing DB and schema to continue previous migration...");
         }
 
-        HashMap<String, ArrayList<String>> validation = ConfigValidation.validateConfigs(migrationConfig);
+        HashMap<String, ArrayList<String>> validation = ConfigValidation.validateConfigs(loaderLoadConfig);
         if (validation.get("processorConfig").size() > 0 ||
                 validation.get("processorConfig").size() > 0) {
             appLogger.error("Found errors in configuration files: ");
@@ -186,10 +186,10 @@ public class TypeDBLoader {
     private List<EntryMigrationConfig> getEntryMigrationConfigsByProcessorType(ProcessorType processorType) {
         List<EntryMigrationConfig> entries = new ArrayList<>();
         for (String dcEntryKey : dataConfig.keySet()) {
-            DataConfigEntry dce = dataConfig.get(dcEntryKey);
+            ConfigEntryData dce = dataConfig.get(dcEntryKey);
             int dataPathIndex = 0;
             for (String dataPath : dce.getDataPath()) {
-                ProcessorConfigEntry pce = getProcessorConfigEntry(dce.getProcessor());
+                ConfigEntryProcessor pce = getProcessorConfigEntry(dce.getProcessor());
                 if (pce != null) {
                     String migrationStatusKey = dcEntryKey + "-" + dataPath;
 
@@ -221,10 +221,10 @@ public class TypeDBLoader {
     private List<EntryMigrationConfig> getOrderedAfterEntryMigrationConfigs() {
         List<EntryMigrationConfig> entries = new ArrayList<>();
         for (String dcEntryKey : dataConfig.keySet()) {
-            DataConfigEntry dce = dataConfig.get(dcEntryKey);
+            ConfigEntryData dce = dataConfig.get(dcEntryKey);
             int dataPathIndex = 0;
             for (String dataPath : dce.getDataPath()) {
-                ProcessorConfigEntry pce = getProcessorConfigEntry(dce.getProcessor());
+                ConfigEntryProcessor pce = getProcessorConfigEntry(dce.getProcessor());
                 if (pce != null) {
                     String migrationStatusKey = dcEntryKey + "-" + dataPath;
 
@@ -255,7 +255,7 @@ public class TypeDBLoader {
     }
 
     private boolean isOfProcessorType(String dataConfigProcessorKey, ProcessorType processorType) {
-        for (ProcessorConfigEntry gce : migrationConfig.getProcessorConfig().get("processors")) {
+        for (ConfigEntryProcessor gce : loaderLoadConfig.getProcessorConfig().get("processors")) {
             if (gce.getProcessor().equals(dataConfigProcessorKey)) {
                 return gce.getProcessorType().equals(processorType);
             }
@@ -263,8 +263,8 @@ public class TypeDBLoader {
         return false;
     }
 
-    private ProcessorConfigEntry getProcessorConfigEntry(String dataConfigProcessorKey) {
-        for (ProcessorConfigEntry gce : migrationConfig.getProcessorConfig().get("processors")) {
+    private ConfigEntryProcessor getProcessorConfigEntry(String dataConfigProcessorKey) {
+        for (ConfigEntryProcessor gce : loaderLoadConfig.getProcessorConfig().get("processors")) {
             if (gce.getProcessor().equals(dataConfigProcessorKey)) {
                 return gce;
             }
@@ -416,8 +416,8 @@ public class TypeDBLoader {
         }
     }
 
-    private InsertProcessor getProcessor(DataConfigEntry dce, int dataPathIndex) {
-        ProcessorConfigEntry gce = getGenFromGenConfig(dce.getProcessor(), migrationConfig.getProcessorConfig());
+    private InsertProcessor getProcessor(ConfigEntryData dce, int dataPathIndex) {
+        ConfigEntryProcessor gce = getGenFromGenConfig(dce.getProcessor(), loaderLoadConfig.getProcessorConfig());
 
         if (gce != null) {
             switch (gce.getProcessorType()) {
@@ -448,8 +448,8 @@ public class TypeDBLoader {
         }
     }
 
-    private ProcessorConfigEntry getGenFromGenConfig(String processor, HashMap<String, ArrayList<ProcessorConfigEntry>> processorConfig) {
-        for (ProcessorConfigEntry e : processorConfig.get("processors")) {
+    private ConfigEntryProcessor getGenFromGenConfig(String processor, HashMap<String, ArrayList<ConfigEntryProcessor>> processorConfig) {
+        for (ConfigEntryProcessor e : processorConfig.get("processors")) {
             if (e.getProcessor().equals(processor)) {
                 return e;
             }

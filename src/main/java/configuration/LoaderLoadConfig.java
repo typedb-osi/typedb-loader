@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MigrationConfig {
+public class LoaderLoadConfig {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private final String dataConfigPath;
@@ -21,10 +21,10 @@ public class MigrationConfig {
     private final String schemaPath;
     private final String keyspace;
     private final String graknURI;
-    private HashMap<String, DataConfigEntry> dataConfig;
-    private HashMap<String, ArrayList<ProcessorConfigEntry>> processorConfig;
+    private HashMap<String, ConfigEntryData> dataConfig;
+    private HashMap<String, ArrayList<ConfigEntryProcessor>> processorConfig;
 
-    public MigrationConfig(String graknURI, String keyspace, String schemaPath, String dataConfigPath, String processorConfigPath) {
+    public LoaderLoadConfig(String graknURI, String keyspace, String schemaPath, String dataConfigPath, String processorConfigPath) {
         this.graknURI = graknURI;
         this.keyspace = keyspace;
         this.schemaPath = schemaPath;
@@ -38,7 +38,7 @@ public class MigrationConfig {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(dataConfigPath));
-            Type ConfigType = new TypeToken<HashMap<String, DataConfigEntry>>() {
+            Type ConfigType = new TypeToken<HashMap<String, ConfigEntryData>>() {
             }.getType();
             this.dataConfig = new Gson().fromJson(bufferedReader, ConfigType);
         } catch (FileNotFoundException e) {
@@ -46,7 +46,7 @@ public class MigrationConfig {
         }
     }
 
-    public HashMap<String, DataConfigEntry> getDataConfig() {
+    public HashMap<String, ConfigEntryData> getDataConfig() {
         return this.dataConfig;
     }
 
@@ -54,7 +54,7 @@ public class MigrationConfig {
         BufferedReader bufferedReader;
         try {
             bufferedReader = new BufferedReader(new FileReader(processorConfigPath));
-            Type ConfigType = new TypeToken<HashMap<String, ArrayList<ProcessorConfigEntry>>>() {
+            Type ConfigType = new TypeToken<HashMap<String, ArrayList<ConfigEntryProcessor>>>() {
             }.getType();
             try {
                 this.processorConfig = new Gson().fromJson(bufferedReader, ConfigType);
@@ -69,9 +69,9 @@ public class MigrationConfig {
     }
 
     private void resolveProcessorReference() {
-        for (ProcessorConfigEntry pce : processorConfig.get("processors")) {
+        for (ConfigEntryProcessor pce : processorConfig.get("processors")) {
             if (pce.getReferenceProcessor() != null) {
-                ProcessorConfigEntry referencedPCE = getReferenceProcessorConfigEntry(pce.getReferenceProcessor());
+                ConfigEntryProcessor referencedPCE = getReferenceProcessorConfigEntry(pce.getReferenceProcessor());
                 if (referencedPCE != null) {
                     pce.setSchemaType(referencedPCE.getSchemaType());
                     pce.setConceptProcessors(referencedPCE.getConceptProcessors());
@@ -82,8 +82,8 @@ public class MigrationConfig {
         }
     }
 
-    private ProcessorConfigEntry getReferenceProcessorConfigEntry(String referenceProcessor) {
-        for (ProcessorConfigEntry pce : processorConfig.get("processors")) {
+    private ConfigEntryProcessor getReferenceProcessorConfigEntry(String referenceProcessor) {
+        for (ConfigEntryProcessor pce : processorConfig.get("processors")) {
             if (pce.getProcessor().equals(referenceProcessor)) {
                 return pce;
             }
@@ -91,7 +91,7 @@ public class MigrationConfig {
         return null;
     }
 
-    public HashMap<String, ArrayList<ProcessorConfigEntry>> getProcessorConfig() {
+    public HashMap<String, ArrayList<ConfigEntryProcessor>> getProcessorConfig() {
         return this.processorConfig;
     }
 

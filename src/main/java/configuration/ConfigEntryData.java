@@ -2,7 +2,7 @@ package configuration;
 
 import java.util.ArrayList;
 
-public class DataConfigEntry {
+public class ConfigEntryData {
     private String[] dataPath;
     private Character separator;
     private String processor;

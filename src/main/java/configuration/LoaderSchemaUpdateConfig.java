@@ -1,12 +1,12 @@
 package configuration;
 
-public class SchemaUpdateConfig {
+public class LoaderSchemaUpdateConfig {
 
     private final String schemaPath;
     private final String keyspace;
     private final String graknURI;
 
-    public SchemaUpdateConfig(String graknURI, String keyspace, String schemaPath) {
+    public LoaderSchemaUpdateConfig(String graknURI, String keyspace, String schemaPath) {
         this.graknURI = graknURI;
         this.keyspace = keyspace;
         this.schemaPath = schemaPath;

@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 import static graql.lang.Graql.var;
 
 public class EntryMigrationConfig {
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
+    private final ConfigEntryData dce;
+    private final ConfigEntryProcessor pce;
     private final int dataPathIndex;
     private final String migrationStatusKey;
     private final Integer migratedRows;
     private final InsertProcessor insertProcessor;
     private final String schemaTypeKey;
 
-    public EntryMigrationConfig(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertProcessor insertProcessor, TypeDBWriter typeDBWriter) {
+    public EntryMigrationConfig(ConfigEntryData dce, ConfigEntryProcessor pce, int dataPathIndex, String migrationStatusKey, Integer migratedRows, InsertProcessor insertProcessor, TypeDBWriter typeDBWriter) {
         this.dce = dce;
         this.pce = pce;
         this.dataPathIndex = dataPathIndex;
@@ -37,11 +37,11 @@ public class EntryMigrationConfig {
         return schemaTypeKey;
     }
 
-    public DataConfigEntry getDce() {
+    public ConfigEntryData getDce() {
         return dce;
     }
 
-    public ProcessorConfigEntry getPce() {
+    public ConfigEntryProcessor getPce() {
         return pce;
     }
 

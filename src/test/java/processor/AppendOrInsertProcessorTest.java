@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,12 +20,12 @@ public class AppendOrInsertProcessorTest {
     private final String dc = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
     private final String pc = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
     private final String datafileA = getAbsPath("src/test/resources/phoneCalls/person-append-or-insert.csv");
-    private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", db, schema, dc, pc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig("localhost:1729", db, schema, dc, pc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> genConf = loaderLoadConfig.getProcessorConfig();
 
     @Test
     public void graknAttributeQueryFromRowTest() throws Exception {
-        AppendOrInsertProcessor testGenerator = new AppendOrInsertProcessor(migrationConfig.getDataConfig().get("person-insert-or-append"), genConf.get("processors").get(10), 0);
+        AppendOrInsertProcessor testGenerator = new AppendOrInsertProcessor(loaderLoadConfig.getDataConfig().get("person-insert-or-append"), genConf.get("processors").get(10), 0);
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

@@ -8,7 +8,7 @@ import processor.ProcessorType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProcessorConfigEntry {
+public class ConfigEntryProcessor {
 
     //TODO: clean up hashmap of hashmap stuff...
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");

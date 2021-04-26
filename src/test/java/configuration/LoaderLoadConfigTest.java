@@ -6,14 +6,14 @@ import processor.ProcessorType;
 
 import static util.Util.getAbsPath;
 
-public class MigrationConfigTest {
+public class LoaderLoadConfigTest {
 
     @Test
     public void dataAndGeneratorConfigTest() {
         String gcPath = getAbsPath("src/test/resources/genericTests/processorConfig-test.json");
         String dcPath = getAbsPath("src/test/resources/genericTests/dataConfig-test.json");
 
-        MigrationConfig mg = new MigrationConfig(null, null, null, dcPath, gcPath);
+        LoaderLoadConfig mg = new LoaderLoadConfig(null, null, null, dcPath, gcPath);
 
         // dataconfig tests
         Assert.assertEquals(8, mg.getDataConfig().get("entity1").getBatchSize());

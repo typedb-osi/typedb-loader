@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,12 +19,12 @@ public class NestedRelationInsertProcessorTest {
     private final String pc = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
     private final String dataA = getAbsPath("src/test/resources/phoneCalls/communication-channel.csv");
     private final String dataB = getAbsPath("src/test/resources/phoneCalls/communication-channel-pm.csv");
-    private final MigrationConfig migrationConfig = new MigrationConfig(null, null, null, dc, pc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> gc = migrationConfig.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(null, null, null, dc, pc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> gc = loaderLoadConfig.getProcessorConfig();
 
     @Test
     public void graknNestedRelationQueryFromRowTest() throws Exception {
-        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(migrationConfig.getDataConfig().get("communication-channel"), gc.get("processors").get(4), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(loaderLoadConfig.getDataConfig().get("communication-channel"), gc.get("processors").get(4), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -100,7 +100,7 @@ public class NestedRelationInsertProcessorTest {
 
     @Test
     public void graknNestedRelationQueryFromRowPMTest() throws Exception {
-        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(migrationConfig.getDataConfig().get("communication-channel-pm"), gc.get("processors").get(4), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new NestedRelationInsertProcessor(loaderLoadConfig.getDataConfig().get("communication-channel-pm"), gc.get("processors").get(4), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

@@ -8,22 +8,22 @@ import java.util.Map;
 
 public class ConfigValidation {
 
-    public static HashMap<String, ArrayList<String>> validateConfigs(MigrationConfig migrationConfig) {
+    public static HashMap<String, ArrayList<String>> validateConfigs(LoaderLoadConfig loaderLoadConfig) {
         HashMap<String, ArrayList<String>> reports = new HashMap<>();
-        reports.put("processorConfig", validateProcessorConfigAgainstSchema(migrationConfig));
-        reports.put("dataConfig", validateDataConfigAgainstProcessorConfig(migrationConfig));
+        reports.put("processorConfig", validateProcessorConfigAgainstSchema(loaderLoadConfig));
+        reports.put("dataConfig", validateDataConfigAgainstProcessorConfig(loaderLoadConfig));
         return reports;
     }
 
-    private static ArrayList<String> validateProcessorConfigAgainstSchema(MigrationConfig migrationConfig) {
-        HashMap<String, ArrayList<ProcessorConfigEntry>> procConfig = migrationConfig.getProcessorConfig();
+    private static ArrayList<String> validateProcessorConfigAgainstSchema(LoaderLoadConfig loaderLoadConfig) {
+        HashMap<String, ArrayList<ConfigEntryProcessor>> procConfig = loaderLoadConfig.getProcessorConfig();
 
         ArrayList<String> errors = new ArrayList<>();
 
-        for (Map.Entry<String, ArrayList<ProcessorConfigEntry>> entry : procConfig.entrySet()) {
-            ArrayList<ProcessorConfigEntry> processors = entry.getValue();
+        for (Map.Entry<String, ArrayList<ConfigEntryProcessor>> entry : procConfig.entrySet()) {
+            ArrayList<ConfigEntryProcessor> processors = entry.getValue();
             int processorIndex = 0;
-            for (ProcessorConfigEntry processor : processors) {
+            for (ConfigEntryProcessor processor : processors) {
                 String curError;
 
                 String processorName = processor.getProcessor();
@@ -131,7 +131,7 @@ public class ConfigValidation {
         return processorType + " is not a valid processorType";
     }
 
-    private static ArrayList<String> validateDataConfigAgainstProcessorConfig(MigrationConfig migrationConfig) {
+    private static ArrayList<String> validateDataConfigAgainstProcessorConfig(LoaderLoadConfig loaderLoadConfig) {
         ArrayList<String> errors = new ArrayList<>();
 //        return new ValidationReport(errors.size() <= 0, errors);
         return errors;

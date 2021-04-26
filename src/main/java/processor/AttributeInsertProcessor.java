@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
+import configuration.ConfigEntryData;
+import configuration.ConfigEntryProcessor;
 import graql.lang.Graql;
 import graql.lang.pattern.Pattern;
 import graql.lang.pattern.constraint.ThingConstraint;
@@ -19,12 +19,12 @@ public class AttributeInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
+    private final ConfigEntryData dce;
+    private final ConfigEntryProcessor pce;
     private final int dataPathIndex;
 
-    public AttributeInsertProcessor(DataConfigEntry dce,
-                                    ProcessorConfigEntry pce,
+    public AttributeInsertProcessor(ConfigEntryData dce,
+                                    ConfigEntryProcessor pce,
                                     int dataPathIndex) {
         super();
         this.dce = dce;
@@ -64,7 +64,7 @@ public class AttributeInsertProcessor implements InsertProcessor {
             return null;
         } else {
             Attribute attributeInsertStatement = null;
-            for (DataConfigEntry.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
+            for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
                 //TODO: check that no list sep in this attributeGeneratorMapping in validation - because otherwise statement produced will be invalid
                 for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, cpm, pce)) {
                     attributeInsertStatement = Graql.var("a").constrain(valueConstraint);

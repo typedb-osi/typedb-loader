@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,14 +25,14 @@ public class EntityInsertProcessorTest {
     private final String dataC = getAbsPath("src/test/resources/genericTests/entity3-test-data.tsv");
     private final String dataD = getAbsPath("src/test/resources/phoneCalls/person.csv");
     private final String dataE = getAbsPath("src/test/resources/phoneCalls/company.csv");
-    private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", db, schema, dc, pc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
-    private final MigrationConfig migrationConfigPC = new MigrationConfig("localhost:1729", db, schema, dcpc, pcpc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConfPC = migrationConfigPC.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig("localhost:1729", db, schema, dc, pc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> genConf = loaderLoadConfig.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfigPC = new LoaderLoadConfig("localhost:1729", db, schema, dcpc, pcpc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> genConfPC = loaderLoadConfigPC.getProcessorConfig();
 
     @Test
     public void graknEntityQueryFromRowTest() {
-        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(loaderLoadConfig.getDataConfig().get("entity1"), genConf.get("processors").get(0), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -134,7 +134,7 @@ public class EntityInsertProcessorTest {
 
     @Test
     public void graknEntityQueryFromRowWithBoolAndDoubleTest() {
-        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(loaderLoadConfig.getDataConfig().get("entity2"), genConf.get("processors").get(1), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -200,7 +200,7 @@ public class EntityInsertProcessorTest {
 
     @Test
     public void graknEntityQueryFromRowWithLongTest() {
-        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(loaderLoadConfig.getDataConfig().get("entity3"), genConf.get("processors").get(2), 0);
         ArrayList<String> rows = getData(dataC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -266,7 +266,7 @@ public class EntityInsertProcessorTest {
 
     @Test
     public void graknEntityQueryFromRowPhoneCallsPerson() {
-        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfigPC.getDataConfig().get("person"), genConfPC.get("processors").get(0), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(loaderLoadConfigPC.getDataConfig().get("person"), genConfPC.get("processors").get(0), 0);
         ArrayList<String> rows = getData(dataD);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -426,7 +426,7 @@ public class EntityInsertProcessorTest {
 
     @Test
     public void graknEntityQueryFromRowPhoneCallsCompany() {
-        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(migrationConfigPC.getDataConfig().get("company"), genConfPC.get("processors").get(1), 0);
+        EntityInsertProcessor testEntityInsertProcessor = new EntityInsertProcessor(loaderLoadConfigPC.getDataConfig().get("company"), genConfPC.get("processors").get(1), 0);
         ArrayList<String> rows = getData(dataE);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

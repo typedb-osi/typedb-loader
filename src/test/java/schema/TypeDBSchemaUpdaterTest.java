@@ -1,7 +1,7 @@
 package schema;
 
-import configuration.MigrationConfig;
-import configuration.SchemaUpdateConfig;
+import configuration.LoaderLoadConfig;
+import configuration.LoaderSchemaUpdateConfig;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import grakn.client.api.GraknTransaction;
@@ -18,7 +18,7 @@ import static graql.lang.Graql.type;
 import static graql.lang.Graql.var;
 import static util.Util.getAbsPath;
 
-public class SchemaUpdaterTest {
+public class TypeDBSchemaUpdaterTest {
 
     String graknURI = "localhost:1729";
 
@@ -31,15 +31,15 @@ public class SchemaUpdaterTest {
         String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
         String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
 
-        MigrationConfig migrationConfig = new MigrationConfig(graknURI,databaseName, asp, adcp, gcp);
-        TypeDBLoader mig = new TypeDBLoader(migrationConfig, msp, true);
+        LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(graknURI,databaseName, asp, adcp, gcp);
+        TypeDBLoader mig = new TypeDBLoader(loaderLoadConfig, msp, true);
         mig.migrate();
 
         TypeDBWriter gi = new TypeDBWriter(graknURI.split(":")[0], graknURI.split(":")[1], asp, databaseName);
 
         asp = getAbsPath("src/test/resources/phoneCalls/schema-updated.gql");
-        SchemaUpdateConfig suConfig = new SchemaUpdateConfig(graknURI,databaseName, asp);
-        SchemaUpdater su = new SchemaUpdater(suConfig);
+        LoaderSchemaUpdateConfig suConfig = new LoaderSchemaUpdateConfig(graknURI,databaseName, asp);
+        TypeDBSchemaUpdater su = new TypeDBSchemaUpdater(suConfig);
         su.updateSchema();
 
         postUpdateSchemaTests(gi);

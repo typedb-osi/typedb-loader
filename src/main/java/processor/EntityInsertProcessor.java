@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
+import configuration.ConfigEntryData;
+import configuration.ConfigEntryProcessor;
 import graql.lang.pattern.variable.ThingVariable;
 import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
@@ -16,12 +16,12 @@ public class EntityInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
+    private final ConfigEntryData dce;
+    private final ConfigEntryProcessor pce;
     private final int dataPathIndex;
 
-    public EntityInsertProcessor(DataConfigEntry dce,
-                                 ProcessorConfigEntry pce,
+    public EntityInsertProcessor(ConfigEntryData dce,
+                                 ConfigEntryProcessor pce,
                                  int dataPathIndex) {
         super();
         this.dce = dce;

@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,12 +22,12 @@ public class AppendAttributeGeneratorTest {
     private final String datafileA = getAbsPath("src/test/resources/phoneCalls/append-twitter-nickname.csv");
     private final String datafileB = getAbsPath("src/test/resources/phoneCalls/append-fb-preprocessed.csv");
     private final String datafileC = getAbsPath("src/test/resources/phoneCalls/append-call-rating.csv");
-    private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", db, schema, dc, pc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig("localhost:1729", db, schema, dc, pc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> genConf = loaderLoadConfig.getProcessorConfig();
 
     @Test
     public void graknAttributeQueryFromRowTestA() throws Exception {
-        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-twitter"), genConf.get("processors").get(5), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(loaderLoadConfig.getDataConfig().get("append-twitter"), genConf.get("processors").get(5), 0);
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -101,7 +101,7 @@ public class AppendAttributeGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTestB() throws Exception {
-        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-pp-fakebook"), genConf.get("processors").get(7), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(loaderLoadConfig.getDataConfig().get("append-pp-fakebook"), genConf.get("processors").get(7), 0);
         ArrayList<String> rows = getData(datafileB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -155,7 +155,7 @@ public class AppendAttributeGeneratorTest {
 
     @Test
     public void graknAttributeQueryFromRowTestC() throws Exception {
-        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(migrationConfig.getDataConfig().get("append-call-rating"), genConf.get("processors").get(6), 0);
+        AppendAttributeProcessor testGenerator = new AppendAttributeProcessor(loaderLoadConfig.getDataConfig().get("append-call-rating"), genConf.get("processors").get(6), 0);
         ArrayList<String> rows = getData(datafileC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

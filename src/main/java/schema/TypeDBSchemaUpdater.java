@@ -1,17 +1,17 @@
 package schema;
 
-import configuration.SchemaUpdateConfig;
+import configuration.LoaderSchemaUpdateConfig;
 import grakn.client.api.GraknClient;
 import write.TypeDBWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SchemaUpdater {
+public class TypeDBSchemaUpdater {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private final TypeDBWriter gm;
 
-    public SchemaUpdater(SchemaUpdateConfig suConfig) {
+    public TypeDBSchemaUpdater(LoaderSchemaUpdateConfig suConfig) {
         this.gm = new TypeDBWriter(suConfig.getGraknURI().split(":")[0],
                 suConfig.getGraknURI().split(":")[1],
                 suConfig.getSchemaPath(),

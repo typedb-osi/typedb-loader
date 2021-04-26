@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,14 +22,14 @@ public class RelationInsertProcessorTest {
     private final String dataA = getAbsPath("src/test/resources/genericTests/rel1-test-data.tsv");
     private final String dataB = getAbsPath("src/test/resources/phoneCalls/call.csv");
     private final String dataC = getAbsPath("src/test/resources/phoneCalls/contract.csv");
-    private final MigrationConfig migrationConfigA = new MigrationConfig(null, null, null, dc, pc);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> gcA = migrationConfigA.getProcessorConfig();
-    private final MigrationConfig migrationConfigB = new MigrationConfig(null, null, null, dcPC, pcPC);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> gcB = migrationConfigB.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfigA = new LoaderLoadConfig(null, null, null, dc, pc);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> gcA = loaderLoadConfigA.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfigB = new LoaderLoadConfig(null, null, null, dcPC, pcPC);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> gcB = loaderLoadConfigB.getProcessorConfig();
 
     @Test
     public void graknRelationQueryFromRowTest() throws Exception {
-        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigA.getDataConfig().get("rel1"), gcA.get("processors").get(3), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(loaderLoadConfigA.getDataConfig().get("rel1"), gcA.get("processors").get(3), 0);
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -283,7 +283,7 @@ public class RelationInsertProcessorTest {
 
     @Test
     public void graknRelationQueryFromRowCallTest() throws Exception {
-        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigB.getDataConfig().get("calls"), gcB.get("processors").get(3), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(loaderLoadConfigB.getDataConfig().get("calls"), gcB.get("processors").get(3), 0);
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
@@ -341,7 +341,7 @@ public class RelationInsertProcessorTest {
 
     @Test
     public void graknRelationQueryFromRowContractTest() throws Exception {
-        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(migrationConfigB.getDataConfig().get("contract"), gcB.get("processors").get(2), 0);
+        RelationInsertProcessor testRelationInsertGenerator = new RelationInsertProcessor(loaderLoadConfigB.getDataConfig().get("contract"), gcB.get("processors").get(2), 0);
         ArrayList<String> rows = getData(dataC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

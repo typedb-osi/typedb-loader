@@ -1,10 +1,10 @@
 package cli;
 
-import configuration.MigrationConfig;
-import configuration.SchemaUpdateConfig;
+import configuration.LoaderLoadConfig;
+import configuration.LoaderSchemaUpdateConfig;
 import loader.TypeDBLoader;
 import picocli.CommandLine;
-import schema.SchemaUpdater;
+import schema.TypeDBSchemaUpdater;
 
 import java.io.IOException;
 
@@ -59,10 +59,10 @@ class LoadCommand implements Runnable {
         spec.commandLine().getOut().println("\tTypeDB server: " + typedbURI);
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
 
-        final MigrationConfig migrationConfig = new MigrationConfig(typedbURI, databaseName, schemaFilePath, dataConfigFilePath, processorConfigFilePath);
+        final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig(typedbURI, databaseName, schemaFilePath, dataConfigFilePath, processorConfigFilePath);
 
         try {
-            TypeDBLoader mig = new TypeDBLoader(migrationConfig, migrationStatusFilePath, cleanMigration);
+            TypeDBLoader mig = new TypeDBLoader(loaderLoadConfig, migrationStatusFilePath, cleanMigration);
             mig.migrate();
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,8 +92,8 @@ class SchemaUpdateCommand implements Runnable {
         spec.commandLine().getOut().println("\tdatabase: " + databaseName);
         spec.commandLine().getOut().println("\tTypeDB server: " + typeDBURI);
 
-        SchemaUpdateConfig suConfig = new SchemaUpdateConfig(typeDBURI, databaseName, schemaFilePath);
-        SchemaUpdater su = new SchemaUpdater(suConfig);
+        LoaderSchemaUpdateConfig suConfig = new LoaderSchemaUpdateConfig(typeDBURI, databaseName, schemaFilePath);
+        TypeDBSchemaUpdater su = new TypeDBSchemaUpdater(suConfig);
         su.updateSchema();
     }
 }

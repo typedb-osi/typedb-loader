@@ -21,16 +21,16 @@ public class ConfigValidationTest {
         // general tests
         String dataConf = getAbsPath("src/test/resources/configValidation/dataConfig.json");
         String procConf = getAbsPath("src/test/resources/configValidation/processorConfig.json");
-        MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
-        HashMap<String, ArrayList<String>> reports = ConfigValidation.validateConfigs(migrationConfig);
+        LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
+        HashMap<String, ArrayList<String>> reports = ConfigValidation.validateConfigs(loaderLoadConfig);
         Assert.assertEquals(2, reports.size());
         Assert.assertEquals(0, reports.get("processorConfig").size());
         Assert.assertEquals(0, reports.get("dataConfig").size());
 
         // processorType
         procConf = getAbsPath("src/test/resources/configValidation/processorConfig_processorType.json");
-        migrationConfig = new MigrationConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
-        reports = ConfigValidation.validateConfigs(migrationConfig);
+        loaderLoadConfig = new LoaderLoadConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
+        reports = ConfigValidation.validateConfigs(loaderLoadConfig);
         Assert.assertEquals(3, reports.get("processorConfig").size());
 
 
@@ -38,8 +38,8 @@ public class ConfigValidationTest {
 
         // processorConfig phoneCalls
         procConf = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
-        migrationConfig = new MigrationConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
-        reports = ConfigValidation.validateConfigs(migrationConfig);
+        loaderLoadConfig = new LoaderLoadConfig("localhost:1729", "configValidation", schema, dataConf, procConf);
+        reports = ConfigValidation.validateConfigs(loaderLoadConfig);
         Assert.assertEquals(0, reports.get("processorConfig").size());
 
     }

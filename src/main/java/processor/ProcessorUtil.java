@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
+import configuration.ConfigEntryData;
+import configuration.ConfigEntryProcessor;
 import graql.lang.Graql;
 import graql.lang.common.GraqlToken;
 import graql.lang.pattern.Pattern;
@@ -90,9 +90,9 @@ public class ProcessorUtil {
     public static ArrayList<ThingConstraint.Value<?>> generateValueConstraints(String[] tokens,
                                                                                String[] columnNames,
                                                                                int lineNumber,
-                                                                               DataConfigEntry.ConceptProcessorMapping generatorMappingForAttribute,
-                                                                               ProcessorConfigEntry pce) {
-        ProcessorConfigEntry.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(generatorMappingForAttribute.getConceptProcessor());
+                                                                               ConfigEntryData.ConceptProcessorMapping generatorMappingForAttribute,
+                                                                               ConfigEntryProcessor pce) {
+        ConfigEntryProcessor.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(generatorMappingForAttribute.getConceptProcessor());
         int columnNameIndex = idxOf(columnNames, generatorMappingForAttribute.getColumnName());
         ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
 
@@ -128,13 +128,13 @@ public class ProcessorUtil {
     public static ArrayList<ThingConstraint.Has> generateHasConstraint(String[] tokens,
                                                                        String[] columnNames,
                                                                        int lineNumber,
-                                                                       DataConfigEntry.ConceptProcessorMapping generatorMappingForAttribute,
-                                                                       ProcessorConfigEntry pce) {
+                                                                       ConfigEntryData.ConceptProcessorMapping generatorMappingForAttribute,
+                                                                       ConfigEntryProcessor pce) {
         ArrayList<ThingConstraint.Has> hasConstraints = new ArrayList<>();
         ArrayList<ThingConstraint.Value<?>> valueConstraints = generateValueConstraints(tokens, columnNames, lineNumber, generatorMappingForAttribute, pce);
 
         String attributeGeneratorKey = generatorMappingForAttribute.getConceptProcessor();
-        ProcessorConfigEntry.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
+        ConfigEntryProcessor.ConceptProcessor attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);
         String attributeSchemaType = attributeGenerator.getAttributeType();
         for (ThingConstraint.Value<?> valueConstraint : valueConstraints) {
             hasConstraints.add(valueToHasConstraint(attributeSchemaType, valueConstraint));
@@ -154,7 +154,7 @@ public class ProcessorUtil {
                                                                    AttributeValueType attributeValueType,
                                                                    String cleanedValue,
                                                                    int lineNumber,
-                                                                   DataConfigEntry.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
+                                                                   ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
         if (preprocessorConfig != null) {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
         }
@@ -211,8 +211,8 @@ public class ProcessorUtil {
     }
 
     private static String applyPreprocessor(String cleanedValue,
-                                            DataConfigEntry.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
-        DataConfigEntry.ConceptProcessorMapping.PreprocessorConfig.PreprocessorParams params = preprocessorConfig.getParams();
+                                            ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
+        ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig.PreprocessorParams params = preprocessorConfig.getParams();
         String processorType = preprocessorConfig.getType();
         switch (processorType) {
             case "regex":
@@ -231,23 +231,23 @@ public class ProcessorUtil {
 
     public static boolean isValidMatchAppend(ArrayList<ThingVariable<?>> matchStatements,
                                              ThingVariable<?> matchInsertInsertStatement,
-                                             DataConfigEntry dce,
-                                             ProcessorConfigEntry pce) {
+                                             ConfigEntryData dce,
+                                             ConfigEntryProcessor pce) {
         if (matchInsertInsertStatement == null) return false;
         StringBuilder matchStatement = new StringBuilder();
         for (Pattern st : matchStatements) {
             matchStatement.append(st.toString());
         }
         ArrayList<String> matchAttributes = new ArrayList<>();
-        for (DataConfigEntry.ConceptProcessorMapping attributeMapping : dce.getMatchAttributes()) {
+        for (ConfigEntryData.ConceptProcessorMapping attributeMapping : dce.getMatchAttributes()) {
             String generatorKey = attributeMapping.getConceptProcessor();
-            ProcessorConfigEntry.ConceptProcessor generatorEntry = pce.getAttributeGenerator(generatorKey);
+            ConfigEntryProcessor.ConceptProcessor generatorEntry = pce.getAttributeGenerator(generatorKey);
             if (!matchStatement.toString().contains("has " + generatorEntry.getAttributeType())) {
                 return false;
             }
             matchAttributes.add(generatorEntry.getAttributeType());
         }
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptProcessor> generatorEntry : pce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ConfigEntryProcessor.ConceptProcessor> generatorEntry : pce.getRequiredAttributes().entrySet()) {
             if (!matchInsertInsertStatement.toString().contains("has " + generatorEntry.getValue().getAttributeType()) &&
                     !matchAttributes.contains(generatorEntry.getValue().getAttributeType())) {
                 return false;
@@ -256,12 +256,12 @@ public class ProcessorUtil {
         return true;
     }
 
-    public static boolean isValidDirectInsert(ThingVariable<?> statement, ProcessorConfigEntry pce) {
+    public static boolean isValidDirectInsert(ThingVariable<?> statement, ConfigEntryProcessor pce) {
         if (statement == null) return false;
         if (!statement.toString().contains("isa " + pce.getSchemaType())) {
             return false;
         }
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptProcessor> cp : pce.getRequiredAttributes().entrySet()) {
+        for (Map.Entry<String, ConfigEntryProcessor.ConceptProcessor> cp : pce.getRequiredAttributes().entrySet()) {
             if (!statement.toString().contains("has " + cp.getValue().getAttributeType())) {
                 return false;
             }
@@ -296,11 +296,11 @@ public class ProcessorUtil {
     public static ArrayList<ThingVariable<?>> generateMatchStatementsFromMatchAttributes(String[] rowTokens,
                                                                                          String[] columnNames,
                                                                                          int rowCounter,
-                                                                                         DataConfigEntry dce,
-                                                                                         ProcessorConfigEntry pce) {
+                                                                                         ConfigEntryData dce,
+                                                                                         ConfigEntryProcessor pce) {
         ArrayList<ThingVariable<?>> statements = new ArrayList<>();
         ThingVariable.Thing statement = generateBoundThingVar(pce.getSchemaType(), pce.getProcessor());
-        for (DataConfigEntry.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
+        for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
             if (cpm.isMatch()) {
                 for (ThingConstraint.Has has : generateHasConstraint(rowTokens, columnNames, rowCounter, cpm, pce)) {
                     statement.constrain(has);
@@ -314,11 +314,11 @@ public class ProcessorUtil {
     public static ThingVariable<?> generateInsertStatementsWithoutMatchAttributes(String[] rowTokens,
                                                                                   String[] columnNames,
                                                                                   int rowCounter,
-                                                                                  DataConfigEntry dce,
-                                                                                  ProcessorConfigEntry pce) {
+                                                                                  ConfigEntryData dce,
+                                                                                  ConfigEntryProcessor pce) {
         UnboundVariable unbound = generateUnboundVar();
         ThingVariable<?> statement = null;
-        for (DataConfigEntry.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
+        for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
             if (!cpm.isMatch()) {
                 for (ThingConstraint.Has has : generateHasConstraint(rowTokens, columnNames, rowCounter, cpm, pce)) {
                     if (statement == null) {
@@ -335,10 +335,10 @@ public class ProcessorUtil {
     public static ThingVariable.Thing generateDirectInsertStatementForThing(String[] rowTokens,
                                                                             String[] columnNames,
                                                                             int rowCounter,
-                                                                            DataConfigEntry dce,
-                                                                            ProcessorConfigEntry pce) {
+                                                                            ConfigEntryData dce,
+                                                                            ConfigEntryProcessor pce) {
         ThingVariable.Thing directInsertStatement = generateBoundThingVar(pce.getSchemaType(), pce.getProcessor());
-        for (DataConfigEntry.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
+        for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
             for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, cpm, pce)) {
                 directInsertStatement.constrain(hasConstraint);
             }

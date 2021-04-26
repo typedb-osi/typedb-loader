@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.MigrationConfig;
-import configuration.ProcessorConfigEntry;
+import configuration.LoaderLoadConfig;
+import configuration.ConfigEntryProcessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,13 +17,13 @@ public class AttributeInsertProcessorTest {
     private final String adcp = getAbsPath("src/test/resources/phoneCalls/dataConfig.json");
     private final String gcp = getAbsPath("src/test/resources/phoneCalls/processorConfig.json");
     private final String file = getAbsPath("src/test/resources/phoneCalls/is-in-use.csv");
-    private final MigrationConfig migrationConfig = new MigrationConfig("localhost:1729", "null", "null", adcp, gcp);
-    private final HashMap<String, ArrayList<ProcessorConfigEntry>> genConf = migrationConfig.getProcessorConfig();
+    private final LoaderLoadConfig loaderLoadConfig = new LoaderLoadConfig("localhost:1729", "null", "null", adcp, gcp);
+    private final HashMap<String, ArrayList<ConfigEntryProcessor>> genConf = loaderLoadConfig.getProcessorConfig();
 
     @Test
     public void graknAttributeQueryFromRowTest() {
 
-        AttributeInsertProcessor testAttributeInsertGenerator = new AttributeInsertProcessor(migrationConfig.getDataConfig().get("is-in-use"), genConf.get("processors").get(8), 0);
+        AttributeInsertProcessor testAttributeInsertGenerator = new AttributeInsertProcessor(loaderLoadConfig.getDataConfig().get("is-in-use"), genConf.get("processors").get(8), 0);
         ArrayList<String> rows = getData(file);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));

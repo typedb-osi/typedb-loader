@@ -1,7 +1,7 @@
 package processor;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
+import configuration.ConfigEntryData;
+import configuration.ConfigEntryProcessor;
 import graql.lang.pattern.variable.ThingVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,18 +15,18 @@ public class AppendAttributeProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
+    private final ConfigEntryData dce;
+    private final ConfigEntryProcessor pce;
     private final int dataPathIndex;
 
-    public AppendAttributeProcessor(DataConfigEntry dataConfigEntry,
-                                    ProcessorConfigEntry processorConfigEntry,
+    public AppendAttributeProcessor(ConfigEntryData configEntryData,
+                                    ConfigEntryProcessor configEntryProcessor,
                                     int dataPathIndex) {
         super();
-        this.dce = dataConfigEntry;
-        this.pce = processorConfigEntry;
+        this.dce = configEntryData;
+        this.pce = configEntryProcessor;
         this.dataPathIndex = dataPathIndex;
-        appLogger.debug("Creating AppendAttribute for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
+        appLogger.debug("Creating AppendAttribute for processor " + configEntryProcessor.getProcessor() + " of type " + configEntryProcessor.getProcessorType());
     }
 
     public InsertQueries typeDBInsert(ArrayList<String> rows,
@@ -72,7 +72,7 @@ public class AppendAttributeProcessor implements InsertProcessor {
     private boolean validateDataConfigEntry() {
         boolean containsMatchAttribute = false;
         boolean containsAppendAttribute = false;
-        for (DataConfigEntry.ConceptProcessorMapping attributeMapping : dce.getAttributeProcessorMappings()) {
+        for (ConfigEntryData.ConceptProcessorMapping attributeMapping : dce.getAttributeProcessorMappings()) {
             if (attributeMapping.isMatch()) {
                 containsMatchAttribute = true;
             }
