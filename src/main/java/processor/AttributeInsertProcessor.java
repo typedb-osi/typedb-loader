@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import static processor.ProcessorUtil.*;
 
-public class AttributeInsertProcessor extends InsertProcessor {
+public class AttributeInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -23,22 +23,22 @@ public class AttributeInsertProcessor extends InsertProcessor {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public AttributeInsertProcessor(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
+    public AttributeInsertProcessor(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex) {
         super();
-        this.dce = dataConfigEntry;
-        this.pce = processorConfigEntry;
+        this.dce = dce;
+        this.pce = pce;
         this.dataPathIndex = dataPathIndex;
-        appLogger.debug("Creating AttributeInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
+        appLogger.debug("Creating AttributeInsertGenerator for processor " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement graknAttributeInsert(ArrayList<String> rows,
-                                                   String header, int rowCounter) throws IllegalArgumentException {
+    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
+                                           String header,
+                                           int rowCounter) throws IllegalArgumentException {
         ProcessorStatement statements = new ProcessorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {
-                ThingVariable<?> temp = graknAttributeQueryFromRow(row, header, rowCounter + batchCount);
-                statements.getInserts().add(temp);
+                statements.getInserts().add(graknAttributeQueryFromRow(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -50,6 +50,7 @@ public class AttributeInsertProcessor extends InsertProcessor {
     public ThingVariable<?> graknAttributeQueryFromRow(String row,
                                                        String header,
                                                        int rowCounter) throws Exception {
+        //TODO use CSVFormat datastructure
         String[] rowTokens = tokenizeCSVStandard(row, dce.getSeparator());
         String[] columnNames = tokenizeCSVStandard(header, dce.getSeparator());
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
@@ -61,8 +62,9 @@ public class AttributeInsertProcessor extends InsertProcessor {
             return null;
         } else {
             Attribute attributeInsertStatement = null;
-            for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-                for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+            for (DataConfigEntry.DataConfigGeneratorMapping attributeGeneratorMapping : dce.getAttributes()) {
+                //TODO: check that no list sep in this attributeGeneratorMapping in validation - because otherwise statement produced will be invalid
+                for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, attributeGeneratorMapping, pce)) {
                     attributeInsertStatement = Graql.var("a").constrain(valueConstraint);
                 }
             }
@@ -82,8 +84,8 @@ public class AttributeInsertProcessor extends InsertProcessor {
         }
     }
 
-    private boolean isValid(Pattern pa) {
-        String patternAsString = pa.toString();
+    private boolean isValid(Pattern insertStatement) {
+        String patternAsString = insertStatement.toString();
         return patternAsString.contains("isa " + pce.getSchemaType());
     }
 }

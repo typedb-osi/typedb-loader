@@ -36,7 +36,7 @@ public class EntityInsertProcessorTest {
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa entity1, has entity1-id \"entity1id0\", has entity1-name \"entity1name0\", has entity1-exp \"entity1id0exp0\"";
@@ -138,7 +138,7 @@ public class EntityInsertProcessorTest {
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa entity2, has entity2-id \"entity2id0\", has entity2-bool true, has entity2-double 0.0";
@@ -205,7 +205,7 @@ public class EntityInsertProcessorTest {
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
 
-        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.typeDBInsert(rows, header, 1);
         int idx = 0;
         String tmp = "$e isa entity3, has entity3-id \"entity3id0\", has entity3-int 0";
         Assert.assertEquals(tmp, results.getInserts().get(idx).toString());
@@ -270,7 +270,7 @@ public class EntityInsertProcessorTest {
         ArrayList<String> rows = getData(dataD);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has first-name \"Melli\", has last-name \"Winchcum\", has phone-number \"+7 171 898 0853\", has city \"London\", has age 55";
@@ -430,7 +430,7 @@ public class EntityInsertProcessorTest {
         ArrayList<String> rows = getData(dataE);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testEntityInsertProcessor.graknEntityInsert(rows, header, 1);
+        ProcessorStatement results = testEntityInsertProcessor.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa company, has name \"Telecom\"";

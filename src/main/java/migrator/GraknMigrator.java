@@ -6,7 +6,7 @@ import configuration.*;
 import grakn.client.api.GraknClient;
 import grakn.client.api.GraknSession;
 import insert.GraknInserter;
-import loader.DataLoader;
+import io.DataLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import processor.*;
@@ -336,32 +336,20 @@ public class GraknMigrator {
     private void buildQueriesAndInsert(EntryMigrationConfig conf, GraknSession session, ArrayList<String> rows, int lineCounter, int rowCounter, String header) throws IOException {
         int threads = conf.getDce().getThreads();
         try {
-            if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ENTITY)) {
-                ProcessorStatement insertStatements = conf.getInsertGenerator().graknEntityInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + insertStatements.getInserts().size());
-                graknInserter.insertThreadedInserting(insertStatements.getInserts(), session, threads, conf.getDce().getBatchSize());
-
-            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.RELATION) ||
-                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.NESTED_RELATION) ||
-                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE_RELATION)) {
-                ProcessorStatement statements = conf.getInsertGenerator().graknRelationInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
-                graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
-
-            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_OR_INSERT)) {
-                ProcessorStatement statements = conf.getInsertGenerator().graknAppendOrInsertInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
-                graknInserter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
-
-            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_ATTRIBUTE)) {
-                ProcessorStatement statements = conf.getInsertGenerator().graknAppendAttributeInsert(rows, header, rowCounter - lineCounter);
-                appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
-                graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
-
-            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE)) {
-                ProcessorStatement statements = conf.getInsertGenerator().graknAttributeInsert(rows, header, rowCounter - lineCounter);
+            ProcessorStatement statements = conf.getInsertGenerator().typeDBInsert(rows, header, rowCounter - lineCounter);
+            if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ENTITY) ||
+                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE)) {
                 appLogger.trace("number of generated insert Statements: " + statements.getInserts().size());
                 graknInserter.insertThreadedInserting(statements.getInserts(), session, threads, conf.getDce().getBatchSize());
+            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.RELATION) ||
+                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.NESTED_RELATION) ||
+                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.ATTRIBUTE_RELATION) ||
+                    isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_ATTRIBUTE)) {
+                appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
+                graknInserter.matchInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
+            } else if (isOfProcessorType(conf.getDce().getProcessor(), ProcessorType.APPEND_OR_INSERT)) {
+                appLogger.trace("number of generated insert Statements: " + statements.getMatchInserts().size());
+                graknInserter.appendOrInsertThreadedInserting(statements, session, threads, conf.getDce().getBatchSize());
             } else {
                 throw new IllegalArgumentException("the processor <" + conf.getDce().getProcessor() + "> is not known - please check your processor config");
             }

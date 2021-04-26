@@ -86,8 +86,7 @@ public class ProcessorUtil {
                                                                                String[] columnNames,
                                                                                int lineNumber,
                                                                                DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
-                                                                               ProcessorConfigEntry pce,
-                                                                               DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                                               ProcessorConfigEntry pce) {
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(generatorMappingForAttribute.getGenerator());
         int columnNameIndex = idxOf(columnNames, generatorMappingForAttribute.getColumnName());
         ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
@@ -104,14 +103,14 @@ public class ProcessorUtil {
                     for (String exploded : cleanedToken.split(generatorMappingForAttribute.getListSeparator())) {
                         String cleanedExplodedToken = cleanToken(exploded);
                         if (!cleanedExplodedToken.isEmpty()) {
-                            ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedExplodedToken, lineNumber, preprocessorConfig);
+                            ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedExplodedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
                             if (hasConstraint != null) {
                                 valueConstraints.add(hasConstraint);
                             }
                         }
                     }
                 } else {
-                    ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedToken, lineNumber, preprocessorConfig);
+                    ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
                     if (hasConstraint != null) {
                         valueConstraints.add(hasConstraint);
                     }
@@ -125,10 +124,9 @@ public class ProcessorUtil {
                                                                        String[] columnNames,
                                                                        int lineNumber,
                                                                        DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute,
-                                                                       ProcessorConfigEntry pce,
-                                                                       DataConfigEntry.DataConfigGeneratorMapping.PreprocessorConfig preprocessorConfig) {
+                                                                       ProcessorConfigEntry pce) {
         ArrayList<ThingConstraint.Has> hasConstraints = new ArrayList<>();
-        ArrayList<ThingConstraint.Value<?>> valueConstraints = generateValueConstraints(tokens, columnNames, lineNumber, generatorMappingForAttribute, pce, preprocessorConfig);
+        ArrayList<ThingConstraint.Value<?>> valueConstraints = generateValueConstraints(tokens, columnNames, lineNumber, generatorMappingForAttribute, pce);
 
         String attributeGeneratorKey = generatorMappingForAttribute.getGenerator();
         ProcessorConfigEntry.ConceptGenerator attributeGenerator = pce.getAttributeGenerator(attributeGeneratorKey);

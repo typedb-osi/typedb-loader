@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static processor.ProcessorUtil.*;
 
-public class AppendOrInsertProcessor extends InsertProcessor {
+public class AppendOrInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -35,7 +35,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         appLogger.debug("Creating AppendOrInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
     }
 
-    public ProcessorStatement graknAppendOrInsertInsert(ArrayList<String> rows,
+    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
                                                         String header, int rowCounter) throws Exception {
         ProcessorStatement processorStatement = new ProcessorStatement();
 
@@ -67,7 +67,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
             if (generatorMappingForMatchAttribute.isMatch()) {
 //                matchStatement = addAttribute(rowTokens, matchStatement, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
-                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor())) {
+                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForMatchAttribute, pce)) {
                     matchStatement.constrain(hasConstraint);
                 }
             }
@@ -80,7 +80,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
             if (!generatorMappingForAppendAttribute.isMatch()) {
 //                    matchInsertStatement = addAttribute(rowTokens, tmpMI, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
-                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor())) {
+                for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce)) {
                     if (matchInsertStatement == null) {
                         matchInsertStatement = unboundMatchInsertStatement.constrain(hasConstraint);
                     } else {
@@ -94,7 +94,7 @@ public class AppendOrInsertProcessor extends InsertProcessor {
         Thing insertStatement = addEntityToMatchPattern();
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
 //            insertStatement = addAttribute(rowTokens, insertStatement, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
-            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor())) {
+            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAppendAttribute, pce)) {
                 insertStatement.constrain(hasConstraint);
             }
         }

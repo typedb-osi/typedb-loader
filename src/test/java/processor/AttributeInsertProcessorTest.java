@@ -27,7 +27,7 @@ public class AttributeInsertProcessorTest {
         ArrayList<String> rows = getData(file);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testAttributeInsertGenerator.graknAttributeInsert(rows, header, 1);
+        ProcessorStatement results = testAttributeInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$a \"yes\" isa is-in-use";

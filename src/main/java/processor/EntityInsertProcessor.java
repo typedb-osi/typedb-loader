@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static processor.ProcessorUtil.*;
 
-public class EntityInsertProcessor extends InsertProcessor {
+public class EntityInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -24,23 +24,22 @@ public class EntityInsertProcessor extends InsertProcessor {
     private final ProcessorConfigEntry pce;
     private final int dataPathIndex;
 
-    public EntityInsertProcessor(DataConfigEntry dataConfigEntry, ProcessorConfigEntry processorConfigEntry, int dataPathIndex) {
+    public EntityInsertProcessor(DataConfigEntry dce, ProcessorConfigEntry pce, int dataPathIndex) {
         super();
-        this.dce = dataConfigEntry;
-        this.pce = processorConfigEntry;
+        this.dce = dce;
+        this.pce = pce;
         this.dataPathIndex = dataPathIndex;
-        appLogger.debug("Creating EntityInsertGenerator for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
+        appLogger.debug("Creating EntityInsertGenerator for processor " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement graknEntityInsert(ArrayList<String> rows,
+    public ProcessorStatement typeDBInsert(ArrayList<String> rows,
                                                 String header,
                                                 int rowCounter) throws IllegalArgumentException {
         ProcessorStatement processorStatement = new ProcessorStatement();
         int batchCount = 1;
         for (String row : rows) {
             try {
-                ThingVariable<?> temp = graknEntityQueryFromRow(row, header, rowCounter + batchCount);
-                processorStatement.getInserts().add(temp);
+                processorStatement.getInserts().add(graknEntityQueryFromRow(row, header, rowCounter + batchCount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -60,8 +59,7 @@ public class EntityInsertProcessor extends InsertProcessor {
         Thing entityInsertStatement = addEntityToStatement();
 
         for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-//            entityInsertStatement = addAttribute(rowTokens, entityInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
-            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+            for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce)) {
                 entityInsertStatement.constrain(hasConstraint);
             }
         }
@@ -83,8 +81,8 @@ public class EntityInsertProcessor extends InsertProcessor {
         }
     }
 
-    private boolean isValid(Pattern pa) {
-        String patternAsString = pa.toString();
+    private boolean isValid(Pattern insertStatement) {
+        String patternAsString = insertStatement.toString();
         if (!patternAsString.contains("isa " + pce.getSchemaType())) {
             return false;
         }

@@ -1,6 +1,6 @@
 package processor;
 
-import loader.DataLoader;
+import io.DataLoader;
 import org.junit.Assert;
 import org.junit.Test;
 

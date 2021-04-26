@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static processor.ProcessorUtil.*;
 
-public class RelationInsertProcessor extends InsertProcessor {
+public class RelationInsertProcessor implements InsertProcessor {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
@@ -36,7 +36,7 @@ public class RelationInsertProcessor extends InsertProcessor {
         appLogger.debug("Creating RelationInsertGenerator for " + pce.getProcessor() + " of type " + pce.getProcessorType());
     }
 
-    public ProcessorStatement graknRelationInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
+    public ProcessorStatement typeDBInsert(ArrayList<String> rows, String header, int rowCounter) throws Exception {
         ProcessorStatement processorStatement = new ProcessorStatement();
 
         int batchCounter = 1;
@@ -65,8 +65,7 @@ public class RelationInsertProcessor extends InsertProcessor {
 
                 if (dce.getAttributes() != null) {
                     for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAttribute : dce.getAttributes()) {
-//                        assembledInsertStatement = addAttribute(rowTokens, assembledInsertStatement, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor());
-                        for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce, generatorMappingForAttribute.getPreprocessor())) {
+                        for (ThingConstraint.Has hasConstraint : generateHasConstraint(rowTokens, columnNames, rowCounter, generatorMappingForAttribute, pce)) {
                             assembledInsertStatement.constrain(hasConstraint);
                         }
                     }

@@ -33,7 +33,7 @@ public class RelationInsertProcessorTest {
         ArrayList<String> rows = getData(dataA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$entity1-0 isa entity1, has entity1-id \"entity1id1\";$entity2-1 isa entity2, has entity2-id \"entity2id1\";$entity3-2 isa entity3, has entity3-id \"entity3id1\";";
@@ -287,7 +287,7 @@ public class RelationInsertProcessorTest {
         ArrayList<String> rows = getData(dataB);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 113;
         Assert.assertNull(results.getMatchInserts().get(idx).getMatches());
@@ -345,7 +345,7 @@ public class RelationInsertProcessorTest {
         ArrayList<String> rows = getData(dataC);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testRelationInsertGenerator.graknRelationInsert(rows, header, 1);
+        ProcessorStatement results = testRelationInsertGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$company-0 isa company, has name \"Telecom\";$person-1 isa person, has phone-number \"+7 171 898 0853\";";

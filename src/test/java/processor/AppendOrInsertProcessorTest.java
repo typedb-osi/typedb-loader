@@ -29,7 +29,7 @@ public class AppendOrInsertProcessorTest {
         ArrayList<String> rows = getData(datafileA);
         String header = rows.get(0);
         rows = new ArrayList<>(rows.subList(1, rows.size()));
-        ProcessorStatement results = testGenerator.graknAppendOrInsertInsert(rows, header, 1);
+        ProcessorStatement results = testGenerator.typeDBInsert(rows, header, 1);
 
         int idx = 0;
         String tmp = "$e isa person, has phone-number \"+7 171 898 0853\";";

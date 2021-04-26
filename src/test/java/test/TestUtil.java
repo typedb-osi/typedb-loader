@@ -1,7 +1,7 @@
 package test;
 
 import graql.lang.pattern.variable.ThingVariable;
-import loader.DataLoader;
+import io.DataLoader;
 
 import java.io.*;
 import java.time.LocalDate;
