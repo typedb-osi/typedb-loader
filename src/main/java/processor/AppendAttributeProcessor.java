@@ -1,8 +1,8 @@
 package processor;
 
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.pattern.variable.ThingVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

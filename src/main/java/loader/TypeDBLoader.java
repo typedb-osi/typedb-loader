@@ -2,9 +2,9 @@ package loader;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.vaticle.typedb.client.api.connection.TypeDBClient;
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import configuration.*;
-import grakn.client.api.GraknClient;
-import grakn.client.api.GraknSession;
 import write.TypeDBWriter;
 import io.FileToInputStream;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +57,7 @@ public class TypeDBLoader {
     public void migrate() throws IOException {
 
         initializeMigrationStatus();
-        GraknClient client = typeDBWriter.getClient();
+        TypeDBClient client = typeDBWriter.getClient();
 
         if (cleanAndMigrate) {
             typeDBWriter.cleanAndDefineSchemaToDatabase(client);
@@ -80,7 +80,7 @@ public class TypeDBLoader {
             System.exit(1);
         }
 
-        GraknSession dataSession = typeDBWriter.getDataSession(client);
+        TypeDBSession dataSession = typeDBWriter.getDataSession(client);
         migrateThingsInOrder(dataSession);
 
         dataSession.close();
@@ -88,7 +88,7 @@ public class TypeDBLoader {
         appLogger.info("GraMi is finished migrating your stuff!");
     }
 
-    private void migrateThingsInOrder(GraknSession session) throws IOException {
+    private void migrateThingsInOrder(TypeDBSession session) throws IOException {
         List<EntryMigrationConfig> migrationBatch;
 
         // independent attributes
@@ -272,7 +272,7 @@ public class TypeDBLoader {
         return null;
     }
 
-    private void batchDataBuildQueriesAndInsert(EntryMigrationConfig conf, GraknSession session) {
+    private void batchDataBuildQueriesAndInsert(EntryMigrationConfig conf, TypeDBSession session) {
 
         appLogger.info("inserting using " + conf.getDce().getThreads() + " threads" + " with thread commit size of " + conf.getDce().getBatchSize() + " rows");
 
@@ -333,7 +333,7 @@ public class TypeDBLoader {
     }
 
 
-    private void buildQueriesAndInsert(EntryMigrationConfig conf, GraknSession session, ArrayList<String> rows, int lineCounter, int rowCounter, String header) throws IOException {
+    private void buildQueriesAndInsert(EntryMigrationConfig conf, TypeDBSession session, ArrayList<String> rows, int lineCounter, int rowCounter, String header) throws IOException {
         int threads = conf.getDce().getThreads();
         try {
             InsertQueries statements = conf.getInsertGenerator().typeDBInsert(rows, header, rowCounter - lineCounter);

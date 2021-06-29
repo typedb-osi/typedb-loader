@@ -1,13 +1,13 @@
 package processor;
 
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.Graql;
-import graql.lang.common.GraqlToken;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -108,16 +108,16 @@ public class ProcessorUtil {
                     for (String exploded : cleanedToken.split(generatorMappingForAttribute.getListSeparator())) {
                         String cleanedExplodedToken = cleanToken(exploded);
                         if (!cleanedExplodedToken.isEmpty()) {
-                            ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedExplodedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
-                            if (hasConstraint != null) {
-                                valueConstraints.add(hasConstraint);
+                            ThingConstraint.Value<?> valueConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedExplodedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
+                            if (valueConstraint != null) {
+                                valueConstraints.add(valueConstraint);
                             }
                         }
                     }
                 } else {
-                    ThingConstraint.Value<?> hasConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
-                    if (hasConstraint != null) {
-                        valueConstraints.add(hasConstraint);
+                    ThingConstraint.Value<?> valueConstraint = generateValueConstraint(attributeGenerator.getAttributeType(), attributeGenerator.getValueType(), cleanedToken, lineNumber, generatorMappingForAttribute.getPreprocessor());
+                    if (valueConstraint != null) {
+                        valueConstraints.add(valueConstraint);
                     }
                 }
             }
@@ -162,27 +162,27 @@ public class ProcessorUtil {
         ThingConstraint.Value<?> constraint = null;
         switch (attributeValueType) {
             case STRING:
-                constraint = new ThingConstraint.Value.String(GraqlToken.Predicate.Equality.EQ, cleanedValue);
+                constraint = new ThingConstraint.Value.String(TypeQLToken.Predicate.Equality.EQ, cleanedValue);
                 break;
             case LONG:
                 try {
-                    constraint = new ThingConstraint.Value.Long(GraqlToken.Predicate.Equality.EQ, Integer.parseInt(cleanedValue));
+                    constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <long> for variable < %s > with non-<long> value - skipping column - < %s >", lineNumber, attributeSchemaType, numberFormatException.getMessage()));
                 }
                 break;
             case DOUBLE:
                 try {
-                    constraint = new ThingConstraint.Value.Double(GraqlToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue));
+                    constraint = new ThingConstraint.Value.Double(TypeQLToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     dataLogger.warn(String.format("row < %s > has column of type <double> for variable < %s > with non-<double> value - skipping column - < %s >", lineNumber, attributeSchemaType, numberFormatException.getMessage()));
                 }
                 break;
             case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
-                    constraint = new ThingConstraint.Value.Boolean(GraqlToken.Predicate.Equality.EQ, true);
+                    constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, true);
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
-                    constraint = new ThingConstraint.Value.Boolean(GraqlToken.Predicate.Equality.EQ, false);
+                    constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, false);
                 } else {
                     dataLogger.warn(String.format("row < %s > has column of type <boolean> for variable < %s > with non-<boolean> value - skipping column", lineNumber, attributeSchemaType));
                 }
@@ -199,7 +199,7 @@ public class ProcessorUtil {
                     } else {
                         dateTime = date.atStartOfDay();
                     }
-                    constraint = new ThingConstraint.Value.DateTime(GraqlToken.Predicate.Equality.EQ, dateTime);
+                    constraint = new ThingConstraint.Value.DateTime(TypeQLToken.Predicate.Equality.EQ, dateTime);
                 } catch (DateTimeException dateTimeException) {
                     dataLogger.warn(String.format("row < %s > has column of type <datetime> for variable < %s > with non-<ISO 8601 format> datetime value:  - < %s >", lineNumber, attributeSchemaType, dateTimeException.getMessage()));
                 }
@@ -272,14 +272,14 @@ public class ProcessorUtil {
     public static ThingVariable.Thing generateBoundThingVar(String schemaType,
                                                             String processor) {
         if (schemaType != null) {
-            return Graql.var("e").isa(schemaType);
+            return TypeQL.var("e").isa(schemaType);
         } else {
             throw new IllegalArgumentException("Required field <schemaType> not set in processor " + processor);
         }
     }
 
     public static UnboundVariable generateUnboundVar() {
-        return Graql.var("e");
+        return TypeQL.var("e");
     }
 
     public static String matchInsertQueriesToString(ArrayList<ThingVariable<?>> matchStatements,

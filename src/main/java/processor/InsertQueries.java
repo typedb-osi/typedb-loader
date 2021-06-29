@@ -1,6 +1,6 @@
 package processor;
 
-import graql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 
 import java.util.ArrayList;
 

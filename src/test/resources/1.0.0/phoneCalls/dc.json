@@ -1,0 +1,172 @@
+{
+  "defaultConfig": {
+    "separator": ',',
+    "rowsPerCommit": 100,
+    "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema.gql"
+  },
+  "attributes": {
+    "is-in-use": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
+      ],
+      "separator": "\t",
+      "column": "values",
+      "conceptType": "is-in-use",
+      "rowsPerCommit": 50
+    }
+  },
+  "entities": {
+    "person": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person.csv",
+        "src/test/resources/1.0.0/phoneCalls/person_nextfile.csv"
+      ],
+      "separator": ",",
+      "conceptType": "person",
+      "rowsPerCommit": 50,
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "company": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/company.csv"
+      ],
+      "separator": ",",
+      "conceptType": "company",
+      "rowsPerCommit": 50,
+      "attributes": [
+        {
+          "conceptType": "name",
+          "column": "name",
+          "requireNonEmpty": true
+        }
+      ]
+    }
+  },
+  "relations": {
+    "contract": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/contract.csv"
+      ],
+      "separator": ",",
+      "rowsPerCommit": 100,
+      "conceptType": "contract",
+      "players": [
+        {
+          "roleType": "provider",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "company",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "name",
+              "handler": "ownership",
+              "column": "company_name"
+            }
+          ]
+        },
+        {
+          "roleType": "customer",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "person",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "phone-number",
+              "handler": "ownership",
+              "column": "person_id",
+              "listSeparator": "###"
+            }
+          ]
+        }
+      ]
+    },
+    "call": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/call.csv"
+      ],
+      "separator": ",",
+      "rowsPerCommit": 100,
+      "conceptType": "call",
+      "players": [
+        {
+          "roleType": "caller",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "person",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "phone-number",
+              "handler": "ownership",
+              "column": "caller_id"
+            }
+          ]
+        },
+        {
+          "roleType": "callee",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "person",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "phone-number",
+              "handler": "ownership",
+              "column": "callee_id"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "conceptType": "started-at",
+          "column": "started_at",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "duration",
+          "column": "duration",
+          "requireNonEmpty": true
+        }
+      ]
+    }
+  }
+}

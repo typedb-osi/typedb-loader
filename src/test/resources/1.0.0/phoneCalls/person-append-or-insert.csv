@@ -1,0 +1,8 @@
+first_name,last_name,phone_number,city,age,nick_name
+Melli,Winchcum,+7 171 898 0853,London,55,Mel
+Sakura,,,Fire Village,13,
+Xylina,D'Alesco,+7 690 597 4443,Cambridge,51,Xyl
+Sasuke,,+62 107 666 3334,Fire Village,13,
+Elenore,Stokey,+62 107 530 7500,Oxford,35,Elen
+Naruto,Uzamaki,+62 107 321 3333,Fire Village,12,
+Missing,Age,+62 107 321 3333,notinsertcity,,notinsertnickname

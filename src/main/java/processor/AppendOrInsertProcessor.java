@@ -1,9 +1,8 @@
 package processor;
 
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +57,7 @@ public class AppendOrInsertProcessor implements InsertProcessor {
 
         ArrayList<ThingVariable<?>> matchStatements = generateMatchStatementsFromMatchAttributes(rowTokens, columnNames, rowCounter, dce, pce);
         ThingVariable<?> matchInsertStatement = generateInsertStatementsWithoutMatchAttributes(rowTokens, columnNames, rowCounter, dce, pce);
-        Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
+        ThingVariable.Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
 
         if (isValidMatchAppend(matchStatements, matchInsertStatement, dce, pce)) {
             appLogger.debug("valid match-insert query: <" + matchInsertQueriesToString(matchStatements, matchInsertStatement) + ">");

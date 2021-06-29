@@ -1,15 +1,12 @@
 package processor;
 
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.Graql;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Attribute;
-import graql.lang.pattern.variable.ThingVariable.Relation;
-import graql.lang.pattern.variable.ThingVariable.Thing;
-import graql.lang.pattern.variable.UnboundVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,7 +56,7 @@ public class RelationInsertProcessor implements InsertProcessor {
 
             if (!matchStatements.isEmpty()) {
                 ThingVariable<?> playersInsertStatement = miStatements.subList(miStatements.size() - 1, miStatements.size()).get(0);
-                Relation assembledInsertStatement = relationInsert((Relation) playersInsertStatement);
+                ThingVariable.Relation assembledInsertStatement = relationInsert((ThingVariable.Relation) playersInsertStatement);
 
                 if (dce.getAttributeProcessorMappings() != null) {
                     for (ConfigEntryData.ConceptProcessorMapping generatorMappingForAttribute : dce.getAttributeProcessorMappings()) {
@@ -103,7 +100,7 @@ public class RelationInsertProcessor implements InsertProcessor {
                                                                    String[] columnNames,
                                                                    int rowCounter) {
         ArrayList<ThingVariable<?>> matches = new ArrayList<>();
-        UnboundVariable relVariable = Graql.var("rel");
+        UnboundVariable relVariable = TypeQL.var("rel");
         ArrayList<ArrayList<String>> relationStrings = new ArrayList<>();
         int playerCounter = 0;
 
@@ -119,105 +116,116 @@ public class RelationInsertProcessor implements InsertProcessor {
             if (rowTokens.length > columnNameIndex && // make sure that there are enough rowTokens in the row for your column of interest
                     !cleanToken(rowTokens[columnNameIndex]).isEmpty()) { // make sure that after cleaning, there is more than an empty string
                 String cleanedRecord = cleanToken(rowTokens[columnNameIndex]);
-                String cls = cpm.getListSeparator();
-                if (cls != null) {
-                    for (String exploded : cleanedRecord.split(cls)) {
+                if (cpm.getListSeparator() != null) {
+                    for (String exploded : cleanedRecord.split(cpm.getListSeparator())) {
                         if (!cleanToken(exploded).isEmpty()) {
-                            String explodedCleanedValue = cleanToken(exploded);
-                            String pVar = cp.getPlayerType() + "-" + playerCounter;
-                            String pRole = cp.getRoleType();
                             if (cp.getUniquePlayerId().contains("_attribute_player_")) {
-                                //TODO now
-                                matches.add(createAttributePlayerMatchStatement(explodedCleanedValue, rowCounter, cp, pVar, cpm.getPreprocessor()));
+                                matches.add(createAttributePlayerMatchStatement(
+                                        cleanToken(exploded),
+                                        rowCounter,
+                                        cp.getPlayerType() + "-" + playerCounter,
+                                        cp.getPlayerType(),
+                                        cp.getUniquePlayerId(),
+                                        cp.getIdValueType(),
+                                        cpm.getPreprocessor()));
                             } else {
-                                //TODO next
-                                matches.add(createEntityPlayerMatchStatement(explodedCleanedValue, rowCounter, cp, pVar, cpm.getPreprocessor()));
+                                matches.add(generateThingPlayerMatchByAttributeStatement(
+                                        cleanToken(exploded),
+                                        rowCounter,
+                                        cp.getPlayerType() + "-" + playerCounter,
+                                        cp.getPlayerType(),
+                                        cp.getUniquePlayerId(),
+                                        cp.getIdValueType(),
+                                        cpm.getPreprocessor()));
                             }
-                            ArrayList<String> rel = new ArrayList<>();
-                            rel.add(pRole);
-                            rel.add(pVar);
-                            relationStrings.add(rel);
+                            relationStrings.add(new ArrayList<>(Arrays.asList(cp.getRoleType(), cp.getPlayerType() + "-" + playerCounter)));
                             playerCounter++;
                         }
                     }
                 } else { // single player, no columnListSeparator
-                    String playerVariable = cp.getPlayerType() + "-" + playerCounter;
-                    String playerRole = cp.getRoleType();
                     if (cp.getUniquePlayerId().contains("_attribute_player_")) {
-                        matches.add(createAttributePlayerMatchStatement(cleanedRecord, rowCounter, cp, playerVariable, cpm.getPreprocessor()));
+                        matches.add(createAttributePlayerMatchStatement(
+                                cleanedRecord,
+                                rowCounter,
+                                cp.getPlayerType() + "-" + playerCounter,
+                                cp.getPlayerType(),
+                                cp.getUniquePlayerId(),
+                                cp.getIdValueType(),
+                                cpm.getPreprocessor()));
                     } else {
-                        matches.add(createEntityPlayerMatchStatement(cleanedRecord, rowCounter, cp, playerVariable, cpm.getPreprocessor()));
+                        matches.add(generateThingPlayerMatchByAttributeStatement(
+                                cleanedRecord,
+                                rowCounter,
+                                cp.getPlayerType() + "-" + playerCounter,
+                                cp.getPlayerType(),
+                                cp.getUniquePlayerId(),
+                                cp.getIdValueType(),
+                                cpm.getPreprocessor()));
                     }
-                    ArrayList<String> rel = new ArrayList<>();
-                    rel.add(playerRole);
-                    rel.add(playerVariable);
-                    relationStrings.add(rel);
+                    relationStrings.add(new ArrayList<>(Arrays.asList(cp.getRoleType(), cp.getPlayerType() + "-" + playerCounter)));
                     playerCounter++;
                 }
             }
         }
         // add Relation Players
         if (dce.getRelationPlayerProcessorMappings() != null) {
-            for (ConfigEntryData.ConceptProcessorMapping generatorMappingForRelationPlayer : dce.getRelationPlayerProcessorMappings()) {
-                String generatorKey = generatorMappingForRelationPlayer.getConceptProcessor();
-                ConfigEntryProcessor.ConceptProcessor playerGenerator = pce.getRelationPlayerGenerator(generatorKey);
+            for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getRelationPlayerProcessorMappings()) {
+                ConfigEntryProcessor.ConceptProcessor cp = pce.getRelationPlayerGenerator(cpm.getConceptProcessor());
 
                 // if matching RelationPlayer by Attribute:
-                if (generatorMappingForRelationPlayer.getMatchByAttribute() != null) {
-                    String columnName = generatorMappingForRelationPlayer.getColumnName();
-                    int columnNameIndex = idxOf(columnNames, columnName);
-
+                if (cpm.getMatchByAttribute() != null) {
+                    int columnNameIndex = idxOf(columnNames, cpm.getColumnName());
                     if (columnNameIndex == -1) {
-                        appLogger.error("The column header " + generatorMappingForRelationPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
+                        appLogger.error("The column header " + cpm.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
                     }
 
                     if (rowTokens.length > columnNameIndex &&
                             !cleanToken(rowTokens[columnNameIndex]).isEmpty()) {
-                        String currentCleanedToken = cleanToken(rowTokens[columnNameIndex]);
-                        String columnListSeparator = generatorMappingForRelationPlayer.getListSeparator();
-                        if (columnListSeparator != null) {
-                            for (String exploded : currentCleanedToken.split(columnListSeparator)) {
+                        String cleanedToken = cleanToken(rowTokens[columnNameIndex]);
+                        if (cpm.getListSeparator() != null) {
+                            for (String exploded : cleanedToken.split(cpm.getListSeparator())) {
                                 if (!cleanToken(exploded).isEmpty()) {
-                                    String currentExplodedCleanedToken = cleanToken(exploded);
-//                                    String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
-                                    String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
-                                    String playerRole = playerGenerator.getRoleType();
-                                    matches.add(createRelationPlayerMatchStatementByAttribute(currentExplodedCleanedToken, rowCounter, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
-                                    ArrayList<String> rel = new ArrayList<>();
-                                    rel.add(playerRole);
-                                    rel.add(playerVariable);
-                                    relationStrings.add(rel);
+                                    matches.add(generateThingPlayerMatchByAttributeStatement(
+                                            cleanToken(exploded),
+                                            rowCounter,
+                                            cp.getPlayerType() + "-" + playerCounter,
+                                            cp.getPlayerType(),
+                                            cp.getMatchByAttribute().get(cpm.getMatchByAttribute()).getAttributeType(),
+                                            cp.getMatchByAttribute().get(cpm.getMatchByAttribute()).getValueType(),
+                                            cpm.getPreprocessor()));
+                                    relationStrings.add(new ArrayList<>(Arrays.asList(cp.getRoleType(), cp.getPlayerType() + "-" + playerCounter)));
                                     playerCounter++;
                                 }
                             }
                         } else { // single player, no listSeparator
-//                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter + "-" + insertCounter;
-                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
-                            String playerRole = playerGenerator.getRoleType();
-                            matches.add(createRelationPlayerMatchStatementByAttribute(currentCleanedToken, rowCounter, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
-                            ArrayList<String> rel = new ArrayList<>();
-                            rel.add(playerRole);
-                            rel.add(playerVariable);
-                            relationStrings.add(rel);
+                            matches.add(generateThingPlayerMatchByAttributeStatement(
+                                    cleanedToken,
+                                    rowCounter,
+                                    cp.getPlayerType() + "-" + playerCounter,
+                                    cp.getPlayerType(),
+                                    cp.getMatchByAttribute().get(cpm.getMatchByAttribute()).getAttributeType(),
+                                    cp.getMatchByAttribute().get(cpm.getMatchByAttribute()).getValueType(),
+                                    cpm.getPreprocessor()));
+                            relationStrings.add(new ArrayList<>((Arrays.asList(cp.getRoleType(), cp.getPlayerType() + "-" + playerCounter))));
                             playerCounter++;
                         }
                     }
                     // if matching the relationStrings player by players in that relationStrings:
-                } else if (generatorMappingForRelationPlayer.getMatchByPlayers().length > 0) {
-                    int[] columnNameIndices = indicesOf(columnNames, generatorMappingForRelationPlayer.getColumnNames());
+                } else if (cpm.getMatchByPlayers().length > 0) {
+                    int[] columnNameIndices = indicesOf(columnNames, cpm.getColumnNames());
 
                     for (int i : columnNameIndices) {
                         if (i == -1) {
-                            appLogger.error("The column header " + generatorMappingForRelationPlayer.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
+                            appLogger.error("The column header " + cpm.getColumnName() + " specified in your dataconfig cannot be found in the file you specified.");
                         }
                     }
 
                     if (Arrays.stream(columnNameIndices).max().isPresent()) {
                         int maxColumnIndex = Arrays.stream(columnNameIndices).max().getAsInt();
                         if (rowTokens.length > maxColumnIndex) {
-                            String playerVariable = playerGenerator.getPlayerType() + "-" + playerCounter;
-                            String playerRole = playerGenerator.getRoleType();
-                            matches.addAll(createRelationPlayerMatchStatementByPlayers(rowTokens, rowCounter, columnNameIndices, playerGenerator, generatorMappingForRelationPlayer, playerVariable));
+                            String playerVariable = cp.getPlayerType() + "-" + playerCounter;
+                            String playerRole = cp.getRoleType();
+                            matches.addAll(createRelationPlayerMatchStatementByPlayers(rowTokens, rowCounter, columnNameIndices, cp, cpm, playerVariable));
                             ArrayList<String> rel = new ArrayList<>();
                             rel.add(playerRole);
                             rel.add(playerVariable);
@@ -228,13 +236,13 @@ public class RelationInsertProcessor implements InsertProcessor {
                         appLogger.error("ColumnNameIndices are empty - this should NEVER happen, please report bug on github...");
                     }
                 } else {
-                    appLogger.error("Your config entry for column header: " + generatorMappingForRelationPlayer.getColumnName() + "needs to specify matching either by player/s or by an attribute");
+                    appLogger.error("Your config entry for column header: " + cpm.getColumnName() + "needs to specify matching either by player/s or by an attribute");
                 }
             }
         }
 
         if (relationStrings.size() >= 1) {
-            Relation returnRelation = relVariable.rel(relationStrings.get(0).get(0), relationStrings.get(0).get(1));
+            ThingVariable.Relation returnRelation = relVariable.rel(relationStrings.get(0).get(0), relationStrings.get(0).get(1));
             for (ArrayList<String> rel : relationStrings.subList(1, relationStrings.size())) {
                 returnRelation = returnRelation.rel(rel.get(0), rel.get(1));
             }
@@ -244,48 +252,35 @@ public class RelationInsertProcessor implements InsertProcessor {
         return matches;
     }
 
-    private ThingVariable<?> createEntityPlayerMatchStatement(String cleanedToken,
-                                                              int rowCounter,
-                                                              ConfigEntryProcessor.ConceptProcessor playerGenerator,
-                                                              String playerVariable,
-                                                              ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
-        Thing ms = Graql
+    private ThingVariable<?> generateThingPlayerMatchByAttributeStatement(String cleanedToken,
+                                                                          int rowCounter,
+                                                                          String playerVariable,
+                                                                          String playerType,
+                                                                          String attributeType,
+                                                                          AttributeValueType attributeValueType,
+                                                                          ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
+        return TypeQL
                 .var(playerVariable)
-                .isa(playerGenerator.getPlayerType());
-        String attributeType = playerGenerator.getUniquePlayerId();
-        AttributeValueType attributeValueType = playerGenerator.getIdValueType();
-        ms = ms.constrain(valueToHasConstraint(attributeType, generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig)));
-        return ms;
+                .isa(playerType)
+                .constrain(valueToHasConstraint(attributeType, generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig)));
     }
 
     private ThingVariable<?> createAttributePlayerMatchStatement(String cleanedToken,
                                                                  int rowCounter,
-                                                                 ConfigEntryProcessor.ConceptProcessor playerGenerator,
                                                                  String playerVariable,
+                                                                 String playerType,
+                                                                 String attributeType,
+                                                                 AttributeValueType attributeValueType,
                                                                  ConfigEntryData.ConceptProcessorMapping.PreprocessorConfig preprocessorConfig) {
-        UnboundVariable uv = Graql.var(playerVariable);
-        Attribute ms = uv.constrain(generateValueConstraint(playerGenerator.getUniquePlayerId(), playerGenerator.getIdValueType(), cleanedToken, rowCounter, preprocessorConfig));
-        ms = ms.isa(playerGenerator.getPlayerType());
-        return ms;
-    }
-
-    private ThingVariable<?> createRelationPlayerMatchStatementByAttribute(String cleanedToken,
-                                                                           int rowCounter,
-                                                                           ConfigEntryProcessor.ConceptProcessor playerGenerator,
-                                                                           ConfigEntryData.ConceptProcessorMapping dcm,
-                                                                           String playerVariable) {
-        Thing ms = Graql
+        return TypeQL
                 .var(playerVariable)
-                .isa(playerGenerator.getPlayerType());
-        String attributeType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getAttributeType();
-        AttributeValueType attributeValueType = playerGenerator.getMatchByAttribute().get(dcm.getMatchByAttribute()).getValueType();
-        ms = ms.constrain(valueToHasConstraint(attributeType, generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor())));
-        return ms;
+                .constrain(generateValueConstraint(attributeType, attributeValueType, cleanedToken, rowCounter, preprocessorConfig))
+                .isa(playerType);
     }
 
     private ArrayList<ThingVariable<?>> createRelationPlayerMatchStatementByPlayers(String[] rowTokens, int rowCounter, int[] columnNameIndices, ConfigEntryProcessor.ConceptProcessor playerGenerator, ConfigEntryData.ConceptProcessorMapping dcm, String playerVariable) {
         ArrayList<ThingVariable<?>> assembledMatchStatements = new ArrayList<>();
-        UnboundVariable relVariable = Graql.var(playerVariable);
+        UnboundVariable relVariable = TypeQL.var(playerVariable);
         ArrayList<ArrayList<String>> relationStrings = new ArrayList<>();
 
         //match the n entites with their attributes
@@ -298,7 +293,7 @@ public class RelationInsertProcessor implements InsertProcessor {
                 String relationPlayerPlayerAttributeType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getUniquePlayerId();
                 AttributeValueType relationPlayerPlayerAttributeValueType = playerGenerator.getMatchByPlayer().get(dcm.getMatchByPlayers()[i]).getIdValueType();
 
-                Thing relationPlayerCurrentPlayerMatchStatement = Graql.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
+                ThingVariable.Thing relationPlayerCurrentPlayerMatchStatement = TypeQL.var(relationPlayerPlayerVariable).isa(relationPlayerPlayerType);
                 relationPlayerCurrentPlayerMatchStatement = relationPlayerCurrentPlayerMatchStatement.constrain(valueToHasConstraint(relationPlayerPlayerAttributeType, generateValueConstraint(relationPlayerPlayerAttributeType, relationPlayerPlayerAttributeValueType, cleanedToken, rowCounter, dcm.getPreprocessor())));
                 assembledMatchStatements.add(relationPlayerCurrentPlayerMatchStatement);
 
@@ -319,7 +314,7 @@ public class RelationInsertProcessor implements InsertProcessor {
         }
 
         if (relationStrings.size() >= 1 && assembledMatchStatements.size() > 0) {
-            Relation returnRelation = relVariable.rel(relationStrings.get(0).get(0), relationStrings.get(0).get(1));
+            ThingVariable.Relation returnRelation = relVariable.rel(relationStrings.get(0).get(0), relationStrings.get(0).get(1));
             for (ArrayList<String> rel : relationStrings.subList(1, relationStrings.size())) {
                 returnRelation = returnRelation.rel(rel.get(0), rel.get(1));
             }
@@ -330,7 +325,7 @@ public class RelationInsertProcessor implements InsertProcessor {
     }
 
 
-    private Relation relationInsert(Relation si) {
+    private ThingVariable.Relation relationInsert(ThingVariable.Relation si) {
         if (si != null) {
             return si.isa(pce.getSchemaType());
         } else {

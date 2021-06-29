@@ -1,9 +1,8 @@
 package processor;
 
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Thing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,7 +53,7 @@ public class EntityInsertProcessor implements InsertProcessor {
         appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
         malformedRow(row, rowTokens, columnNames.length);
 
-        Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
+        ThingVariable.Thing directInsertStatement = generateDirectInsertStatementForThing(rowTokens, columnNames, rowCounter, dce, pce);
 
         if (isValidDirectInsert(directInsertStatement, pce)) {
             appLogger.debug("valid query: <insert " + directInsertStatement + ";>");

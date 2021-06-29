@@ -1,7 +1,7 @@
 package schema;
 
+import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import configuration.LoaderSchemaUpdateConfig;
-import grakn.client.api.GraknClient;
 import write.TypeDBWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +20,7 @@ public class TypeDBSchemaUpdater {
     }
 
     public void updateSchema() {
-        GraknClient client = gm.getClient();
+        TypeDBClient client = gm.getClient();
         appLogger.info("applying schema to existing schema");
         gm.loadAndDefineSchema(client);
         appLogger.info("GraMi is finished applying your schema!");

@@ -1,18 +1,16 @@
 package configuration;
 
-import grakn.client.api.GraknClient;
-import grakn.client.api.GraknSession;
-import grakn.client.api.GraknTransaction;
-import grakn.client.api.concept.type.AttributeType;
-import graql.lang.Graql;
-import graql.lang.query.GraqlMatch;
+import com.vaticle.typedb.client.api.concept.type.AttributeType;
+import com.vaticle.typedb.client.api.connection.TypeDBClient;
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
 import write.TypeDBWriter;
 import processor.InsertProcessor;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static graql.lang.Graql.var;
 
 public class EntryMigrationConfig {
     private final ConfigEntryData dce;
@@ -63,11 +61,11 @@ public class EntryMigrationConfig {
 
     private String getSchemaTypeKey(String schemaType, TypeDBWriter typeDBWriter) {
         final String[] key = {null};
-        GraknClient client = typeDBWriter.getClient();
-        GraknSession session = typeDBWriter.getSchemaSession(client);
-        GraknTransaction tx = session.transaction(GraknTransaction.Type.READ);
+        TypeDBClient client = typeDBWriter.getClient();
+        TypeDBSession session = typeDBWriter.getSchemaSession(client);
+        TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.READ);
 
-        GraqlMatch getQuery = Graql.match(var("st").type(schemaType)).get("st").limit(1000);
+        TypeQLMatch getQuery = TypeQL.match(TypeQL.var("st").type(schemaType)).get("st").limit(1000);
         tx.query().match(getQuery).forEach(answers -> answers.concepts().forEach(entry -> {
             List<AttributeType> keys = entry.asRemote(tx).asThingType().getOwns(true).collect(Collectors.toList());
             if (keys.size() > 0) {

@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import static util.Util.getAbsPath;
 
-public class ConfigValidationTest {
+public class ConfigurationValidationTest {
 
     @Test
     public void configValidationTest() {

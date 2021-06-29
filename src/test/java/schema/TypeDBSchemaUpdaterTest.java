@@ -1,21 +1,18 @@
 package schema;
 
+import com.vaticle.typedb.client.api.connection.TypeDBClient;
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.query.TypeQLMatch;
 import configuration.LoaderLoadConfig;
 import configuration.LoaderSchemaUpdateConfig;
-import grakn.client.api.GraknClient;
-import grakn.client.api.GraknSession;
-import grakn.client.api.GraknTransaction;
-import graql.lang.Graql;
-import graql.lang.query.GraqlMatch;
 import write.TypeDBWriter;
 import loader.TypeDBLoader;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-
-import static graql.lang.Graql.type;
-import static graql.lang.Graql.var;
 import static util.Util.getAbsPath;
 
 public class TypeDBSchemaUpdaterTest {
@@ -46,30 +43,30 @@ public class TypeDBSchemaUpdaterTest {
     }
 
     private void postUpdateSchemaTests(TypeDBWriter gi) {
-        GraknClient client = gi.getClient();
-        GraknSession session = gi.getDataSession(client);
+        TypeDBClient client = gi.getClient();
+        TypeDBSession session = gi.getDataSession(client);
 
         // query attribute type
-        GraknTransaction read = session.transaction(GraknTransaction.Type.READ);
-        GraqlMatch.Filtered getQuery = Graql.match(var("a").type("added-attribute")).get("a");
+        TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
+        TypeQLMatch.Filtered getQuery = TypeQL.match(TypeQL.var("a").type("added-attribute")).get("a");
         Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
 
         // query entity type
-        read = session.transaction(GraknTransaction.Type.READ);
-        GraqlMatch.Limited getQuery2 = Graql.match(var("a").type("added-entity")).get("a").limit(1000);
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        TypeQLMatch.Limited getQuery2 = TypeQL.match(TypeQL.var("a").type("added-entity")).get("a").limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query relation type
-        read = session.transaction(GraknTransaction.Type.READ);
-        getQuery2 = Graql.match(var("a").type("added-relation")).get("a").limit(1000);
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        getQuery2 = TypeQL.match(TypeQL.var("a").type("added-relation")).get("a").limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 
         // query role type
-        read = session.transaction(GraknTransaction.Type.READ);
-        getQuery2 = Graql.match(type("added-relation").relates(var("r"))).limit(1000);
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        getQuery2 = TypeQL.match(TypeQL.type("added-relation").relates(TypeQL.var("r"))).limit(1000);
         Assert.assertEquals(1, read.query().match(getQuery2).count());
         read.close();
 

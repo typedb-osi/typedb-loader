@@ -1,0 +1,13 @@
+entity2-id	entity2-bool	entity2-double
+entity2id0	true	0.0
+entity2id1	false	1.1###11.11
+entity2id2	True	2.2###
+entity2id3	False	###-3.3
+entity2id4		4
+entity2id5		string
+entity2id6	somethingelse	
+entity2id7		
+entity2id8		###
+entity2id9		###
+entity2id10		 ###
+

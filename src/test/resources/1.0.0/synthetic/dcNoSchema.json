@@ -1,0 +1,6 @@
+{
+  "defaultConfig": {
+    "separator": ',',
+    "rowsPerCommit": 200
+  }
+}

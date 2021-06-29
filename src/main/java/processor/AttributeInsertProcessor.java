@@ -1,12 +1,11 @@
 package processor;
 
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.pattern.Pattern;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import configuration.ConfigEntryData;
 import configuration.ConfigEntryProcessor;
-import graql.lang.Graql;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.constraint.ThingConstraint;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Attribute;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,11 +62,11 @@ public class AttributeInsertProcessor implements InsertProcessor {
             appLogger.error("the dataconfig entry for inserting independent attribute <" + pce.getSchemaType() + "> lists more than one column - this is not allowed");
             return null;
         } else {
-            Attribute attributeInsertStatement = null;
+            ThingVariable.Attribute attributeInsertStatement = null;
             for (ConfigEntryData.ConceptProcessorMapping cpm : dce.getAttributeProcessorMappings()) {
                 //TODO: check that no list sep in this attributeGeneratorMapping in validation - because otherwise statement produced will be invalid
                 for (ThingConstraint.Value<?> valueConstraint : generateValueConstraints(rowTokens, columnNames, rowCounter, cpm, pce)) {
-                    attributeInsertStatement = Graql.var("a").constrain(valueConstraint);
+                    attributeInsertStatement = TypeQL.var("a").constrain(valueConstraint);
                 }
             }
             if (attributeInsertStatement != null) {

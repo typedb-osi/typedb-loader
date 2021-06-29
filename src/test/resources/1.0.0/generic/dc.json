@@ -1,0 +1,83 @@
+{
+  "defaultConfig": {
+    "separator": ',',
+    "rowsPerCommit": 100,
+    "schemaPath": "src/test/resources/1.0.0/generic/schema.gql"
+  },
+  "entities": {
+    "entity1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity1.tsv"
+      ],
+      "separator": "\t",
+      "conceptType": "entity1",
+      "rowsPerCommit": 50,
+      "attributes": [
+        {
+          "conceptType": "entity1-id",
+          "column": "entity1-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity1-name",
+          "column": "entity1-name",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        },
+        {
+          "conceptType": "entity1-exp",
+          "column": "entity1-exp",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        }
+      ]
+    },
+    "entity2": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity2.tsv"
+      ],
+      "separator": "\t",
+      "conceptType": "entity2",
+      "rowsPerCommit": 50,
+      "attributes": [
+        {
+          "conceptType": "entity2-id",
+          "column": "entity2-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity2-bool",
+          "column": "entity2-bool",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity2-double",
+          "column": "entity2-double",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        }
+      ]
+    },
+    "entity3": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity3.tsv"
+      ],
+      "separator": "\t",
+      "conceptType": "entity3",
+      "rowsPerCommit": 50,
+      "attributes": [
+        {
+          "conceptType": "entity3-id",
+          "column": "entity3-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity3-int",
+          "column": "entity3-int",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        }
+      ]
+    }
+  }
+}
