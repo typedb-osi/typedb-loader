@@ -41,6 +41,8 @@ public class TypeDBLoaderTest {
         testEntities(session);
         testRelations(session);
         testAttributeRelation(session);
+        testNestedRelations(session);
+
 
         session.close();
         client.close();
@@ -143,6 +145,92 @@ public class TypeDBLoaderTest {
         TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch getQuery = TypeQL.match(TypeQL.var("a").isa("in-use")).get("a");
         Assert.assertEquals(7, read.query().match(getQuery).count());
+
+        read.close();
+    }
+
+    public void testNestedRelations(TypeDBSession session) {
+
+        // query specific communication-channel and count the number of past calls (single past-call):
+        TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
+        ThingVariable.Thing playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+54 398 559 0423");
+        ThingVariable.Thing playerTwo = TypeQL.var("p2").isa("person").has("phone-number", "+48 195 624 2025");
+        ThingVariable.Relation relation = TypeQL.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
+        ArrayList<ThingVariable<?>> statements = new ArrayList<>();
+        statements.add(playerOne);
+        statements.add(playerTwo);
+        statements.add(relation);
+        TypeQLMatch getQuery = TypeQL.match(statements).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+        getQuery = TypeQL.match(statements).get("x").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        // query specific communication-channel and count the number of past calls (listSeparated past-calls:
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+263 498 495 0617");
+        playerTwo = TypeQL.var("p2").isa("person").has("phone-number", "+33 614 339 0298");
+        relation = TypeQL.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
+        statements = new ArrayList<>();
+        statements.add(playerOne);
+        statements.add(playerTwo);
+        statements.add(relation);
+        getQuery = TypeQL.match(statements).get("c").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+        getQuery = TypeQL.match(statements).get("x").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        // make sure that this doesn't get inserted:
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+7 690 597 4443");
+        playerTwo = TypeQL.var("p2").isa("person").has("phone-number", "+54 398 559 9999");
+        relation = TypeQL.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
+        statements = new ArrayList<>();
+        statements.add(playerOne);
+        statements.add(playerTwo);
+        statements.add(relation);
+        getQuery = TypeQL.match(statements).get("c").limit(1000);
+        Assert.assertEquals(0, read.query().match(getQuery).count());
+        getQuery = TypeQL.match(statements).get("x").limit(1000);
+        Assert.assertEquals(0, read.query().match(getQuery).count());
+
+        // these are added by doing player matching for past calls:
+//        read = session.transaction(TypeDBTransaction.Type.READ);
+//        playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+81 308 988 7153");
+//        playerTwo = TypeQL.var("p2").isa("person").has("phone-number", "+351 515 605 7915");
+//        relation = TypeQL.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
+//        statements = new ArrayList<>();
+//        statements.add(playerOne);
+//        statements.add(playerTwo);
+//        statements.add(relation);
+//        getQuery = TypeQL.match(statements).get("c").limit(1000);
+//        Assert.assertEquals(5, read.query().match(getQuery).count());
+//        getQuery = TypeQL.match(statements).get("x").limit(1000);
+//        Assert.assertEquals(5, read.query().match(getQuery).count());
+//
+//        read = session.transaction(TypeDBTransaction.Type.READ);
+//        playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+7 171 898 0853");
+//        playerTwo = TypeQL.var("p2").isa("person").has("phone-number", "+57 629 420 5680");
+//        relation = TypeQL.var("c").rel("peer", "p1").rel("peer", "p2").rel("past-call", "x").isa("communication-channel");
+//        statements = new ArrayList<>();
+//        statements.add(playerOne);
+//        statements.add(playerTwo);
+//        statements.add(relation);
+//        getQuery = TypeQL.match(statements).get("c").limit(1000);
+//        Assert.assertEquals(4, read.query().match(getQuery).count());
+//        getQuery = TypeQL.match(statements).get("x").limit(1000);
+//        Assert.assertEquals(4, read.query().match(getQuery).count());
+//
+//        // these must not be found (come from player-matched past-call):
+//        read = session.transaction(TypeDBTransaction.Type.READ);
+//        playerOne = TypeQL.var("p1").isa("person").has("phone-number", "+261 860 539 4754");
+//        relation = TypeQL.var("c").rel("peer", "p1").rel("past-call", "x").isa("communication-channel");
+//        statements = new ArrayList<>();
+//        statements.add(playerOne);
+//        statements.add(relation);
+//        getQuery = TypeQL.match(statements).get("c").limit(1000);
+//        Assert.assertEquals(0, read.query().match(getQuery).count());
+//        getQuery = TypeQL.match(statements).get("x").limit(1000);
+//        Assert.assertEquals(0, read.query().match(getQuery).count());
 
         read.close();
     }

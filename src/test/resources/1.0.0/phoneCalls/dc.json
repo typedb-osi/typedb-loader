@@ -199,6 +199,62 @@
           ]
         }
       ]
+    },
+    "communication-channel": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel.csv"
+      ],
+      "separator": ",",
+      "rowsPerCommit": 100,
+      "conceptType": "communication-channel",
+      "players": [
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "person",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "phone-number",
+              "handler": "ownership",
+              "column": "peer_1"
+            }
+          ]
+        },
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "person",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "phone-number",
+              "handler": "ownership",
+              "column": "peer_2"
+            }
+          ]
+        },
+        {
+          "roleType": "past-call",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "call",
+              "handler": "relation"
+            },
+            {
+              "conceptType": "started-at",
+              "handler": "ownership",
+              "column": "call_started_at",
+              "listSeparator": "###"
+            }
+          ]
+        }
+      ]
     }
   }
 }

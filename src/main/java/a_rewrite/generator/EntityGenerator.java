@@ -44,7 +44,7 @@ public class EntityGenerator implements Generator {
         }
 
         TypeQLInsert statement = generateInsertStatement(row);
-        if (isValid(statement)) {
+        if (entityInsertStatementValid(statement)) {
             try {
                 tx.query().insert(statement);
             } catch (TypeDBClientException typeDBClientException) {
@@ -82,7 +82,7 @@ public class EntityGenerator implements Generator {
         }
     }
 
-    private boolean isValid(TypeQLInsert insert) {
+    public boolean entityInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + entityConfiguration.getConceptType())) return false;
         for (Configuration.HasAttribute hasAttribute : entityConfiguration.getRequireNonEmptyAttributes()) {
