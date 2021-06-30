@@ -153,13 +153,18 @@ public class Configuration {
 
         public HasAttribute[] getRequireNonEmptyAttributes() {
             ArrayList<HasAttribute> tmp = new ArrayList<>();
-            for (HasAttribute hasAttribute : getAttributes()) {
-                if (hasAttribute.getRequireNonEmpty()) {
-                    tmp.add(hasAttribute);
+            if (getAttributes() != null) {
+                for (HasAttribute hasAttribute : getAttributes()) {
+                    if (hasAttribute.getRequireNonEmpty()) {
+                        tmp.add(hasAttribute);
+                    }
                 }
+                HasAttribute[] requireNoneEmptyAttributes = new HasAttribute[tmp.size()];
+                return tmp.toArray(requireNoneEmptyAttributes);
+            } else {
+                return new HasAttribute[0];
             }
-            HasAttribute[] requireNoneEmptyAttributes = new HasAttribute[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
+
         }
 
         public Player[] getPlayers() { return players; }

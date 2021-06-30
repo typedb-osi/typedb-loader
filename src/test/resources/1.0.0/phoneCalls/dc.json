@@ -80,8 +80,8 @@
         "src/test/resources/1.0.0/phoneCalls/contract.csv"
       ],
       "separator": ",",
-      "rowsPerCommit": 100,
       "conceptType": "contract",
+      "rowsPerCommit": 100,
       "players": [
         {
           "roleType": "provider",

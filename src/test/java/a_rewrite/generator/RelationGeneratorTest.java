@@ -23,8 +23,7 @@ public class RelationGeneratorTest {
     @Test
     public void genericRelationTest() throws IOException {
 
-
-        String dbName = "entity-generator-test";
+        String dbName = "relation-generator-test";
         String sp = new File("src/test/resources/1.0.0/generic/schema.gql").getAbsolutePath();
         TypeDBClient client = GraknUtil.getClient("localhost:1729");
         GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
@@ -35,9 +34,10 @@ public class RelationGeneratorTest {
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
         TypeDBSession session = GraknUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
-            for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
-                setRelationHasAttributeConceptType(relationKey, idx, dc, session);
-
+            if(dc.getRelations().get(relationKey).getAttributes() != null) {
+                for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
+                    setRelationHasAttributeConceptType(relationKey, idx, dc, session);
+                }
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
                 setGetterAttributeConceptType(relationKey, idx, dc, session);
@@ -247,142 +247,151 @@ public class RelationGeneratorTest {
 
     @Test
     public void phoneCallsPersonTest() throws IOException {
-//        String dbName = "entity-generator-test";
-//        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
-//        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-//        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
-//
-//        String dp = new File("src/test/resources/1.0.0/phoneCalls/person.csv").getAbsolutePath();
-//        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
-//        Configuration dc = Util.initializeDataConfig(dcp);
-//        assert dc != null;
-//        String entityKey = "person";
-//        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
-//        for (int idx = 0; idx < dc.getEntities().get(entityKey).getAttributes().length; idx++) {
-//            setEntityHasAttributeConceptType(entityKey, idx, dc, session);
-//        }
-//        EntityGenerator gen = new EntityGenerator(dp,
-//                dc.getEntities().get(entityKey),
-//                Objects.requireNonNullElseGet(dc.getEntities().get(entityKey).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
-//
-//        session.close();
-//        client.close();
-//
-//        Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
-//
-//        String tmp = "insert $e isa person, has first-name \"Melli\", has last-name \"Winchcum\", has phone-number \"+7 171 898 0853\", has city \"London\", has age 55;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Celinda\", has last-name \"Bonick\", has phone-number \"+370 351 224 5176\", has city \"London\", has age 52;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Chryste\", has last-name \"Lilywhite\", has phone-number \"+81 308 988 7153\", has city \"London\", has age 66;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"D'arcy\", has last-name \"Byfford\", has phone-number \"+54 398 559 0423\", has city \"London\", has age 19, has nick-name \"D\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Xylina\", has last-name \"D'Alesco\", has phone-number \"+7 690 597 4443\", has city \"Cambridge\", has age 51;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Roldan\", has last-name \"Cometti\", has phone-number \"+263 498 495 0617\", has city \"Oxford\", has age 59, has nick-name \"Rolly\", has nick-name \"Rolli\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Cob\", has last-name \"Lafflin\", has phone-number \"+63 815 962 6097\", has city \"Cambridge\", has age 56;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Olag\", has last-name \"Heakey\", has phone-number \"+81 746 154 2598\", has city \"London\", has age 45;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Mandie\", has last-name \"Assender\", has phone-number \"+261 860 539 4754\", has city \"London\", has age 18;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Elenore\", has last-name \"Stokey\", has phone-number \"+62 107 530 7500\", has city \"Oxford\", has age 35;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+86 921 547 9004\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+48 894 777 5173\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+86 922 760 0418\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+33 614 339 0298\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+30 419 575 7546\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+7 414 625 3019\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+57 629 420 5680\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+351 515 605 7915\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+36 318 105 5629\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+63 808 497 1769\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+62 533 266 3426\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+351 272 414 6570\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+86 825 153 5518\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+86 202 257 8619\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+27 117 258 4149\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+48 697 447 6933\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+48 195 624 2025\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+1 254 875 4647\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+7 552 196 4096\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has phone-number \"+86 892 682 0628\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"John\", has last-name \"Smith\", has phone-number \"+62 999 888 7777\", has city \"London\", has age 43, has nick-name \"Jack\", has nick-name \"J\";";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        tmp = "insert $e isa person, has first-name \"Jane\", has last-name \"Smith\", has phone-number \"+62 999 888 7778\", has city \"London\", has age 43;";
-//        Assert.assertEquals(tmp, gen.generateInsertStatement(Util.parseCSV(iterator.next())).toString());
-//
-//        try {
-//            gen.generateInsertStatement(Util.parseCSV(iterator.next()));
-//        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-//            Assert.assertEquals("Index 0 out of bounds for length 0", indexOutOfBoundsException.getMessage());
-//        }
-//
-//        try {
-//            gen.generateInsertStatement(Util.parseCSV(iterator.next()));
-//        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-//            Assert.assertEquals("Index 0 out of bounds for length 0", indexOutOfBoundsException.getMessage());
-//        }
-//
-//        try {
-//            gen.generateInsertStatement(Util.parseCSV(iterator.next()));
-//        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-//            Assert.assertEquals("Index 0 out of bounds for length 0", indexOutOfBoundsException.getMessage());
-//        }
+        String dbName = "relation-generator-test";
+        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        TypeDBClient client = GraknUtil.getClient("localhost:1729");
+        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+
+        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        Configuration dc = Util.initializeDataConfig(dcp);
+        assert dc != null;
+        ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call"));
+        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        for (String relationKey : relationKeys) {
+            if(dc.getRelations().get(relationKey).getAttributes() != null) {
+                for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
+                    setRelationHasAttributeConceptType(relationKey, idx, dc, session);
+                }
+            }
+            for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
+                setGetterAttributeConceptType(relationKey, idx, dc, session);
+            }
+        }
+        session.close();
+        client.close();
+
+        // Test contracts
+        String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv").getAbsolutePath();
+        RelationGenerator gen = new RelationGenerator(dp,
+                dc.getRelations().get(relationKeys.get(0)),
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+        Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
+
+        TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        String tmp = "match\n" +
+                "$player-0 isa company, has name \"Telecom\";\n" +
+                "$player-1 isa person, has phone-number \"+7 171 898 0853\";\n" +
+                "insert $rel (provider: $player-0, customer: $player-1) isa contract;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 7; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        iterator.next();
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match $player-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "insert $rel (customer: $player-0) isa contract;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match $player-0 isa company, has name \"Telecom\";\n" +
+                "insert $rel (provider: $player-0) isa contract;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 3; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa company, has name \"Telecom\";\n" +
+                "$player-1 isa person, has phone-number \"+62 107 530 7500\", has phone-number \"+261 860 539 4754\";\n" +
+                "insert $rel (provider: $player-0, customer: $player-1) isa contract;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+
+        // Test calls
+        dp = new File("src/test/resources/1.0.0/phoneCalls/call.csv").getAbsolutePath();
+        gen = new RelationGenerator(dp,
+                dc.getRelations().get(relationKeys.get(1)),
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(1)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+        iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+54 398 559 0423\";\n" +
+                "$player-1 isa person, has phone-number \"+48 195 624 2025\";\n" +
+                "insert $rel (caller: $player-0, callee: $player-1) isa call, has started-at 2018-09-16T22:24:19, has duration 122;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 112; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "$player-1 isa person, has phone-number \"+263 498 495 0617\";\n" +
+                "insert $rel (caller: $player-0, callee: $player-1) isa call, has started-at 2018-09-19T23:16:49;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 98; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "$player-1 isa person, has phone-number \"+7 552 196 4096\";\n" +
+                "insert $rel (caller: $player-0, callee: $player-1) isa call, has started-at 2018-09-23T01:14:56;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "$player-1 isa person, has phone-number \"+7 552 196 4096\";\n" +
+                "insert $rel (caller: $player-0, callee: $player-1) isa call, has started-at 2018-09-23T01:14:56;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "$player-1 isa person, has phone-number \"+7 552 196 4096\";\n" +
+                "insert $rel (caller: $player-0, callee: $player-1) isa call, has duration 53;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match $player-0 isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "insert $rel (caller: $player-0) isa call, has started-at 2018-09-23T01:14:56, has duration 53;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match $player-0 isa person, has phone-number \"+7 552 196 4096\";\n" +
+                "insert $rel (callee: $player-0) isa call, has started-at 2018-09-23T01:14:56, has duration 53;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
     }
 
     private void setRelationHasAttributeConceptType(String relationKey, int attributeIndex, Configuration dc, TypeDBSession session) {

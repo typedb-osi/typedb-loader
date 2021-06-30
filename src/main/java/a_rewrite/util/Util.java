@@ -56,13 +56,21 @@ public class Util {
     }
 
     public static String[] parseCSV(String line) throws IOException {
-        CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
-        return parse(csv);
+        if (!line.isEmpty()) {
+            CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+            return parse(csv);
+        } else {
+            return new String[0];
+        }
     }
 
     public static String[] parseTSV(String line) throws IOException {
-        CSVRecord tsv = CSVParser.parse(line, TSV_FORMAT).getRecords().get(0);
-        return parse(tsv);
+        if (!line.isEmpty()) {
+            CSVRecord tsv = CSVParser.parse(line, TSV_FORMAT).getRecords().get(0);
+            return parse(tsv);
+        } else {
+            return new String[0];
+        }
     }
 
     private static String[] parse(CSVRecord record) {

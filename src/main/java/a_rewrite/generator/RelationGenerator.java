@@ -60,64 +60,70 @@ public class RelationGenerator implements Generator {
     }
 
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
-        ArrayList<ThingVariable.Thing> playerMatchStatements = new ArrayList<>();
-        //TODO: replace this String solution with language builder
-        ArrayList<String> playerVars = new ArrayList<>();
-        ArrayList<String> roleTypes = new ArrayList<>();
+        if (row.length > 0) {
+            ArrayList<ThingVariable.Thing> playerMatchStatements = new ArrayList<>();
+            //TODO: replace this String solution with language builder
+            ArrayList<String> playerVars = new ArrayList<>();
+            ArrayList<String> roleTypes = new ArrayList<>();
 
-        int playerIdx = 0;
-        for (Configuration.Player player : relationConfiguration.getPlayers()) {
-            String playerVar = "player-" + playerIdx;
-            ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
-                    .isa(player.getRolePlayerGetter().getConceptType());
-            for (Configuration.Getter ownershipGetter : player.getOwnershipGetters()) {
-                ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                        row[GeneratorUtil.getColumnIndexByName(header, ownershipGetter.getColumn())],
-                        ownershipGetter.getConceptType(),
-                        ownershipGetter.getConceptValueType(),
-                        ownershipGetter.getListSeparator(),
-                        ownershipGetter.getPreprocessorConfig(),
-                        row,
-                        filePath,
-                        fileSeparator);
-                for (ThingConstraint.Value<?> constraintValue : tmp) {
-                    playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipGetter.getConceptType(), constraintValue));
+            int playerIdx = 0;
+            for (Configuration.Player player : relationConfiguration.getPlayers()) {
+                String playerVar = "player-" + playerIdx;
+                ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
+                        .isa(player.getRolePlayerGetter().getConceptType());
+                for (Configuration.Getter ownershipGetter : player.getOwnershipGetters()) {
+                    ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
+                            row[GeneratorUtil.getColumnIndexByName(header, ownershipGetter.getColumn())],
+                            ownershipGetter.getConceptType(),
+                            ownershipGetter.getConceptValueType(),
+                            ownershipGetter.getListSeparator(),
+                            ownershipGetter.getPreprocessorConfig(),
+                            row,
+                            filePath,
+                            fileSeparator);
+                    for (ThingConstraint.Value<?> constraintValue : tmp) {
+                        playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipGetter.getConceptType(), constraintValue));
+                    }
+                }
+                if(playerMatchStatement.toString().contains(", has")){
+                    playerMatchStatements.add(playerMatchStatement);
+                    playerVars.add(playerVar);
+                    roleTypes.add(player.getRoleType());
+                    playerIdx += 1;
                 }
             }
-            if(playerMatchStatement.toString().contains(", has")){
-                playerMatchStatements.add(playerMatchStatement);
-                playerVars.add(playerVar);
-                roleTypes.add(player.getRoleType());
-                playerIdx += 1;
-            }
-        }
 
-        ThingVariable.Relation insertStatement = null;
-        for (int i = 0; i < roleTypes.size(); i++) {
-            if (insertStatement == null) {
-                insertStatement = TypeQL.var("rel").rel(roleTypes.get(i), playerVars.get(i));
-            } else {
-                insertStatement = insertStatement.rel(roleTypes.get(i), playerVars.get(i));
+            ThingVariable.Relation insertStatement = null;
+            for (int i = 0; i < roleTypes.size(); i++) {
+                if (insertStatement == null) {
+                    insertStatement = TypeQL.var("rel").rel(roleTypes.get(i), playerVars.get(i));
+                } else {
+                    insertStatement = insertStatement.rel(roleTypes.get(i), playerVars.get(i));
+                }
             }
-        }
-        insertStatement = insertStatement.isa(relationConfiguration.getConceptType());
+            insertStatement = insertStatement.isa(relationConfiguration.getConceptType());
 
-        for (Configuration.HasAttribute hasAttribute : relationConfiguration.getAttributes()) {
-            ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                    row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
-                    hasAttribute.getConceptType(),
-                    hasAttribute.getConceptValueType(),
-                    hasAttribute.getListSeparator(),
-                    hasAttribute.getPreprocessorConfig(),
-                    row,
-                    filePath,
-                    fileSeparator);
-            for (ThingConstraint.Value<?> constraintValue : tmp) {
-                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+            if (relationConfiguration.getAttributes() != null) {
+                for (Configuration.HasAttribute hasAttribute : relationConfiguration.getAttributes()) {
+                    ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
+                            row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
+                            hasAttribute.getConceptType(),
+                            hasAttribute.getConceptValueType(),
+                            hasAttribute.getListSeparator(),
+                            hasAttribute.getPreprocessorConfig(),
+                            row,
+                            filePath,
+                            fileSeparator);
+                    for (ThingConstraint.Value<?> constraintValue : tmp) {
+                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+                    }
+                }
             }
-        }
 
-        return TypeQL.match(playerMatchStatements).insert(insertStatement);
+            return TypeQL.match(playerMatchStatements).insert(insertStatement);
+        } else {
+            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+        }
     }
 
     public boolean relationInsertStatementValid(TypeQLInsert insert) {
@@ -148,9 +154,16 @@ public class RelationGenerator implements Generator {
         }
 
         // all required attributes part of the insert statement
-        for (Configuration.HasAttribute hasAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
-            if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
+        if (relationConfiguration.getRequireNonEmptyAttributes() != null) {
+            for (Configuration.HasAttribute hasAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
+                if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
+            }
         }
+        // all roles that are required must be filled
+        for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
+            if(!insert.toString().contains(player.getRoleType() + ":")) return false;
+        }
+
         return true;
     }
 
