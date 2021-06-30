@@ -167,6 +167,38 @@
           "requireNonEmpty": true
         }
       ]
+    },
+    "in-use": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/in-use.csv"
+      ],
+      "separator": ",",
+      "rowsPerCommit": 100,
+      "conceptType": "in-use",
+      "players": [
+        {
+          "roleType": "status",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "is-in-use",
+              "handler": "attribute",
+              "column": "in_use"
+            }
+          ]
+        },
+        {
+          "roleType": "account",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "phone-number",
+              "handler": "attribute",
+              "column": "pn"
+            }
+          ]
+        }
+      ]
     }
   }
 }

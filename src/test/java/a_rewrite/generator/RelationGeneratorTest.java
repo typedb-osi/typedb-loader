@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class RelationGeneratorTest {
-    //TODO: continue here!!!! --> need to validate that the relationGenerator creates appropriate statements for entity relations, then move on to test attribute relations and nested ones...
 
     @Test
     public void genericRelationTest() throws IOException {
@@ -33,7 +32,7 @@ public class RelationGeneratorTest {
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
-            if(dc.getRelations().get(relationKey).getAttributes() != null) {
+            if (dc.getRelations().get(relationKey).getAttributes() != null) {
                 for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
                     Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
                 }
@@ -254,10 +253,10 @@ public class RelationGeneratorTest {
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
-        ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call"));
+        ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
-            if(dc.getRelations().get(relationKey).getAttributes() != null) {
+            if (dc.getRelations().get(relationKey).getAttributes() != null) {
                 for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
                     Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
                 }
@@ -269,7 +268,12 @@ public class RelationGeneratorTest {
         session.close();
         client.close();
 
-        // Test contracts
+        testContracts(dc, relationKeys);
+        testCalls(dc, relationKeys);
+        testInUse(dc, relationKeys);
+    }
+
+    private void testContracts(Configuration dc, ArrayList<String> relationKeys) throws IOException {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
@@ -318,17 +322,18 @@ public class RelationGeneratorTest {
                 "insert $rel (provider: $player-0, customer: $player-1) isa contract;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertTrue(gen.relationInsertStatementValid(statement));
+    }
 
+    private void testCalls(Configuration dc, ArrayList<String> relationKeys) throws IOException {
 
-        // Test calls
-        dp = new File("src/test/resources/1.0.0/phoneCalls/call.csv").getAbsolutePath();
-        gen = new RelationGenerator(dp,
+        String dp = new File("src/test/resources/1.0.0/phoneCalls/call.csv").getAbsolutePath();
+        RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(1)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(1)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
-        iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
+        Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
-        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match\n" +
+        TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        String tmp = "match\n" +
                 "$player-0 isa person, has phone-number \"+54 398 559 0423\";\n" +
                 "$player-1 isa person, has phone-number \"+48 195 624 2025\";\n" +
                 "insert $rel (caller: $player-0, callee: $player-1) isa call, has started-at 2018-09-16T22:24:19, has duration 122;";
@@ -392,4 +397,42 @@ public class RelationGeneratorTest {
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
     }
+
+    private void testInUse(Configuration dc, ArrayList<String> relationKeys) throws IOException {
+        String dp = new File("src/test/resources/1.0.0/phoneCalls/in-use.csv").getAbsolutePath();
+        RelationGenerator gen = new RelationGenerator(dp,
+                dc.getRelations().get(relationKeys.get(2)),
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(2)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+        Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
+
+        TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        String tmp = "match\n" +
+                "$player-0 \"yes\" isa is-in-use;\n" +
+                "$player-1 \"+7 171 898 0853\" isa phone-number;\n" +
+                "insert $rel (status: $player-0, account: $player-1) isa in-use;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 4; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        for (int i = 0; i < 2; i++) {
+            iterator.next();
+        }
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match $player-0 \"+62 107 530 7500\" isa phone-number;\n" +
+                "insert $rel (account: $player-0) isa in-use;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+
+    }
+
 }

@@ -301,4 +301,35 @@ public class ConfigurationValidation {
         }
     }
 
+//    private TypeHandler getPlayerType(Configuration.Player player) {
+//        int entityGetter = 0;
+//        int attributeGetter = 0;
+//        int relationGetter = 0;
+//
+//        for (Configuration.Getter playerGetter : player.getGetter()) {
+//            switch (playerGetter.getHandler().toString()) {
+//                case "attribute":
+//                    attributeGetter++; break;
+//                case "entity":
+//                    entityGetter++; break;
+//                case "relation":
+//                    relationGetter++; break;
+//            }
+//        }
+//
+//        if (entityGetter + attributeGetter + relationGetter == 1) {
+//            if (attributeGetter == 1) {
+//                return TypeHandler.ATTRIBUTE;
+//            } else if (entityGetter == 1) {
+//                return TypeHandler.ENTITY;
+//            } else if (relationGetter == 1) {
+//                return TypeHandler.RELATION;
+//            } else {
+//                return null;
+//            }
+//        } else {
+//            return null;
+//        }
+//    }
+
 }

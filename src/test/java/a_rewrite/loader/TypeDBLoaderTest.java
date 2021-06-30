@@ -40,6 +40,7 @@ public class TypeDBLoaderTest {
         testAttributes(session);
         testEntities(session);
         testRelations(session);
+        testAttributeRelation(session);
 
         session.close();
         client.close();
@@ -133,6 +134,15 @@ public class TypeDBLoaderTest {
         statements.add(relation);
         getQuery = TypeQL.match(statements).get("c").limit(1000);
         Assert.assertEquals(4, read.query().match(getQuery).count());
+
+        read.close();
+    }
+
+    public void testAttributeRelation(TypeDBSession session) {
+
+        TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
+        TypeQLMatch getQuery = TypeQL.match(TypeQL.var("a").isa("in-use")).get("a");
+        Assert.assertEquals(7, read.query().match(getQuery).count());
 
         read.close();
     }

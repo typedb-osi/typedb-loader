@@ -61,7 +61,7 @@ public class RelationGenerator implements Generator {
 
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
-            ArrayList<ThingVariable.Thing> playerMatchStatements = new ArrayList<>();
+            ArrayList<ThingVariable<?>> playerMatchStatements = new ArrayList<>();
             //TODO: replace this String solution with language builder
             ArrayList<String> playerVars = new ArrayList<>();
             ArrayList<String> roleTypes = new ArrayList<>();
@@ -69,28 +69,41 @@ public class RelationGenerator implements Generator {
             int playerIdx = 0;
             for (Configuration.Player player : relationConfiguration.getPlayers()) {
                 String playerVar = "player-" + playerIdx;
-                ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
-                        .isa(player.getRolePlayerGetter().getConceptType());
-                for (Configuration.Getter ownershipGetter : player.getOwnershipGetters()) {
-                    ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                            row[GeneratorUtil.getColumnIndexByName(header, ownershipGetter.getColumn())],
-                            ownershipGetter.getConceptType(),
-                            ownershipGetter.getConceptValueType(),
-                            ownershipGetter.getListSeparator(),
-                            ownershipGetter.getPreprocessorConfig(),
-                            row,
-                            filePath,
-                            fileSeparator);
-                    for (ThingConstraint.Value<?> constraintValue : tmp) {
-                        playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipGetter.getConceptType(), constraintValue));
+                TypeHandler playerTypeHandler = getPlayerType(player);
+                assert playerTypeHandler != null;
+
+                // ATTRIBUTE PLAYER
+                if (playerTypeHandler.equals(TypeHandler.ATTRIBUTE)) {
+                    ThingVariable.Attribute playerMatchStatement = getAttributePlayerMatchStatement(row, player, playerVar);
+                    if (playerMatchStatement != null) {
+                        playerMatchStatements.add(playerMatchStatement);
+                        playerVars.add(playerVar);
+                        roleTypes.add(player.getRoleType());
+                        playerIdx += 1;
                     }
                 }
-                if(playerMatchStatement.toString().contains(", has")){
-                    playerMatchStatements.add(playerMatchStatement);
-                    playerVars.add(playerVar);
-                    roleTypes.add(player.getRoleType());
-                    playerIdx += 1;
+
+                // ENTITY PLAYER
+                if (playerTypeHandler.equals(TypeHandler.ENTITY)) {
+                    ThingVariable.Thing playerMatchStatement = getEntityPlayerMatchStatement(row, player, playerVar);
+                    if (playerMatchStatement.toString().contains(", has")) {
+                        playerMatchStatements.add(playerMatchStatement);
+                        playerVars.add(playerVar);
+                        roleTypes.add(player.getRoleType());
+                        playerIdx += 1;
+                    }
                 }
+
+//                // RELATION PLAYER
+//                if (playerTypeHandler.equals(TypeHandler.RELATION)) {
+//                    ThingVariable.Relation playerMatchStatement = getRelationPlayerMatchStatement(row, player, playerVar);
+//                    if(playerMatchStatement.toString().contains(", has")){
+//                        playerMatchStatements.add(playerMatchStatement);
+//                        playerVars.add(playerVar);
+//                        roleTypes.add(player.getRoleType());
+//                        playerIdx += 1;
+//                    }
+//                }
             }
 
             ThingVariable.Relation insertStatement = null;
@@ -126,6 +139,46 @@ public class RelationGenerator implements Generator {
         }
     }
 
+    private ThingVariable.Thing getEntityPlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
+        ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
+                .isa(player.getRolePlayerGetter().getConceptType());
+        for (Configuration.Getter ownershipGetter : player.getOwnershipGetters()) {
+            ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
+                    row[GeneratorUtil.getColumnIndexByName(header, ownershipGetter.getColumn())],
+                    ownershipGetter.getConceptType(),
+                    ownershipGetter.getConceptValueType(),
+                    ownershipGetter.getListSeparator(),
+                    ownershipGetter.getPreprocessorConfig(),
+                    row,
+                    filePath,
+                    fileSeparator);
+            for (ThingConstraint.Value<?> constraintValue : tmp) {
+                playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipGetter.getConceptType(), constraintValue));
+            }
+        }
+        return playerMatchStatement;
+    }
+
+    private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
+        Configuration.Getter attributeGetter = player.getAttributeGetter();
+        ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraints(
+                row[GeneratorUtil.getColumnIndexByName(header, attributeGetter.getColumn())],
+                attributeGetter.getConceptType(),
+                attributeGetter.getConceptValueType(),
+                null,
+                attributeGetter.getPreprocessorConfig(),
+                row,
+                filePath,
+                fileSeparator);
+        if (constraints.size() > 0) {
+            return TypeQL.var(playerVar)
+                    .constrain(constraints.get(0))
+                    .isa(attributeGetter.getConceptType());
+        } else {
+            return null;
+        }
+    }
+
     public boolean relationInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + relationConfiguration.getConceptType())) return false;
@@ -133,8 +186,7 @@ public class RelationGenerator implements Generator {
         for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
             if (player.getRolePlayerGetter().getHandler() == TypeHandler.ATTRIBUTE) {
                 // the relation must be in the match statement
-                if (!insert.toString().contains(player.getRolePlayerGetter().getConceptType())) return false;
-                // TODO
+                if (!insert.toString().contains("isa " + player.getRolePlayerGetter().getConceptType())) return false;
             } else if (player.getRolePlayerGetter().getHandler() == TypeHandler.ENTITY) {
                 // the entity must be in the match statement
                 if (!insert.toString().contains("isa " + player.getRolePlayerGetter().getConceptType())) return false;
@@ -161,7 +213,7 @@ public class RelationGenerator implements Generator {
         }
         // all roles that are required must be in the insert statement
         for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
-            if(!insert.toString().contains(player.getRoleType() + ":")) return false;
+            if (!insert.toString().contains(player.getRoleType() + ":")) return false;
         }
 
         return true;
@@ -169,5 +221,14 @@ public class RelationGenerator implements Generator {
 
     public char getFileSeparator() {
         return this.fileSeparator;
+    }
+
+    private TypeHandler getPlayerType(Configuration.Player player) {
+        for (Configuration.Getter playerGetter : player.getGetter()) {
+            if (playerGetter.getHandler() != TypeHandler.OWNERSHIP) {
+                return playerGetter.getHandler();
+            }
+        }
+        return null;
     }
 }
