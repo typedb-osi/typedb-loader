@@ -1,6 +1,7 @@
 package a_rewrite.generator;
 
 import a_rewrite.config.Configuration;
+import a_rewrite.config.TypeHandler;
 import a_rewrite.io.ErrorFileLogger;
 import a_rewrite.util.GeneratorUtil;
 import a_rewrite.util.Util;
@@ -44,7 +45,8 @@ public class RelationGenerator implements Generator {
         }
 
         TypeQLInsert statement = generateMatchInsertStatement(row);
-        if (isValid(statement)) {
+
+        if (relationInsertStatementValid(statement)) {
             try {
                 tx.query().insert(statement);
             } catch (TypeDBClientException typeDBClientException) {
@@ -68,7 +70,7 @@ public class RelationGenerator implements Generator {
             String playerVar = "player-" + playerIdx;
             ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
                     .isa(player.getRolePlayerGetter().getConceptType());
-            for (Configuration.Getter ownershipGetter : player.getOwnershipGetter()) {
+            for (Configuration.Getter ownershipGetter : player.getOwnershipGetters()) {
                 ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
                         row[GeneratorUtil.getColumnIndexByName(header, ownershipGetter.getColumn())],
                         ownershipGetter.getConceptType(),
@@ -82,14 +84,16 @@ public class RelationGenerator implements Generator {
                     playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipGetter.getConceptType(), constraintValue));
                 }
             }
-            playerMatchStatements.add(playerMatchStatement);
-            playerVars.add(playerVar);
-            roleTypes.add(player.getRoleType());
-            playerIdx += 1;
+            if(playerMatchStatement.toString().contains(", has")){
+                playerMatchStatements.add(playerMatchStatement);
+                playerVars.add(playerVar);
+                roleTypes.add(player.getRoleType());
+                playerIdx += 1;
+            }
         }
 
         ThingVariable.Relation insertStatement = null;
-        for (int i = 0; i <= roleTypes.size(); i++) {
+        for (int i = 0; i < roleTypes.size(); i++) {
             if (insertStatement == null) {
                 insertStatement = TypeQL.var("rel").rel(roleTypes.get(i), playerVars.get(i));
             } else {
@@ -116,12 +120,37 @@ public class RelationGenerator implements Generator {
         return TypeQL.match(playerMatchStatements).insert(insertStatement);
     }
 
-    private boolean isValid(TypeQLInsert insert) {
-//        if (insert == null) return false;
-//        if (!insert.toString().contains("isa " + relationConfiguration.getConceptType())) return false;
-//        for (Configuration.HasAttribute hasAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
-//            if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
-//        }
+    public boolean relationInsertStatementValid(TypeQLInsert insert) {
+        if (insert == null) return false;
+        if (!insert.toString().contains("isa " + relationConfiguration.getConceptType())) return false;
+
+        for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
+            if (player.getRolePlayerGetter().getHandler() == TypeHandler.ATTRIBUTE) {
+                // the relation must be in the match statement
+                if (!insert.toString().contains(player.getRolePlayerGetter().getConceptType())) return false;
+                // TODO
+            } else if (player.getRolePlayerGetter().getHandler() == TypeHandler.ENTITY) {
+                // the entity must be in the match statement
+                if (!insert.toString().contains("isa " + player.getRolePlayerGetter().getConceptType())) return false;
+                // each identifying attribute of the entity must be in the match statement
+                Configuration.Getter[] ownerships = player.getOwnershipGetters();
+                for (Configuration.Getter ownership : ownerships) {
+                    if (ownership != null) {
+                        String conceptType = ownership.getConceptType();
+                        if (!insert.toString().contains("has " + conceptType)) return false;
+                    }
+                }
+            } else if (player.getRolePlayerGetter().getHandler() == TypeHandler.RELATION) {
+                // the relation must be in the match statement
+                if (!insert.toString().contains("isa " + player.getRolePlayerGetter().getConceptType())) return false;
+                // TODO
+            }
+        }
+
+        // all required attributes part of the insert statement
+        for (Configuration.HasAttribute hasAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
+            if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
+        }
         return true;
     }
 

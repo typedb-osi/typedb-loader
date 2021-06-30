@@ -9,37 +9,16 @@ entity1id1	entity2id1	entity3id1	###att6	opt6
 entity1id1	entity2id1	entity3id1	 ###att7	opt7
 entity1id1	entity2id1	entity3id1	  ###att8	opt8
 entity1id1	entity2id1	entity3id1	######att9	opt9
-entity1id1	entity2id1	entity3id1	att10
-entity1id1	entity2id1	entity3id1	att11
-entity1id1	entity2id1	entity3id1	att12
-entity1id1	entity2id1	entity3id1	att13
-entity1id1	entity2id1		att14
-entity1id1	entity2id1	 	att15
-entity1id1	entity2id1	  	att16
-entity1id1	entity2id1	  	att17
-entity1id1	entity2id1	  	att18
-entity1id1	entity2id1	  	att19
+entity1id1	entity2id1	entity3id1	att10	
+entity1id1	entity2id1	  	att19	
 entity1id1	entity2id1	  	att20	opt20
 entity1id1	entity2id1	  	att21###explosion21	optional21
-entity1id1	entity2id1	entity3id1	att22
-entity1id1	entity2id1	entity3id1	att23
-entity1id1	entity2id1	entity3id1	att24
+entity1id1	entity2id1	entity3id1	att22	
 entity1id1	entity2id1	entity3id1		opt25
-entity1id1	entity2id1	entity3id1	 	opt26
-entity1id1	entity2id1	entity3id1	   	opt27
-entity1id1	entity2id1	entity3id1	###	opt28
-entity1id1	entity2id1	entity3id1	 ###	opt29
-entity1id1	entity2id1	entity3id1	 ### 	opt30
-entity1id1	entity2id1	entity3id1	### 	opt31
-entity1id1	entity2id1	entity3id1
+entity1id1	entity2id1	entity3id1		
 	entity2id1	entity3id1	att34	opt33
- 	entity2id1	entity3id1	att35	opt34
-  	entity2id1	entity3id1	att36	opt35
 entity1id1		entity3id1	att37	opt36
-entity1id1	 	entity3id1	att38	opt37
-entity1id1	 	entity3id1	att39	opt38
 entity1id1###entity1id2	entity2id1	entity3id1	att39	opt39
-entity1id1###entity1id2	entity2id1		att40
+entity1id1###entity1id2	entity2id1		att40	
 ###	entity2id1	entity3id1	att41	opt41
- ###	entity2id1	entity3id1	att42	opt42
- ### 	entity2id1	entity3id1	att43	opt43
+

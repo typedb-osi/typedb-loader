@@ -230,20 +230,61 @@ public class Configuration {
             return getter;
         }
 
-        public Getter getRolePlayerGetter() {
+        public Getter getAttributeGetter() {
+            ArrayList<Getter> tmp = new ArrayList<>();
             for (Getter getter : getGetter()) {
-                if (getter.getHandler() != TypeHandler.OWNERSHIP) return getter;
+                if (getter.getHandler() == TypeHandler.ATTRIBUTE) tmp.add(getter);
             }
-            return null;
+            if (tmp.size() == 1) {
+                return tmp.get(0); //TODO - log error or catch in validation!
+            } else {
+                return null;
+            }
         }
 
-        public Getter[] getOwnershipGetter() {
+        public Getter getEntityGetter() {
+            ArrayList<Getter> tmp = new ArrayList<>();
+            for (Getter getter : getGetter()) {
+                if (getter.getHandler() != TypeHandler.ENTITY) tmp.add(getter);
+            }
+            if (tmp.size() > 1) {
+                return null; //TODO - log error or catch in validation!
+            } else {
+                return tmp.get(0);
+            }
+        }
+
+        public Getter getRelationGetter() {
+            ArrayList<Getter> tmp = new ArrayList<>();
+            for (Getter getter : getGetter()) {
+                if (getter.getHandler() != TypeHandler.RELATION) tmp.add(getter);
+            }
+            if (tmp.size() > 1) {
+                return null; //TODO - log error or catch in validation!
+            } else {
+                return tmp.get(0);
+            }
+        }
+
+        public Getter[] getOwnershipGetters() {
             ArrayList<Getter> tmp = new ArrayList<>();
             for (Getter getter : getGetter()) {
                 if (getter.getHandler() == TypeHandler.OWNERSHIP) tmp.add(getter);
             }
             Getter[] ownershipGetter = new Getter[tmp.size()];
             return tmp.toArray(ownershipGetter);
+        }
+
+        public Getter getRolePlayerGetter() {
+            ArrayList<Getter> tmp = new ArrayList<>();
+            for (Getter getter : getGetter()) {
+                if (getter.getHandler() != TypeHandler.OWNERSHIP) tmp.add(getter);
+            }
+            if (tmp.size() > 1) {
+                return null; //TODO - log error or catch in validation!
+            } else {
+                return tmp.get(0);
+            }
         }
     }
 

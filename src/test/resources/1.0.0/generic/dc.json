@@ -79,5 +79,77 @@
         }
       ]
     }
+  },
+  "relations": {
+    "rel1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/rel1.tsv"
+      ],
+      "separator": "\t",
+      "conceptType": "rel1",
+      "rowsPerCommit": 50,
+      "players": [
+        {
+          "roleType": "player-one",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "entity1",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "entity1-id",
+              "handler": "ownership",
+              "column": "entity1-id",
+              "listSeparator": "###"
+            }
+          ]
+        },
+        {
+          "roleType": "player-two",
+          "requireNonEmpty": true,
+          "getter": [
+            {
+              "conceptType": "entity2",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "entity2-id",
+              "handler": "ownership",
+              "column": "entity2-id"
+            }
+          ]
+        },
+        {
+          "roleType": "player-optional",
+          "requireNonEmpty": false,
+          "getter": [
+            {
+              "conceptType": "entity3",
+              "handler": "entity"
+            },
+            {
+              "conceptType": "entity3-id",
+              "handler": "ownership",
+              "column": "entity3-id"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "conceptType": "relAt-1",
+          "column": "relAt-1",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        },
+        {
+          "conceptType": "relAt-2",
+          "column": "relAt-2",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        }
+      ]
+    }
   }
 }
