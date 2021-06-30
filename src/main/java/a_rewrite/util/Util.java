@@ -3,6 +3,8 @@ package a_rewrite.util;
 import a_rewrite.config.Configuration;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -116,5 +118,28 @@ public class Util {
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                 .toLowerCase();
+    }
+
+    public static void setAttributeConceptType(Configuration.Attribute attribute, TypeDBSession session) {
+        attribute.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    }
+
+    public static  void setEntityHasAttributeConceptType(Configuration.Entity entity, int attributeIndex, TypeDBSession session) {
+        entity.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    }
+
+    public static  void setRelationHasAttributeConceptType(Configuration.Relation relation, int attributeIndex, TypeDBSession session) {
+        relation.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    }
+
+    public static  void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
+        Configuration.Getter[] ownershipGetters = relation.getPlayers()[playerIndex].getOwnershipGetters();
+        for (Configuration.Getter ownershipGetter : ownershipGetters){
+            ownershipGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        }
+        Configuration.Getter attributeGetter = relation.getPlayers()[playerIndex].getAttributeGetter();
+        if (attributeGetter != null) {
+            attributeGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        }
     }
 }

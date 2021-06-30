@@ -1,11 +1,10 @@
 package a_rewrite.generator;
 
 import a_rewrite.config.Configuration;
-import a_rewrite.util.GraknUtil;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,22 +24,22 @@ public class RelationGeneratorTest {
 
         String dbName = "relation-generator-test";
         String sp = new File("src/test/resources/1.0.0/generic/schema.gql").getAbsolutePath();
-        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
-        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if(dc.getRelations().get(relationKey).getAttributes() != null) {
                 for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
-                    setRelationHasAttributeConceptType(relationKey, idx, dc, session);
+                    Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
                 }
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
-                setGetterAttributeConceptType(relationKey, idx, dc, session);
+                Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
             }
         }
         session.close();
@@ -249,22 +248,22 @@ public class RelationGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "relation-generator-test";
         String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call"));
-        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if(dc.getRelations().get(relationKey).getAttributes() != null) {
                 for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
-                    setRelationHasAttributeConceptType(relationKey, idx, dc, session);
+                    Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
                 }
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
-                setGetterAttributeConceptType(relationKey, idx, dc, session);
+                Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
             }
         }
         session.close();
@@ -392,20 +391,5 @@ public class RelationGeneratorTest {
                 "insert $rel (callee: $player-0) isa call, has started-at 2018-09-23T01:14:56, has duration 53;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
-    }
-
-    private void setRelationHasAttributeConceptType(String relationKey, int attributeIndex, Configuration dc, TypeDBSession session) {
-        dc.getRelations().get(relationKey).getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    private void setGetterAttributeConceptType(String relationKey, int playerIndex, Configuration dc, TypeDBSession session) {
-        Configuration.Getter[] getters = dc.getRelations().get(relationKey).getPlayers()[playerIndex].getOwnershipGetters();
-        for (Configuration.Getter ownershipGetter : getters){
-            ownershipGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-        }
-        Configuration.Getter attributeGetter = dc.getRelations().get(relationKey).getPlayers()[playerIndex].getAttributeGetter();
-        if (attributeGetter != null) {
-            attributeGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-        }
     }
 }

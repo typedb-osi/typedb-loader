@@ -58,24 +58,28 @@ public class EntityGenerator implements Generator {
     }
 
     public TypeQLInsert generateInsertStatement(String[] row) {
-        ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getConceptType());
+        if (row.length > 0) {
+            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getConceptType());
 
-        for (Configuration.HasAttribute hasAttribute : entityConfiguration.getAttributes()) {
-            ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                    row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
-                    hasAttribute.getConceptType(),
-                    hasAttribute.getConceptValueType(),
-                    hasAttribute.getListSeparator(),
-                    hasAttribute.getPreprocessorConfig(),
-                    row,
-                    filePath,
-                    fileSeparator);
-            for (ThingConstraint.Value<?> constraintValue : tmp) {
-                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+            for (Configuration.HasAttribute hasAttribute : entityConfiguration.getAttributes()) {
+                ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
+                        row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
+                        hasAttribute.getConceptType(),
+                        hasAttribute.getConceptValueType(),
+                        hasAttribute.getListSeparator(),
+                        hasAttribute.getPreprocessorConfig(),
+                        row,
+                        filePath,
+                        fileSeparator);
+                for (ThingConstraint.Value<?> constraintValue : tmp) {
+                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+                }
             }
-        }
 
-        return TypeQL.insert(insertStatement);
+            return TypeQL.insert(insertStatement);
+        } else {
+            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+        }
     }
 
     private boolean isValid(TypeQLInsert insert) {

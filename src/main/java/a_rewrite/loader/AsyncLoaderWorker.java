@@ -4,7 +4,8 @@ import a_rewrite.config.Configuration;
 import a_rewrite.generator.AttributeGenerator;
 import a_rewrite.generator.EntityGenerator;
 import a_rewrite.generator.Generator;
-import a_rewrite.util.GraknUtil;
+import a_rewrite.generator.RelationGenerator;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -46,45 +47,60 @@ public class AsyncLoaderWorker {
 
     public void run(TypeDBClient client) throws IOException, InterruptedException {
 
-        try (TypeDBSession session = GraknUtil.getDataSession(client, databaseName)) {
+        try (TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName)) {
             // Load attributes
             Util.info("loading attributes");
-            for (Map.Entry<String, Configuration.Attribute> attribute : dc.getAttributes().entrySet()) {
-                for (String fp : attribute.getValue().getDataPaths()) {
-                    setAttributeConceptType(attribute.getKey(), session);
-                    Generator gen = new AttributeGenerator(fp, attribute.getValue(), getSeparator(attribute.getValue().getSeparator()));
-                    if (!hasError.get()) asyncLoad(session, fp, gen, getRowsPerCommit(attribute.getValue().getRowsPerCommit()));
+            if (dc.getAttributes() != null) {
+                for (Map.Entry<String, Configuration.Attribute> attribute : dc.getAttributes().entrySet()) {
+                    for (String fp : attribute.getValue().getDataPaths()) {
+                        Util.setAttributeConceptType(attribute.getValue(), session);
+                        Generator gen = new AttributeGenerator(fp, attribute.getValue(), getSeparator(attribute.getValue().getSeparator()));
+                        if (!hasError.get())
+                            asyncLoad(session, fp, gen, getRowsPerCommit(attribute.getValue().getRowsPerCommit()));
+                    }
                 }
             }
+
             // Load entities
             Util.info("loading entities");
-            for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
-                for (String fp : entity.getValue().getDataPaths()) {
-                    for (int idx = 0; idx < entity.getValue().getAttributes().length; idx++) {
-                        setEntityHasAttributeConceptType(entity.getKey(), idx, session);
+            if (dc.getEntities() != null) {
+                for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
+                    for (String fp : entity.getValue().getDataPaths()) {
+                        for (int idx = 0; idx < entity.getValue().getAttributes().length; idx++) {
+                            Util.setEntityHasAttributeConceptType(entity.getValue(), idx, session);
+                        }
+                        Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(entity.getValue().getSeparator()));
+                        if (!hasError.get()) asyncLoad(session, fp, gen, getRowsPerCommit(entity.getValue().getRowsPerCommit()));
                     }
-                    Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(entity.getValue().getSeparator()));
-                    if (!hasError.get()) asyncLoad(session, fp, gen, getRowsPerCommit(entity.getValue().getRowsPerCommit()));
                 }
             }
+
 //            //Load relations
-//            Util.info("loading relations");
-//            for (String fp : RELATION_FILEPATHS) {
-//                String[] header = Util.getFileHeader(fp);
-//                Generator gen = new AttributeGenerator(fp, header, dc);
-//                if (!hasError.get()) asyncLoad(session, fp, gen);
-//            }
+            Util.info("loading relations");
+            if (dc.getRelations() != null) {
+                for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
+                    for (String fp : relation.getValue().getDataPaths()) {
+                        if(relation.getValue().getAttributes() != null) {
+                            for (int idx = 0; idx < relation.getValue().getAttributes().length; idx++) {
+                                Util.setRelationHasAttributeConceptType(relation.getValue(), idx, session);
+                            }
+                        }
+                        for (int idx = 0; idx < relation.getValue().getPlayers().length; idx++) {
+                            Util.setGetterAttributeConceptType(relation.getValue(), idx, session);
+                        }
+                        Generator gen = new RelationGenerator(fp, relation.getValue(), getSeparator(relation.getValue().getSeparator()));
+                        if (!hasError.get()) {
+                            asyncLoad(session, fp, gen, getRowsPerCommit(relation.getValue().getRowsPerCommit()));
+                        }
+                    }
+                }
+            }
+
+            //Finished
             Util.info("TypeDB Loader finished");
         }
     }
 
-    private void setAttributeConceptType(String key, TypeDBSession session) {
-        dc.getAttributes().get(key).setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    private void setEntityHasAttributeConceptType(String entityKey, int attributeIndex, TypeDBSession session) {
-        dc.getEntities().get(entityKey).getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
 
     private int getRowsPerCommit(Integer rowsPerCommit) {
         return Objects.requireNonNullElseGet(rowsPerCommit, () -> dc.getDefaultConfig().getRowsPerCommit());

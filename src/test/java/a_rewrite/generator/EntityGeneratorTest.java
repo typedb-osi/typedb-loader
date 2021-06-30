@@ -1,7 +1,7 @@
 package a_rewrite.generator;
 
 import a_rewrite.config.Configuration;
-import a_rewrite.util.GraknUtil;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -22,14 +22,14 @@ public class EntityGeneratorTest {
     public void genericEntityTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/1.0.0/generic/schema.gql").getAbsolutePath();
-        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
         ArrayList<String> entityKeys = new ArrayList<>(List.of("entity1", "entity2", "entity3"));
-        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String entityKey : entityKeys) {
             for (int idx = 0; idx < dc.getEntities().get(entityKey).getAttributes().length; idx++) {
                 setEntityHasAttributeConceptType(entityKey, idx, dc, session);
@@ -187,15 +187,15 @@ public class EntityGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dp = new File("src/test/resources/1.0.0/phoneCalls/person.csv").getAbsolutePath();
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
         String entityKey = "person";
-        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (int idx = 0; idx < dc.getEntities().get(entityKey).getAttributes().length; idx++) {
             setEntityHasAttributeConceptType(entityKey, idx, dc, session);
         }

@@ -1,7 +1,7 @@
 package a_rewrite.generator;
 
 import a_rewrite.config.Configuration;
-import a_rewrite.util.GraknUtil;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -22,8 +22,8 @@ public class AttributeGeneratorTest {
     public void generateInsertStatementsTest() throws IOException {
         String dbName = "attribute-generator-test";
         String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = GraknUtil.getClient("localhost:1729");
-        GraknUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dp = new File("src/test/resources/1.0.0/phoneCalls/is-in-use.csv").getAbsolutePath();
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
@@ -34,7 +34,7 @@ public class AttributeGeneratorTest {
                 dc.getAttributes().get(attributeKey),
                 Objects.requireNonNullElseGet(dc.getAttributes().get(attributeKey).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
 
-        TypeDBSession session = GraknUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         dc.getAttributes().get(attributeKey).setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
         session.close();
         client.close();

@@ -159,7 +159,7 @@ public class RelationGenerator implements Generator {
                 if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
             }
         }
-        // all roles that are required must be filled
+        // all roles that are required must be in the insert statement
         for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
             if(!insert.toString().contains(player.getRoleType() + ":")) return false;
         }

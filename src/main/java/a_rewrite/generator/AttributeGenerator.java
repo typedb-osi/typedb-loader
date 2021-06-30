@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,25 +62,30 @@ public class AttributeGenerator implements Generator {
     }
 
     public List<TypeQLInsert> generateInsertStatements(String[] row) {
-        ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraints(
-                row[GeneratorUtil.getColumnIndexByName(header, attributeConfiguration.getColumn())],
-                attributeConfiguration.getConceptType(),
-                attributeConfiguration.getConceptValueType(),
-                attributeConfiguration.getListSeparator(),
-                attributeConfiguration.getPreprocessorConfig(),
-                row,
-                filePath,
-                fileSeparator);
+        if (row.length > 0) {
+            ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraints(
+                    row[GeneratorUtil.getColumnIndexByName(header, attributeConfiguration.getColumn())],
+                    attributeConfiguration.getConceptType(),
+                    attributeConfiguration.getConceptValueType(),
+                    attributeConfiguration.getListSeparator(),
+                    attributeConfiguration.getPreprocessorConfig(),
+                    row,
+                    filePath,
+                    fileSeparator);
 
-        List<TypeQLInsert> insertStatements = new ArrayList<>();
-        for (ThingConstraint.Value<?> constraint : constraints) {
-            insertStatements.add(TypeQL.insert(
-                    TypeQL.var("a")
-                            .constrain(constraint)
-                            .isa(attributeConfiguration.getConceptType())
-            ));
+            List<TypeQLInsert> insertStatements = new ArrayList<>();
+            for (ThingConstraint.Value<?> constraint : constraints) {
+                insertStatements.add(TypeQL.insert(
+                        TypeQL.var("a")
+                                .constrain(constraint)
+                                .isa(attributeConfiguration.getConceptType())
+                ));
+            }
+            return insertStatements;
+        } else {
+            return List.of(TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null")));
         }
-        return insertStatements;
+
     }
 
     private boolean isValid(TypeQLInsert insert) {

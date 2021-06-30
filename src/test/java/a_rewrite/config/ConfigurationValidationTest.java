@@ -1,6 +1,6 @@
 package a_rewrite.config;
 
-import a_rewrite.util.GraknUtil;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -69,7 +69,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dcValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = GraknUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -81,10 +81,10 @@ public class ConfigurationValidationTest {
 
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            GraknUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             appLogger.info("cleaned database and migrated schema...");
         }
-        TypeDBSession schemaSession = GraknUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
         schemaClient.close();
@@ -161,7 +161,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/phoneCalls/dcValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = GraknUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -173,10 +173,10 @@ public class ConfigurationValidationTest {
 
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            GraknUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             appLogger.info("cleaned database and migrated schema...");
         }
-        TypeDBSession schemaSession = GraknUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
         schemaClient.close();
@@ -190,7 +190,7 @@ public class ConfigurationValidationTest {
     public void validateDataConfig() {
         Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dc.json").getAbsolutePath());
         assert dc != null;
-        TypeDBClient schemaClient = GraknUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -202,11 +202,11 @@ public class ConfigurationValidationTest {
         cv.validateSchemaPresent(validationReport);
 
         if (validationReport.get("errors").size() == 0) {
-            GraknUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             appLogger.info("cleaned database and migrated schema...");
         }
 
-        TypeDBSession schemaSession = GraknUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
         schemaClient.close();
@@ -222,7 +222,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = GraknUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
@@ -232,11 +232,11 @@ public class ConfigurationValidationTest {
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            GraknUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             appLogger.info("cleaned database and migrated schema...");
         }
 
-        TypeDBSession schemaSession = GraknUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
         schemaClient.close();

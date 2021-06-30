@@ -2,7 +2,7 @@ package a_rewrite.loader;
 
 import a_rewrite.config.Configuration;
 import a_rewrite.config.ConfigurationValidation;
-import a_rewrite.util.GraknUtil;
+import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -32,7 +32,7 @@ public class TypeDBLoader {
 
     public void load() {
 
-        TypeDBClient schemaClient = GraknUtil.getClient(graknURI);
+        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
@@ -43,11 +43,11 @@ public class TypeDBLoader {
         cv.validateSchemaPresent(validationReport);
 
         if (validationReport.get("errors").size() == 0) {
-            GraknUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             appLogger.info("cleaned database and migrated schema...");
         }
 
-        TypeDBSession schemaSession = GraknUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
         if (validationReport.get("warnings").size() > 0) {

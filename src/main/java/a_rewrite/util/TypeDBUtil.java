@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import static util.Util.loadSchemaFromFile;
 
-public class GraknUtil {
+public class TypeDBUtil {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
 
