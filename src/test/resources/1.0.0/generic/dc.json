@@ -92,48 +92,48 @@
         {
           "roleType": "player-one",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "entity1",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "entity1-id",
-              "handler": "ownership",
-              "column": "entity1-id",
-              "listSeparator": "###"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "entity1",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity1-id",
+                "handler": "ownership",
+                "column": "entity1-id",
+                "listSeparator": "###"
+              }
+            ]
+          }
         },
         {
           "roleType": "player-two",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "entity2",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "entity2-id",
-              "handler": "ownership",
-              "column": "entity2-id"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "entity2",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity2-id",
+                "handler": "ownership",
+                "column": "entity2-id"
+              }
+            ]
+          }
         },
         {
           "roleType": "player-optional",
           "requireNonEmpty": false,
-          "getter": [
-            {
-              "conceptType": "entity3",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "entity3-id",
-              "handler": "ownership",
-              "column": "entity3-id"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "entity3",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity3-id",
+                "handler": "ownership",
+                "column": "entity3-id"
+              }
+            ]
+          }
         }
       ],
       "attributes": [

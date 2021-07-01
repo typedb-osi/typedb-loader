@@ -64,19 +64,19 @@ public class ConfigurationValidation {
             }
 
             // validate relations:
-            if (configuration.getRelations() != null) {
-                for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
-                    String relationKey = relation.getKey();
-                    String[] filePaths = relation.getValue().getDataPaths();
-                    Character fileSeparator = Objects.requireNonNullElseGet(relation.getValue().getSeparator(), defaultConfig::getSeparator);
-                    String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relationKey;
-                    validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
-                    String conceptType = relation.getValue().getConceptType();
-                    validateConceptType(validationReport, session, breadcrumbs, conceptType);
-                    validateRelationHasAttributes(validationReport, session, relation.getValue().getAttributes(), breadcrumbs, filePaths, fileSeparator);
-                    validateRelationPlayers(validationReport, session, conceptType, relation.getValue().getPlayers(), breadcrumbs, filePaths, fileSeparator);
-                }
-            }
+//            if (configuration.getRelations() != null) {
+//                for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
+//                    String relationKey = relation.getKey();
+//                    String[] filePaths = relation.getValue().getDataPaths();
+//                    Character fileSeparator = Objects.requireNonNullElseGet(relation.getValue().getSeparator(), defaultConfig::getSeparator);
+//                    String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relationKey;
+//                    validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
+//                    String conceptType = relation.getValue().getConceptType();
+//                    validateConceptType(validationReport, session, breadcrumbs, conceptType);
+//                    validateRelationHasAttributes(validationReport, session, relation.getValue().getAttributes(), breadcrumbs, filePaths, fileSeparator);
+//                    validateRelationPlayers(validationReport, session, conceptType, relation.getValue().getPlayers(), breadcrumbs, filePaths, fileSeparator);
+//                }
+//            }
 
         } else {
             validationReport.get("errors").add("defaultConfig does not exist");
@@ -218,26 +218,24 @@ public class ConfigurationValidation {
                 validationReport.get("warnings").add(pBreadcrumbs + ".requireNonEmpty: field not set - defaults to false");
             }
 
-            if (player.getGetter() != null) {
-                validateGetterComposition(validationReport, player.getGetter(), pBreadcrumbs);
+            if (player.getRoleGetter() != null) {
+                validateGetterComposition(validationReport, player.getRoleGetter(), pBreadcrumbs);
 
                 int getterIdx = 0;
-                for (Configuration.Getter getter : player.getGetter()) {
-                    String gBreadcrumbs = pBreadcrumbs + ".getter.[" + getterIdx + "]";
+                Configuration.RoleGetter roleGetter = player.getRoleGetter();
+                String gBreadcrumbs = pBreadcrumbs + ".roleGetter";
 
-                    if (getter.getHandler() == null) {
-                        validationReport.get("errors").add(gBreadcrumbs + ".handler: missing required field (one of [entity, relation, attribute, ownership])");
-                    }
-                    if (getter.getConceptType() == null) {
-                        validationReport.get("errors").add(gBreadcrumbs + ".conceptType: missing required field");
-                    } else {
-                        validateConceptType(validationReport, session, gBreadcrumbs, getter.getConceptType());
-                    }
+                if (roleGetter.getHandler() == null) {
+                    validationReport.get("errors").add(gBreadcrumbs + ".handler: missing required field (one of [entity, relation, attribute, ownership])");
+                }
+                if (roleGetter.getConceptType() == null) {
+                    validationReport.get("errors").add(gBreadcrumbs + ".conceptType: missing required field");
+                } else {
+                    validateConceptType(validationReport, session, gBreadcrumbs, roleGetter.getConceptType());
+                }
 
-                    if (getter.getColumn() != null) {
-                        validateColumnInHeader(validationReport, gBreadcrumbs, filePaths, getter.getColumn(), fileSeparator);
-                    }
-                    getterIdx += 1;
+                if (roleGetter.getColumn() != null) {
+                    validateColumnInHeader(validationReport, gBreadcrumbs, filePaths, roleGetter.getColumn(), fileSeparator);
                 }
             } else {
                 validationReport.get("errors").add(pBreadcrumbs + ".players: missing required players block");
@@ -262,26 +260,25 @@ public class ConfigurationValidation {
     }
 
     private void validateGetterComposition(HashMap<String, ArrayList<String>> validationReport,
-                                           Configuration.Getter[] getters,
+                                           Configuration.RoleGetter roleGetter,
                                            String breadcrumbs) {
         int attributeCounter = 0;
         int entityCounter = 0;
         int relationCounter = 0;
         int ownershipCounter = 0;
 
-        for (Configuration.Getter getter : getters) {
-            if (getter.getHandler().equals(TypeHandler.ATTRIBUTE)) {
-                attributeCounter += 1;
-            }
-            if (getter.getHandler().equals(TypeHandler.ENTITY)) {
-                entityCounter += 1;
-            }
-            if (getter.getHandler().equals(TypeHandler.RELATION)) {
-                relationCounter += 1;
-            }
-            if (getter.getHandler().equals(TypeHandler.OWNERSHIP)) {
-                ownershipCounter += 1;
-            }
+
+        if (roleGetter.getHandler().equals(TypeHandler.ATTRIBUTE)) {
+            attributeCounter += 1;
+        }
+        if (roleGetter.getHandler().equals(TypeHandler.ENTITY)) {
+            entityCounter += 1;
+        }
+        if (roleGetter.getHandler().equals(TypeHandler.RELATION)) {
+            relationCounter += 1;
+        }
+        if (roleGetter.getHandler().equals(TypeHandler.OWNERSHIP)) {
+            ownershipCounter += 1;
         }
 
         int typeHandlerSum = attributeCounter + entityCounter + relationCounter;

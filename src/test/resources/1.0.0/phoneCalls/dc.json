@@ -86,33 +86,33 @@
         {
           "roleType": "provider",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "company",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "name",
-              "handler": "ownership",
-              "column": "company_name"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "company",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "name",
+                "column": "company_name"
+              }
+            ]
+          }
         },
         {
           "roleType": "customer",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "person",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "phone-number",
-              "handler": "ownership",
-              "column": "person_id",
-              "listSeparator": "###"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "person_id",
+                "listSeparator": "###"
+              }
+            ]
+          }
         }
       ]
     },
@@ -127,32 +127,32 @@
         {
           "roleType": "caller",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "person",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "phone-number",
-              "handler": "ownership",
-              "column": "caller_id"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "caller_id"
+              }
+            ]
+          }
         },
         {
           "roleType": "callee",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "person",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "phone-number",
-              "handler": "ownership",
-              "column": "callee_id"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "callee_id"
+              }
+            ]
+          }
         }
       ],
       "attributes": [
@@ -179,24 +179,20 @@
         {
           "roleType": "status",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "is-in-use",
-              "handler": "attribute",
-              "column": "in_use"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "is-in-use",
+            "handler": "attribute",
+            "column": "in_use"
+          }
         },
         {
           "roleType": "account",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "phone-number",
-              "handler": "attribute",
-              "column": "pn"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "phone-number",
+            "handler": "attribute",
+            "column": "pn"
+          }
         }
       ]
     },
@@ -211,48 +207,122 @@
         {
           "roleType": "peer",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "person",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "phone-number",
-              "handler": "ownership",
-              "column": "peer_1"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "phone-number",
+                "handler": "ownership",
+                "column": "peer_1"
+              }
+            ]
+          }
         },
         {
           "roleType": "peer",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "person",
-              "handler": "entity"
-            },
-            {
-              "conceptType": "phone-number",
-              "handler": "ownership",
-              "column": "peer_2"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "peer_2"
+              }
+            ]
+          }
         },
         {
           "roleType": "past-call",
           "requireNonEmpty": true,
-          "getter": [
-            {
-              "conceptType": "call",
-              "handler": "relation"
-            },
-            {
-              "conceptType": "started-at",
-              "handler": "ownership",
-              "column": "call_started_at",
-              "listSeparator": "###"
-            }
-          ]
+          "roleGetter": {
+            "conceptType": "call",
+            "handler": "relation",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "started-at",
+                "column": "call_started_at",
+                "listSeparator": "###"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "communication-channel-pm": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv"
+      ],
+      "separator": ",",
+      "rowsPerCommit": 100,
+      "conceptType": "communication-channel",
+      "players": [
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "phone-number",
+                "handler": "ownership",
+                "column": "peer_1"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "peer_2"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "past-call",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "call",
+            "handler": "relation",
+            "thingGetters": [
+              {
+                "handler": "entity",
+                "conceptType": "person",
+                "roleType": "caller",
+                "thingGetters": [
+                  {
+                    "handler": "ownership",
+                    "conceptType": "phone-number",
+                    "column": "peer_1"
+                  }
+                ]
+              },
+              {
+                "handler": "entity",
+                "conceptType": "person",
+                "roleType": "callee",
+                "thingGetters": [
+                  {
+                    "handler": "ownership",
+                    "conceptType": "phone-number",
+                    "column": "peer_2"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     }

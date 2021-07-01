@@ -1,12 +1,10 @@
 package a_rewrite.config;
 
-import a_rewrite.type.AttributeValueType;
 import a_rewrite.util.Util;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.ObjectInputFilter;
 
 public class ConfigurationTest {
 
@@ -78,30 +76,30 @@ public class ConfigurationTest {
         Configuration.Player player = players[0];
         Assert.assertEquals("provider", player.getRoleType());
         Assert.assertTrue(player.getRequireNonEmpty());
-        Configuration.Getter getter = player.getGetter()[0];
-        Assert.assertEquals("company", getter.getConceptType());
-        Assert.assertEquals("entity", getter.getHandler().toString());
-        Assert.assertNull(getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
-        getter = player.getGetter()[1];
-        Assert.assertEquals("name", getter.getConceptType());
-        Assert.assertEquals("ownership", getter.getHandler().toString());
-        Assert.assertEquals("company_name", getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
+        Configuration.RoleGetter roleGetter = player.getRoleGetter();
+        Assert.assertEquals("company", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        Configuration.ThingGetter thingGetter = player.getRoleGetter().getThingGetters()[0];
+        Assert.assertEquals("name", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("company_name", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
 
         player = players[1];
         Assert.assertEquals("customer", player.getRoleType());
         Assert.assertTrue(player.getRequireNonEmpty());
-        getter = player.getGetter()[0];
-        Assert.assertEquals("person", getter.getConceptType());
-        Assert.assertEquals("entity", getter.getHandler().toString());
-        Assert.assertNull(getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
-        getter = player.getGetter()[1];
-        Assert.assertEquals("phone-number", getter.getConceptType());
-        Assert.assertEquals("ownership", getter.getHandler().toString());
-        Assert.assertEquals("person_id", getter.getColumn());
-        Assert.assertEquals("###", getter.getListSeparator());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = player.getRoleGetter().getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("person_id", thingGetter.getColumn());
+        Assert.assertEquals("###", thingGetter.getListSeparator());
 
         relation = "call";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/call.csv", dc.getRelations().get(relation).getDataPaths()[0]);
@@ -113,30 +111,30 @@ public class ConfigurationTest {
         player = players[0];
         Assert.assertEquals("caller", player.getRoleType());
         Assert.assertTrue(player.getRequireNonEmpty());
-        getter = player.getGetter()[0];
-        Assert.assertEquals("person", getter.getConceptType());
-        Assert.assertEquals("entity", getter.getHandler().toString());
-        Assert.assertNull(getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
-        getter = player.getGetter()[1];
-        Assert.assertEquals("phone-number", getter.getConceptType());
-        Assert.assertEquals("ownership", getter.getHandler().toString());
-        Assert.assertEquals("caller_id", getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = player.getRoleGetter().getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("caller_id", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
 
         player = players[1];
         Assert.assertEquals("callee", player.getRoleType());
         Assert.assertTrue(player.getRequireNonEmpty());
-        getter = player.getGetter()[0];
-        Assert.assertEquals("person", getter.getConceptType());
-        Assert.assertEquals("entity", getter.getHandler().toString());
-        Assert.assertNull(getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
-        getter = player.getGetter()[1];
-        Assert.assertEquals("phone-number", getter.getConceptType());
-        Assert.assertEquals("ownership", getter.getHandler().toString());
-        Assert.assertEquals("callee_id", getter.getColumn());
-        Assert.assertNull(getter.getListSeparator());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = player.getRoleGetter().getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("callee_id", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
 
         attributes = dc.getRelations().get(relation).getAttributes();
         Configuration.HasAttribute attribute = attributes[0];
@@ -152,6 +150,117 @@ public class ConfigurationTest {
         Assert.assertTrue(attribute.getRequireNonEmpty());
         Assert.assertNull(attribute.getPreprocessorConfig());
         Assert.assertNull(attribute.getListSeparator());
+
+        //Nested-Relation by Attribute:
+        relation = "communication-channel";
+        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/communication-channel.csv", dc.getRelations().get(relation).getDataPaths()[0]);
+        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
+        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals("communication-channel", dc.getRelations().get(relation).getConceptType());
+
+        players = dc.getRelations().get(relation).getPlayers();
+        player = players[0];
+        Assert.assertEquals("peer", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("peer_1", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
+
+        player = players[1];
+        Assert.assertEquals("peer", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("peer_2", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
+
+        player = players[2];
+        Assert.assertEquals("past-call", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("call", roleGetter.getConceptType());
+        Assert.assertEquals("relation", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("started-at", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("call_started_at", thingGetter.getColumn());
+        Assert.assertEquals("###", thingGetter.getListSeparator());
+
+        //Nested-Relation by Players:
+        relation = "communication-channel-pm";
+        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv", dc.getRelations().get(relation).getDataPaths()[0]);
+        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
+        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals("communication-channel", dc.getRelations().get(relation).getConceptType());
+
+        players = dc.getRelations().get(relation).getPlayers();
+        player = players[0];
+        Assert.assertEquals("peer", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("peer_1", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
+
+        player = players[1];
+        Assert.assertEquals("peer", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("person", roleGetter.getConceptType());
+        Assert.assertEquals("entity", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingGetter.getHandler().toString());
+        Assert.assertEquals("peer_2", thingGetter.getColumn());
+        Assert.assertNull(thingGetter.getListSeparator());
+
+        player = players[2];
+        Assert.assertEquals("past-call", player.getRoleType());
+        Assert.assertTrue(player.getRequireNonEmpty());
+        roleGetter = player.getRoleGetter();
+        Assert.assertEquals("call", roleGetter.getConceptType());
+        Assert.assertEquals("relation", roleGetter.getHandler().toString());
+        Assert.assertNull(roleGetter.getColumn());
+        Assert.assertNull(roleGetter.getListSeparator());
+        //first person to use for relation identification
+        thingGetter = roleGetter.getThingGetters()[0];
+        Assert.assertEquals("person", thingGetter.getConceptType());
+        Assert.assertEquals("entity", thingGetter.getHandler().toString());
+        Configuration.ThingGetter thingThingGetter = thingGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingThingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingThingGetter.getHandler().toString());
+        Assert.assertEquals("peer_1", thingThingGetter.getColumn());
+        //second person to use for relation identification
+        thingGetter = roleGetter.getThingGetters()[1];
+        Assert.assertEquals("person", thingGetter.getConceptType());
+        Assert.assertEquals("entity", thingGetter.getHandler().toString());
+        thingThingGetter = thingGetter.getThingGetters()[0];
+        Assert.assertEquals("phone-number", thingThingGetter.getConceptType());
+        Assert.assertEquals("ownership", thingThingGetter.getHandler().toString());
+        Assert.assertEquals("peer_2", thingThingGetter.getColumn());
     }
 
 }

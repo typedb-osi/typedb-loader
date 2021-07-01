@@ -1,6 +1,7 @@
 package a_rewrite.util;
 
 import a_rewrite.config.Configuration;
+import a_rewrite.config.TypeHandler;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -133,13 +134,32 @@ public class Util {
     }
 
     public static  void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
-        Configuration.Getter[] ownershipGetters = relation.getPlayers()[playerIndex].getOwnershipGetters();
-        for (Configuration.Getter ownershipGetter : ownershipGetters){
-            ownershipGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        if (relation.getPlayers()[playerIndex].getRoleGetter() != null) {
+            Configuration.ThingGetter[] ownershipThingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getOwnershipThingGetters();
+            if (ownershipThingGetters != null) {
+                for (Configuration.ThingGetter ownershipRoleGetter : ownershipThingGetters){
+                    ownershipRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+                }
+            }
+            Configuration.ThingGetter[] thingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getThingGetters();
+            if (thingGetters != null) {
+                for (Configuration.ThingGetter thingGetter : thingGetters){
+                    if (thingGetter != null) {
+                        Configuration.ThingGetter[] thingThingGetters = thingGetter.getThingGetters();
+                        if (thingThingGetters != null) {
+                            for (Configuration.ThingGetter thingThingGetter : thingThingGetters) {
+                                if (thingThingGetter.getHandler() == TypeHandler.OWNERSHIP) {
+                                    thingThingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        Configuration.Getter attributeGetter = relation.getPlayers()[playerIndex].getAttributeGetter();
-        if (attributeGetter != null) {
-            attributeGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        Configuration.RoleGetter attributeRoleGetter = relation.getPlayers()[playerIndex].getRoleGetter();
+        if(attributeRoleGetter != null &&attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
+            attributeRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
         }
     }
 }

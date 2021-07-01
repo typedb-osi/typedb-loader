@@ -253,7 +253,7 @@ public class RelationGeneratorTest {
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         Configuration dc = Util.initializeDataConfig(dcp);
         assert dc != null;
-        ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel"));
+        ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel", "communication-channel-pm"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getAttributes() != null) {
@@ -272,6 +272,7 @@ public class RelationGeneratorTest {
         testCalls(dc, relationKeys);
         testInUse(dc, relationKeys);
         testCommunicationChannel(dc, relationKeys);
+        testCommunicationChannelPM(dc, relationKeys);
     }
 
     private void testContracts(Configuration dc, ArrayList<String> relationKeys) throws IOException {
@@ -468,6 +469,15 @@ public class RelationGeneratorTest {
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+263 498 495 0617\";\n" +
+                "$player-1 isa person, has phone-number \"+33 614 339 0298\";\n" +
+                "$player-2 isa call, has started-at 2018-09-11T22:10:34;\n" +
+                "insert $rel (peer: $player-0, peer: $player-1, past-call: $player-2) isa communication-channel;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
                 "$player-0 isa person, has phone-number \"+370 351 224 5176\";\n" +
                 "$player-1 isa person, has phone-number \"+62 533 266 3426\";\n" +
                 "$player-2 isa call, has started-at 2018-09-15T12:12:59;\n" +
@@ -524,6 +534,70 @@ public class RelationGeneratorTest {
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+    }
+
+    private void testCommunicationChannelPM(Configuration dc, ArrayList<String> relationKeys) throws IOException {
+        String dp = new File("src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv").getAbsolutePath();
+        RelationGenerator gen = new RelationGenerator(dp,
+                dc.getRelations().get(relationKeys.get(4)),
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(4)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+        Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
+
+        TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        String tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+81 308 988 7153\";\n" +
+                "$player-1 isa person, has phone-number \"+351 515 605 7915\";\n" +
+                "$player-2-0 isa person, has phone-number \"+81 308 988 7153\";\n" +
+                "$player-2-1 isa person, has phone-number \"+351 515 605 7915\";\n" +
+                "$player-2 (caller: $player-2-0, callee: $player-2-1) isa call;\n" +
+                "insert $rel (peer: $player-0, peer: $player-1, past-call: $player-2) isa communication-channel;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+7 171 898 0853\";\n" +
+                "$player-1 isa person, has phone-number \"+57 629 420 5680\";\n" +
+                "$player-2-0 isa person, has phone-number \"+7 171 898 0853\";\n" +
+                "$player-2-1 isa person, has phone-number \"+57 629 420 5680\";\n" +
+                "$player-2 (caller: $player-2-0, callee: $player-2-1) isa call;\n" +
+                "insert $rel (peer: $player-0, peer: $player-1, past-call: $player-2) isa communication-channel;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertTrue(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "$player-1-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "$player-1 (caller: $player-1-0) isa call;\n" +
+                "insert $rel (peer: $player-0, past-call: $player-1) isa communication-channel;";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "insert $null isa null, has null \"null\";";
+        Assert.assertEquals(tmp, statement.toString());
+        Assert.assertFalse(gen.relationInsertStatementValid(statement));
+
+        statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
+        tmp = "match\n" +
+                "$player-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "$player-1-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "$player-1 (caller: $player-1-0) isa call;\n" +
+                "insert $rel (peer: $player-0, past-call: $player-1) isa communication-channel;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
 

@@ -221,7 +221,7 @@ public class Configuration {
     public class Player {
         String roleType;
         Boolean requireNonEmpty;
-        Getter[] getter;
+        RoleGetter roleGetter;
 
         public String getRoleType() {
             return roleType;
@@ -231,75 +231,19 @@ public class Configuration {
             return requireNonEmpty;
         }
 
-        public Getter[] getGetter() {
-            return getter;
-        }
-
-        public Getter getAttributeGetter() {
-            ArrayList<Getter> tmp = new ArrayList<>();
-            for (Getter getter : getGetter()) {
-                if (getter.getHandler() == TypeHandler.ATTRIBUTE) tmp.add(getter);
-            }
-            if (tmp.size() == 1) {
-                return tmp.get(0); //TODO - log error or catch in validation!
-            } else {
-                return null;
-            }
-        }
-
-        public Getter getEntityGetter() {
-            ArrayList<Getter> tmp = new ArrayList<>();
-            for (Getter getter : getGetter()) {
-                if (getter.getHandler() != TypeHandler.ENTITY) tmp.add(getter);
-            }
-            if (tmp.size() > 1) {
-                return null; //TODO - log error or catch in validation!
-            } else {
-                return tmp.get(0);
-            }
-        }
-
-        public Getter getRelationGetter() {
-            ArrayList<Getter> tmp = new ArrayList<>();
-            for (Getter getter : getGetter()) {
-                if (getter.getHandler() != TypeHandler.RELATION) tmp.add(getter);
-            }
-            if (tmp.size() > 1) {
-                return null; //TODO - log error or catch in validation!
-            } else {
-                return tmp.get(0);
-            }
-        }
-
-        public Getter[] getOwnershipGetters() {
-            ArrayList<Getter> tmp = new ArrayList<>();
-            for (Getter getter : getGetter()) {
-                if (getter.getHandler() == TypeHandler.OWNERSHIP) tmp.add(getter);
-            }
-            Getter[] ownershipGetter = new Getter[tmp.size()];
-            return tmp.toArray(ownershipGetter);
-        }
-
-        public Getter getRolePlayerGetter() {
-            ArrayList<Getter> tmp = new ArrayList<>();
-            for (Getter getter : getGetter()) {
-                if (getter.getHandler() != TypeHandler.OWNERSHIP) tmp.add(getter);
-            }
-            if (tmp.size() > 1) {
-                return null; //TODO - log error or catch in validation!
-            } else {
-                return tmp.get(0);
-            }
+        public RoleGetter getRoleGetter() {
+            return roleGetter;
         }
     }
 
-    public class Getter {
+    public class RoleGetter {
         String conceptType;
         String handler;
         String column;
         String listSeparator;
         AttributeValueType conceptValueType;
         PreprocessorConfig preprocessorConfig;
+        ThingGetter[] thingGetters;
 
         public String getConceptType() {
             return conceptType;
@@ -327,6 +271,73 @@ public class Configuration {
 
         public PreprocessorConfig getPreprocessorConfig() {
             return preprocessorConfig;
+        }
+
+        public ThingGetter[] getThingGetters() {
+            return thingGetters;
+        }
+
+        public ThingGetter[] getOwnershipThingGetters() {
+            ArrayList<ThingGetter> tmp = new ArrayList<>();
+            ThingGetter[] thingGetters = getThingGetters();
+            if (thingGetters != null) {
+                for (ThingGetter thingGetter : getThingGetters()) {
+                    if (thingGetter.getHandler() == TypeHandler.OWNERSHIP) tmp.add(thingGetter);
+                }
+                ThingGetter[] ownershipThingGetter = new ThingGetter[tmp.size()];
+                return tmp.toArray(ownershipThingGetter);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public class ThingGetter {
+        String handler;
+        String conceptType;
+        String column;
+        String listSeparator;
+        String roleType;
+        AttributeValueType conceptValueType;
+        PreprocessorConfig preprocessorConfig;
+        ThingGetter[] thingGetters;
+
+        //TODO Config validation: allow here only a single or a set of attributes, or a single or a set of entities/attributes, not yet a mixture
+
+        public String getConceptType() {
+            return conceptType;
+        }
+
+        public TypeHandler getHandler() {
+            return TypeHandler.valueOf(handler.toUpperCase());
+        }
+
+        public String getColumn() {
+            return column;
+        }
+
+        public String getListSeparator() {
+            return listSeparator;
+        }
+
+        public AttributeValueType getConceptValueType() {
+            return conceptValueType;
+        }
+
+        public void setConceptValueType(TypeDBTransaction txn) {
+            this.conceptValueType = getValueType(txn, conceptType);
+        }
+
+        public PreprocessorConfig getPreprocessorConfig() {
+            return preprocessorConfig;
+        }
+
+        public ThingGetter[] getThingGetters() {
+            return thingGetters;
+        }
+
+        public String getRoleType() {
+            return roleType;
         }
     }
 
