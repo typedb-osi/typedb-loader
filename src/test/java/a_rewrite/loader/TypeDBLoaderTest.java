@@ -6,6 +6,7 @@ import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,8 +22,8 @@ public class TypeDBLoaderTest {
 
     @Test
     public void loadSyntheticTest() {
-        String dcPath = new File("src/test/resources/1.0.0/synthetic/dc.json").getAbsolutePath();
-        String databaseName = "synthetic-test";
+        String dcPath = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
+        String databaseName = "generic-test";
         TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri);
         typeDBLoader.load();
     }
@@ -43,6 +44,7 @@ public class TypeDBLoaderTest {
         testAttributeRelation(session);
         testNestedRelations(session);
         testAppendAttribute(session);
+        testInsertOrAppend(session);
 
         session.close();
         client.close();
@@ -78,7 +80,7 @@ public class TypeDBLoaderTest {
 
         // query all entities of type person
         getQuery = TypeQL.match(TypeQL.var("c").isa("person")).get("c").limit(1000);
-        Assert.assertEquals(33, read.query().match(getQuery).count());
+        Assert.assertEquals(36, read.query().match(getQuery).count()); //after adding order must be 39
 
         // query all entites of type company
         getQuery = TypeQL.match(TypeQL.var("e").isa("company")).get("e").limit(1000);
@@ -242,6 +244,27 @@ public class TypeDBLoaderTest {
         read.query().match(getQuery).forEach(answer -> {
             Assert.assertEquals(5L, answer.get("cr").asAttribute().getValue());
         });
+
+        read.close();
+    }
+
+    public void testInsertOrAppend(TypeDBSession session) {
+        TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
+        TypeQLMatch getQuery = TypeQL.match(TypeQL.var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
+        Assert.assertEquals(8, read.query().match(getQuery).count());
+
+        // test new ones present (middle and at end)
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("first-name", "Naruto")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("first-name", "Sasuke")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
+
+        read = session.transaction(TypeDBTransaction.Type.READ);
+        getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("first-name", "Sakura")).get("p").limit(1000);
+        Assert.assertEquals(1, read.query().match(getQuery).count());
 
         read.close();
     }

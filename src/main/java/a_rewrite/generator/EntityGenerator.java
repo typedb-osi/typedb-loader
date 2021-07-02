@@ -43,7 +43,7 @@ public class EntityGenerator implements Generator {
             dataLogger.warn("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
-        TypeQLInsert statement = generateInsertStatement(row);
+        TypeQLInsert statement = generateThingInsertStatement(row);
         if (entityInsertStatementValid(statement)) {
             try {
                 tx.query().insert(statement);
@@ -57,7 +57,7 @@ public class EntityGenerator implements Generator {
         }
     }
 
-    public TypeQLInsert generateInsertStatement(String[] row) {
+    public TypeQLInsert generateThingInsertStatement(String[] row) {
         if (row.length > 0) {
             ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getConceptType());
 

@@ -38,7 +38,7 @@ public class AppendAttributeGeneratorTest {
             }
             if (dc.getAppendAttribute().get(appendkey).getThingGetter() != null && dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters() != null) {
                 for (int idx = 0; idx < dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters().length; idx++) {
-                    Util.setThingGetterEntityHasAttributeConceptType(dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters()[0], idx, session);
+                    Util.setThingGetterEntityHasAttributeConceptType(dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters()[idx], session);
                 }
             }
         }

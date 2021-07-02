@@ -130,7 +130,7 @@ public class Util {
         entity.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 
-    public static void setThingGetterEntityHasAttributeConceptType(Configuration.ThingGetter thingGetter, int attributeIndex, TypeDBSession session) {
+    public static void setThingGetterEntityHasAttributeConceptType(Configuration.ThingGetter thingGetter, TypeDBSession session) {
         thingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 

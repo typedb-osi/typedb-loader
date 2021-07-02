@@ -17,6 +17,7 @@ public class Configuration {
     Map<String, Entity> entities;
     Map<String, Relation> relations;
     Map<String, AppendAttribute> appendAttribute;
+    Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
 
     public DefaultConfig getDefaultConfig() {
         return defaultConfig;
@@ -31,6 +32,10 @@ public class Configuration {
     public Map<String, Relation> getRelations() { return relations; }
 
     public Map<String, AppendAttribute> getAppendAttribute() { return appendAttribute; }
+
+    public Map<String, AppendAttributeOrInsertThing> getAppendAttributeOrInsertThing() {
+        return appendAttributeOrInsertThing;
+    }
 
     public class DefaultConfig {
         Character separator;
@@ -160,6 +165,8 @@ public class Configuration {
             return thingGetter;
         }
     }
+
+    public class AppendAttributeOrInsertThing extends AppendAttribute {}
 
     public class ConstrainingAttribute {
         String conceptType;

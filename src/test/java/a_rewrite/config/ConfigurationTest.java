@@ -9,25 +9,6 @@ import java.io.File;
 public class ConfigurationTest {
 
     @Test
-    public void dcTest() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dc.json").getAbsolutePath());
-        //general
-        Assert.assertNotNull(dc);
-
-        //default config
-        Assert.assertEquals(',', dc.getDefaultConfig().getSeparator().charValue());
-
-        //attributes
-        Assert.assertEquals("src/test/resources/1.0.0/synthetic/names.csv", dc.getAttributes().get("names").getDataPaths()[0]);
-        Assert.assertEquals("name", dc.getAttributes().get("names").getAttribute().getColumn());
-        Assert.assertEquals("name", dc.getAttributes().get("names").getAttribute().getConceptType());
-        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getConceptValueType());
-        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getListSeparator());
-        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getPreprocessorConfig());
-        Assert.assertEquals("###", dc.getAttributes().get("names-list-separated").getAttribute().getListSeparator());
-    }
-
-    @Test
     public void dcPhoneCallsTest() {
         Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath());
         //general
@@ -264,10 +245,10 @@ public class ConfigurationTest {
 
         //appendAttributes
         String appendAttribute = "append-twitter";
-        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/append-twitter.csv", dc.getAppendAttribute().get(appendAttribute).getDataPaths()[0]);
+        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv", dc.getAppendAttribute().get(appendAttribute).getDataPaths()[0]);
         Assert.assertEquals(',', dc.getAppendAttribute().get(appendAttribute).getSeparator().charValue());
         Assert.assertEquals(100, dc.getAppendAttribute().get(appendAttribute).getRowsPerCommit().intValue());
-        Assert.assertEquals(1, dc.getAppendAttribute().get(appendAttribute).getAttributes().length);
+        Assert.assertEquals(2, dc.getAppendAttribute().get(appendAttribute).getAttributes().length);
 
         Assert.assertEquals("entity", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getHandler().toString());
         Assert.assertEquals("person", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getConceptType());

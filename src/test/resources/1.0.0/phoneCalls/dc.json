@@ -417,5 +417,48 @@
         }
       ]
     }
+  },
+  "appendAttributeOrInsertThing": {
+    "append-or-insert-person": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv"
+      ],
+      "rowsPerCommit": 100,
+      "separator": ",",
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name"
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name"
+        },
+        {
+          "conceptType": "city",
+          "column": "city"
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name"
+        }
+      ]
+    }
   }
 }

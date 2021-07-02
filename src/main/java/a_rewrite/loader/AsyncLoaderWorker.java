@@ -63,7 +63,8 @@ public class AsyncLoaderWorker {
             if (dc.getEntities() != null) {
                 for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
                     for (String fp : entity.getValue().getDataPaths()) {
-                        for (int idx = 0; idx < entity.getValue().getAttributes().length; idx++) {
+                        Configuration.ConstrainingAttribute[] hasAttributes = entity.getValue().getAttributes();
+                        for (int idx = 0; idx < hasAttributes.length; idx++) {
                             Util.setEntityHasAttributeConceptType(entity.getValue(), idx, session);
                         }
                         Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(entity.getValue().getSeparator()));
@@ -77,8 +78,9 @@ public class AsyncLoaderWorker {
             if (dc.getRelations() != null) {
                 for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
                     for (String fp : relation.getValue().getDataPaths()) {
-                        if(relation.getValue().getAttributes() != null) {
-                            for (int idx = 0; idx < relation.getValue().getAttributes().length; idx++) {
+                        Configuration.ConstrainingAttribute[] hasAttributes = relation.getValue().getAttributes();
+                        if(hasAttributes != null) {
+                            for (int idx = 0; idx < hasAttributes.length; idx++) {
                                 Util.setRelationHasAttributeConceptType(relation.getValue(), idx, session);
                             }
                         }
@@ -95,22 +97,55 @@ public class AsyncLoaderWorker {
 
             //Load appendAttributes
             Util.info("loading appendAttributes");
-            if (dc.getRelations() != null) {
+            if (dc.getAppendAttribute() != null) {
                 for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
                     for (String fp : appendAttribute.getValue().getDataPaths()) {
-                        if(appendAttribute.getValue().getAttributes() != null) {
-                            for (int idx = 0; idx < appendAttribute.getValue().getAttributes().length; idx++) {
+                        Configuration.ConstrainingAttribute[] hasAttributes = appendAttribute.getValue().getAttributes();
+                        if(hasAttributes != null) {
+                            for (int idx = 0; idx < hasAttributes.length; idx++) {
                                 Util.setAppendAttributeHasAttributeConceptType(appendAttribute.getValue(), idx, session);
                             }
                         }
-                        if (appendAttribute.getValue().getThingGetter() != null && appendAttribute.getValue().getThingGetter().getThingGetters() != null) {
-                            for (int idx = 0; idx < appendAttribute.getValue().getThingGetter().getThingGetters().length; idx++) {
-                                Util.setThingGetterEntityHasAttributeConceptType(appendAttribute.getValue().getThingGetter().getThingGetters()[0], idx, session);
+                        Configuration.ThingGetter thingGetter = appendAttribute.getValue().getThingGetter();
+                        if (thingGetter != null) {
+                            Configuration.ConstrainingAttribute[] matchAttributes= appendAttribute.getValue().getThingGetter().getThingGetters();
+                            if (matchAttributes != null) {
+                                for (int idx = 0; idx < matchAttributes.length; idx++) {
+                                    Util.setThingGetterEntityHasAttributeConceptType(appendAttribute.getValue().getThingGetter().getThingGetters()[idx], session);
+                                }
                             }
                         }
                         Generator gen = new AppendAttributeGenerator(fp, appendAttribute.getValue(), getSeparator(appendAttribute.getValue().getSeparator()));
                         if (!hasError.get()) {
                             asyncLoad(session, fp, gen, getRowsPerCommit(appendAttribute.getValue().getRowsPerCommit()));
+                        }
+                    }
+                }
+            }
+
+            //Load appendAttributesOrInsertThing
+            Util.info("loading appendAttributesOrInsertThing");
+            if (dc.getAppendAttributeOrInsertThing() != null) {
+                for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendAttributeOrInsertThing : dc.getAppendAttributeOrInsertThing().entrySet()) {
+                    for (String fp : appendAttributeOrInsertThing.getValue().getDataPaths()) {
+                        Configuration.ConstrainingAttribute[] hasAttributes = appendAttributeOrInsertThing.getValue().getAttributes();
+                        if(hasAttributes != null) {
+                            for (int idx = 0; idx < hasAttributes.length; idx++) {
+                                Util.setAppendAttributeHasAttributeConceptType(appendAttributeOrInsertThing.getValue(), idx, session);
+                            }
+                        }
+                        Configuration.ThingGetter thingGetter = appendAttributeOrInsertThing.getValue().getThingGetter();
+                        if (thingGetter != null) {
+                            Configuration.ConstrainingAttribute[] matchAttributes= appendAttributeOrInsertThing.getValue().getThingGetter().getThingGetters();
+                            if (matchAttributes != null) {
+                                for (int idx = 0; idx < matchAttributes.length; idx++) {
+                                    Util.setThingGetterEntityHasAttributeConceptType(appendAttributeOrInsertThing.getValue().getThingGetter().getThingGetters()[idx], session);
+                                }
+                            }
+                        }
+                        Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing.getValue(), getSeparator(appendAttributeOrInsertThing.getValue().getSeparator()));
+                        if (!hasError.get()) {
+                            asyncLoad(session, fp, gen, getRowsPerCommit(appendAttributeOrInsertThing.getValue().getRowsPerCommit()));
                         }
                     }
                 }
