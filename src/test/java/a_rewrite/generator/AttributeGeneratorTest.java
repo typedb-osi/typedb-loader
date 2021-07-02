@@ -32,7 +32,7 @@ public class AttributeGeneratorTest {
         String attributeKey = "is-in-use";
         AttributeGenerator gen = new AttributeGenerator(dp,
                 dc.getAttributes().get(attributeKey),
-                Objects.requireNonNullElseGet(dc.getAttributes().get(attributeKey).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAttributes().get(attributeKey).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
 
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         dc.getAttributes().get(attributeKey).getAttribute().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));

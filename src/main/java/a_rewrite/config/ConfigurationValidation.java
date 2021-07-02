@@ -39,7 +39,7 @@ public class ConfigurationValidation {
                 for (Map.Entry<String, Configuration.Attribute> attribute : configuration.getAttributes().entrySet()) {
                     String attributeKey = attribute.getKey();
                     String[] filePaths = attribute.getValue().getDataPaths();
-                    Character fileSeparator = Objects.requireNonNullElseGet(attribute.getValue().getSeparator(), defaultConfig::getSeparator);
+                    Character fileSeparator = Objects.requireNonNullElseGet(attribute.getValue().getConfig().getSeparator(), defaultConfig::getSeparator);
                     String conceptType = attribute.getValue().getAttribute().getConceptType();
                     String column = attribute.getValue().getAttribute().getColumn();
                     String errorBreadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attributeKey;
@@ -54,7 +54,7 @@ public class ConfigurationValidation {
                 for (Map.Entry<String, Configuration.Entity> entity : configuration.getEntities().entrySet()) {
                     String entityKey = entity.getKey();
                     String[] filePaths = entity.getValue().getDataPaths();
-                    Character fileSeparator = Objects.requireNonNullElseGet(entity.getValue().getSeparator(), defaultConfig::getSeparator);
+                    Character fileSeparator = Objects.requireNonNullElseGet(entity.getValue().getConfig().getSeparator(), defaultConfig::getSeparator);
                     String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entityKey;
                     validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
                     String conceptType = entity.getValue().getConceptType();

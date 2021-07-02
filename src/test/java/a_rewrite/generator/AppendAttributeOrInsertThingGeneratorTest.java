@@ -33,14 +33,10 @@ public class AppendAttributeOrInsertThingGeneratorTest {
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String appendOrInsertkey : appendOrInsertKeys) {
             if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getAttributes() != null) {
-                for (int idx = 0; idx < dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getAttributes().length; idx++) {
-                    Util.setAppendAttributeHasAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey), idx, session);
-                }
+                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getAttributes(), session);
             }
             if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter() != null && dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters() != null) {
-                for (int idx = 0; idx < dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters().length; idx++) {
-                    Util.setThingGetterEntityHasAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters()[idx], session);
-                }
+                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters(), session);
             }
         }
         session.close();
@@ -53,7 +49,7 @@ public class AppendAttributeOrInsertThingGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv").getAbsolutePath();
         AppendAttributeOrInsertThingGenerator gen = new AppendAttributeOrInsertThingGenerator(dp,
                 dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         String[] row = Util.parseCSV(iterator.next());

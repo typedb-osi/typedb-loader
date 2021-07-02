@@ -33,9 +33,8 @@ public class RelationGeneratorTest {
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getAttributes() != null) {
-                for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
-                    Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
-                }
+                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getAttributes();
+                Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
                 Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
@@ -47,7 +46,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/generic/rel1.tsv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseTSV(iterator.next()));
@@ -257,9 +256,8 @@ public class RelationGeneratorTest {
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getAttributes() != null) {
-                for (int idx = 0; idx < dc.getRelations().get(relationKey).getAttributes().length; idx++) {
-                    Util.setRelationHasAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
-                }
+                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getAttributes();
+                Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
                 Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
@@ -279,7 +277,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -336,7 +334,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/call.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(1)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(1)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(1)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -409,7 +407,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/in-use.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(2)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(2)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(2)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -446,7 +444,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/communication-channel.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(3)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(3)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(3)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -543,7 +541,7 @@ public class RelationGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(4)),
-                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(4)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(4)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));

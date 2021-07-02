@@ -122,24 +122,10 @@ public class Util {
                 .toLowerCase();
     }
 
-    public static void setAttributeConceptType(Configuration.Attribute attribute, TypeDBSession session) {
-        attribute.getAttribute().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    public static void setEntityHasAttributeConceptType(Configuration.Entity entity, int attributeIndex, TypeDBSession session) {
-        entity.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    public static void setThingGetterEntityHasAttributeConceptType(Configuration.ThingGetter thingGetter, TypeDBSession session) {
-        thingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    public static void setRelationHasAttributeConceptType(Configuration.Relation relation, int attributeIndex, TypeDBSession session) {
-        relation.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-    }
-
-    public static void setAppendAttributeHasAttributeConceptType(Configuration.AppendAttribute appendAttribute, int attributeIndex, TypeDBSession session) {
-        appendAttribute.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    public static void setConstrainingAttributeConceptType(Configuration.ConstrainingAttribute[] attributes, TypeDBSession session) {
+        for (Configuration.ConstrainingAttribute attribute : attributes) {
+            attribute.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        }
     }
 
     public static void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {

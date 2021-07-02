@@ -6,9 +6,11 @@ import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typeql.lang.TypeQL;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Configuration {
 
@@ -18,6 +20,17 @@ public class Configuration {
     Map<String, Relation> relations;
     Map<String, AppendAttribute> appendAttribute;
     Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
+    ArrayList<String> orderedGenerators;
+
+    public static AttributeValueType getValueType(TypeDBTransaction txn, String conceptType) {
+        AttributeValueType valueType = null;
+        Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.var("t").type(conceptType)).get("t")).collect(Collectors.toSet());
+        assert answers.size() == 1;
+        for (ConceptMap answer : answers) {
+            valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());
+        }
+        return valueType;
+    }
 
     public DefaultConfig getDefaultConfig() {
         return defaultConfig;
@@ -27,14 +40,82 @@ public class Configuration {
         return attributes;
     }
 
-    public Map<String, Entity> getEntities() { return entities; }
+    public Map<String, Entity> getEntities() {
+        return entities;
+    }
 
-    public Map<String, Relation> getRelations() { return relations; }
+    public Map<String, Relation> getRelations() {
+        return relations;
+    }
 
-    public Map<String, AppendAttribute> getAppendAttribute() { return appendAttribute; }
+    public Map<String, AppendAttribute> getAppendAttribute() {
+        return appendAttribute;
+    }
 
     public Map<String, AppendAttributeOrInsertThing> getAppendAttributeOrInsertThing() {
         return appendAttributeOrInsertThing;
+    }
+
+    public Generator getGeneratorByKey(String key){
+        for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return generator.getValue();
+            }
+        }
+        for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return generator.getValue();
+            }
+        }
+        for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return generator.getValue();
+            }
+        }
+        for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return generator.getValue();
+            }
+        }
+        for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return generator.getValue();
+            }
+        }
+        return null;
+    }
+
+    public String getGeneratorTypeByKey(String key){
+        for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return "attributes";
+            }
+        }
+        for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return "entities";
+            }
+        }
+        for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return "relations";
+            }
+        }
+        for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return "appendAttribute";
+            }
+        }
+        for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
+            if (generator.getKey().equals(key)) {
+                return "appendAttributeOrInsertThing";
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<String> getOrderedGenerators() {
+        return orderedGenerators;
     }
 
     public class DefaultConfig {
@@ -50,21 +131,35 @@ public class Configuration {
             return rowsPerCommit;
         }
 
-        public String getSchemaPath() { return schemaPath; }
+        public String getSchemaPath() {
+            return schemaPath;
+        }
     }
 
     public class Generator {
         String[] dataPaths;
-        Character separator;
-        Integer rowsPerCommit;
+        GeneratorConfig config;
 
         public String[] getDataPaths() {
             return dataPaths;
         }
 
-        public Character getSeparator() { return separator; }
+        public GeneratorConfig getConfig() {
+            return config;
+        }
+    }
 
-        public Integer getRowsPerCommit() { return rowsPerCommit; }
+    public class GeneratorConfig {
+        Character separator;
+        Integer rowsPerCommit;
+
+        public Character getSeparator() {
+            return separator;
+        }
+
+        public Integer getRowsPerCommit() {
+            return rowsPerCommit;
+        }
     }
 
     public class Attribute extends Generator {
@@ -128,7 +223,9 @@ public class Configuration {
 
         }
 
-        public Player[] getPlayers() { return players; }
+        public Player[] getPlayers() {
+            return players;
+        }
 
         public Player[] getRequiredNonEmptyPlayers() {
             ArrayList<Player> tmp = new ArrayList<>();
@@ -166,7 +263,8 @@ public class Configuration {
         }
     }
 
-    public class AppendAttributeOrInsertThing extends AppendAttribute {}
+    public class AppendAttributeOrInsertThing extends AppendAttribute {
+    }
 
     public class ConstrainingAttribute {
         String conceptType;
@@ -176,16 +274,16 @@ public class Configuration {
         String listSeparator;
         PreprocessorConfig preprocessorConfig;
 
-        public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, conceptType);
-        }
-
         public String getConceptType() {
             return conceptType;
         }
 
         public AttributeValueType getConceptValueType() {
             return conceptValueType;
+        }
+
+        public void setConceptValueType(TypeDBTransaction txn) {
+            this.conceptValueType = getValueType(txn, conceptType);
         }
 
         public String getColumn() {
@@ -205,7 +303,7 @@ public class Configuration {
         }
     }
 
-    public class RoleGetter extends ConstrainingAttribute{
+    public class RoleGetter extends ConstrainingAttribute {
         String handler;
         ThingGetter[] thingGetters;
 
@@ -234,7 +332,6 @@ public class Configuration {
 
     public class ThingGetter extends RoleGetter {
         String roleType;
-
         //TODO Config validation: allow here only a single or a set of attributes, or a single or a set of entities/attributes, not yet a mixture
 
         public String getRoleType() {
@@ -268,7 +365,9 @@ public class Configuration {
             return type;
         }
 
-        public PreprocessorParameters getParameters() { return parameters; }
+        public PreprocessorParameters getParameters() {
+            return parameters;
+        }
 
         public class PreprocessorParameters {
             String regexMatch;
@@ -282,15 +381,5 @@ public class Configuration {
                 return regexReplace;
             }
         }
-    }
-
-    public static AttributeValueType getValueType(TypeDBTransaction txn, String conceptType) {
-        AttributeValueType valueType = null;
-        Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.var("t").type(conceptType)).get("t")).collect(Collectors.toSet());
-        assert answers.size() == 1;
-        for (ConceptMap answer : answers) {
-            valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());
-        }
-        return valueType;
     }
 }

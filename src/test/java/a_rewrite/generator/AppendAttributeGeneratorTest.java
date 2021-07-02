@@ -31,15 +31,13 @@ public class AppendAttributeGeneratorTest {
         ArrayList<String> appendKeys = new ArrayList<>(List.of("append-twitter", "append-fakebook", "append-call-rating"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String appendkey : appendKeys) {
-            if (dc.getAppendAttribute().get(appendkey).getAttributes() != null) {
-                for (int idx = 0; idx < dc.getAppendAttribute().get(appendkey).getAttributes().length; idx++) {
-                    Util.setAppendAttributeHasAttributeConceptType(dc.getAppendAttribute().get(appendkey), idx, session);
-                }
+            Configuration.ConstrainingAttribute[] hasAttributes = dc.getAppendAttribute().get(appendkey).getAttributes();
+            if (hasAttributes != null) {
+                Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             if (dc.getAppendAttribute().get(appendkey).getThingGetter() != null && dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters() != null) {
-                for (int idx = 0; idx < dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters().length; idx++) {
-                    Util.setThingGetterEntityHasAttributeConceptType(dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters()[idx], session);
-                }
+                Configuration.ConstrainingAttribute[] thingGetterAttributes = dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters();
+                Util.setConstrainingAttributeConceptType(thingGetterAttributes, session);
             }
         }
         session.close();
@@ -54,7 +52,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(0)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -121,7 +119,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(1)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(1)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(1)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -155,7 +153,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-call-rating.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(2)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(2)).getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(2)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));

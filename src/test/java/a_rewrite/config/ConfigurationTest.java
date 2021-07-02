@@ -22,19 +22,19 @@ public class ConfigurationTest {
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/is-in-use.csv", dc.getAttributes().get(att).getDataPaths()[0]);
         Assert.assertEquals("values", dc.getAttributes().get(att).getAttribute().getColumn());
         Assert.assertEquals("is-in-use", dc.getAttributes().get(att).getAttribute().getConceptType());
-        Assert.assertEquals('\t', dc.getAttributes().get(att).getSeparator().charValue());
+        Assert.assertEquals(',', dc.getAttributes().get(att).getConfig().getSeparator().charValue());
         Assert.assertNull(dc.getAttributes().get(att).getAttribute().getConceptValueType());
         Assert.assertNull(dc.getAttributes().get(att).getAttribute().getListSeparator());
         Assert.assertNull(dc.getAttributes().get(att).getAttribute().getPreprocessorConfig());
-        Assert.assertEquals(50, dc.getAttributes().get(att).getRowsPerCommit().intValue());
+        Assert.assertEquals(50, dc.getAttributes().get(att).getConfig().getRowsPerCommit().intValue());
 
         //entities
         String entity = "person";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/person.csv", dc.getEntities().get(entity).getDataPaths()[0]);
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/person_nextfile.csv", dc.getEntities().get(entity).getDataPaths()[1]);
-        Assert.assertEquals(',', dc.getEntities().get(entity).getSeparator().charValue());
+        Assert.assertEquals(',', dc.getEntities().get(entity).getConfig().getSeparator().charValue());
         Assert.assertEquals("person", dc.getEntities().get(entity).getConceptType());
-        Assert.assertEquals(50, dc.getEntities().get(entity).getRowsPerCommit().intValue());
+        Assert.assertEquals(50, dc.getEntities().get(entity).getConfig().getRowsPerCommit().intValue());
         Configuration.ConstrainingAttribute[] attributes = dc.getEntities().get(entity).getAttributes();
         Assert.assertEquals("first-name", attributes[0].getConceptType());
         Assert.assertNull(attributes[0].getConceptValueType());
@@ -48,9 +48,9 @@ public class ConfigurationTest {
         //entity-relations
         String relation = "contract";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/contract.csv", dc.getRelations().get(relation).getDataPaths()[0]);
-        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
+        Assert.assertEquals(',', dc.getRelations().get(relation).getConfig().getSeparator().charValue());
         Assert.assertEquals("contract", dc.getRelations().get(relation).getConceptType());
-        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals(50, dc.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());
         Assert.assertNull(dc.getRelations().get(relation).getAttributes());
 
         Configuration.Player[] players = dc.getRelations().get(relation).getPlayers();
@@ -84,8 +84,8 @@ public class ConfigurationTest {
 
         relation = "call";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/call.csv", dc.getRelations().get(relation).getDataPaths()[0]);
-        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
-        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals(',', dc.getRelations().get(relation).getConfig().getSeparator().charValue());
+        Assert.assertEquals(50, dc.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());
         Assert.assertEquals("call", dc.getRelations().get(relation).getConceptType());
 
         players = dc.getRelations().get(relation).getPlayers();
@@ -135,8 +135,8 @@ public class ConfigurationTest {
         //Nested-Relation by Attribute:
         relation = "communication-channel";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/communication-channel.csv", dc.getRelations().get(relation).getDataPaths()[0]);
-        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
-        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals(',', dc.getRelations().get(relation).getConfig().getSeparator().charValue());
+        Assert.assertEquals(50, dc.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());
         Assert.assertEquals("communication-channel", dc.getRelations().get(relation).getConceptType());
 
         players = dc.getRelations().get(relation).getPlayers();
@@ -185,8 +185,8 @@ public class ConfigurationTest {
         //Nested-Relation by Players:
         relation = "communication-channel-pm";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv", dc.getRelations().get(relation).getDataPaths()[0]);
-        Assert.assertEquals(',', dc.getRelations().get(relation).getSeparator().charValue());
-        Assert.assertEquals(100, dc.getRelations().get(relation).getRowsPerCommit().intValue());
+        Assert.assertEquals(',', dc.getRelations().get(relation).getConfig().getSeparator().charValue());
+        Assert.assertEquals(50, dc.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());
         Assert.assertEquals("communication-channel", dc.getRelations().get(relation).getConceptType());
 
         players = dc.getRelations().get(relation).getPlayers();
@@ -246,8 +246,8 @@ public class ConfigurationTest {
         //appendAttributes
         String appendAttribute = "append-twitter";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv", dc.getAppendAttribute().get(appendAttribute).getDataPaths()[0]);
-        Assert.assertEquals(',', dc.getAppendAttribute().get(appendAttribute).getSeparator().charValue());
-        Assert.assertEquals(100, dc.getAppendAttribute().get(appendAttribute).getRowsPerCommit().intValue());
+        Assert.assertEquals(',', dc.getAppendAttribute().get(appendAttribute).getConfig().getSeparator().charValue());
+        Assert.assertEquals(50, dc.getAppendAttribute().get(appendAttribute).getConfig().getRowsPerCommit().intValue());
         Assert.assertEquals(2, dc.getAppendAttribute().get(appendAttribute).getAttributes().length);
 
         Assert.assertEquals("entity", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getHandler().toString());

@@ -61,7 +61,6 @@ public class TypeDBLoaderTest {
         getQuery = TypeQL.match(TypeQL.var("a").eq("no").isa("is-in-use")).get("a");
         Assert.assertEquals(1, read.query().match(getQuery).count());
 
-
         getQuery = TypeQL.match(TypeQL.var("a").eq("5").isa("is-in-use")).get("a");
         Assert.assertEquals(1, read.query().match(getQuery).count());
         read.close();
@@ -80,7 +79,7 @@ public class TypeDBLoaderTest {
 
         // query all entities of type person
         getQuery = TypeQL.match(TypeQL.var("c").isa("person")).get("c").limit(1000);
-        Assert.assertEquals(36, read.query().match(getQuery).count()); //after adding order must be 39
+        Assert.assertEquals(39, read.query().match(getQuery).count());
 
         // query all entites of type company
         getQuery = TypeQL.match(TypeQL.var("e").isa("company")).get("e").limit(1000);

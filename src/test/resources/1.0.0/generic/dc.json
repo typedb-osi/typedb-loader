@@ -9,9 +9,11 @@
       "dataPaths": [
         "src/test/resources/1.0.0/generic/entity1.tsv"
       ],
-      "separator": "\t",
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
       "conceptType": "entity1",
-      "rowsPerCommit": 50,
       "attributes": [
         {
           "conceptType": "entity1-id",
@@ -36,9 +38,11 @@
       "dataPaths": [
         "src/test/resources/1.0.0/generic/entity2.tsv"
       ],
-      "separator": "\t",
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
       "conceptType": "entity2",
-      "rowsPerCommit": 50,
       "attributes": [
         {
           "conceptType": "entity2-id",
@@ -62,9 +66,11 @@
       "dataPaths": [
         "src/test/resources/1.0.0/generic/entity3.tsv"
       ],
-      "separator": "\t",
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
       "conceptType": "entity3",
-      "rowsPerCommit": 50,
       "attributes": [
         {
           "conceptType": "entity3-id",
@@ -85,9 +91,11 @@
       "dataPaths": [
         "src/test/resources/1.0.0/generic/rel1.tsv"
       ],
-      "separator": "\t",
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
       "conceptType": "rel1",
-      "rowsPerCommit": 50,
       "players": [
         {
           "roleType": "player-one",

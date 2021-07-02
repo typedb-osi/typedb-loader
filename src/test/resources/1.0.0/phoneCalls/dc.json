@@ -9,8 +9,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
       ],
-      "separator": "\t",
-      "rowsPerCommit": 50,
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "attribute": {
         "conceptType": "is-in-use",
         "column": "values"
@@ -23,9 +25,11 @@
         "src/test/resources/1.0.0/phoneCalls/person.csv",
         "src/test/resources/1.0.0/phoneCalls/person_nextfile.csv"
       ],
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "person",
-      "rowsPerCommit": 50,
       "attributes": [
         {
           "conceptType": "first-name",
@@ -64,14 +68,145 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/company.csv"
       ],
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "company",
-      "rowsPerCommit": 50,
       "attributes": [
         {
           "conceptType": "name",
           "column": "name",
           "requireNonEmpty": true
+        }
+      ]
+    },
+    "person-1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person1.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-2": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person2.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-3": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
         }
       ]
     }
@@ -81,9 +216,11 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/contract.csv"
       ],
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "contract",
-      "rowsPerCommit": 100,
       "players": [
         {
           "roleType": "provider",
@@ -122,8 +259,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/call.csv"
       ],
-      "separator": ",",
-      "rowsPerCommit": 100,
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "call",
       "players": [
         {
@@ -174,8 +313,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/in-use.csv"
       ],
-      "separator": ",",
-      "rowsPerCommit": 100,
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "in-use",
       "players": [
         {
@@ -202,8 +343,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/communication-channel.csv"
       ],
-      "separator": ",",
-      "rowsPerCommit": 100,
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "communication-channel",
       "players": [
         {
@@ -258,8 +401,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv"
       ],
-      "separator": ",",
-      "rowsPerCommit": 100,
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "conceptType": "communication-channel",
       "players": [
         {
@@ -334,8 +479,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv"
       ],
-      "rowsPerCommit": 100,
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "thingGetter": {
         "conceptType": "person",
         "handler": "entity",
@@ -364,8 +511,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv"
       ],
-      "rowsPerCommit": 100,
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "thingGetter": {
         "conceptType": "person",
         "handler": "entity",
@@ -385,7 +534,7 @@
           "preprocessorConfig": {
             "type": "regex",
             "parameters": {
-              "regexMatch" : "^.*(fakebook\\.com.*)/$",
+              "regexMatch": "^.*(fakebook\\.com.*)/$",
               "regexReplace": "$1"
             }
           }
@@ -396,8 +545,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/append-call-rating.csv"
       ],
-      "rowsPerCommit": 100,
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "thingGetter": {
         "conceptType": "call",
         "handler": "relation",
@@ -423,8 +574,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv"
       ],
-      "rowsPerCommit": 100,
-      "separator": ",",
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
       "thingGetter": {
         "conceptType": "person",
         "handler": "entity",
@@ -460,5 +613,10 @@
         }
       ]
     }
-  }
+  },
+  "orderedGenerators": [
+    "person-1",
+    "person-2",
+    "person-3"
+  ]
 }
