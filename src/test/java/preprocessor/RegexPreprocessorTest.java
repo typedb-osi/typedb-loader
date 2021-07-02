@@ -1,5 +1,6 @@
 package preprocessor;
 
+import preprocessor.RegexPreprocessor;
 import org.junit.Assert;
 import org.junit.Test;
 
