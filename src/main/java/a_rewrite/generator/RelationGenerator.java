@@ -62,7 +62,6 @@ public class RelationGenerator implements Generator {
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
             ArrayList<ThingVariable<?>> playerMatchStatements = new ArrayList<>();
-            //TODO: replace this String solution with language builder
             ArrayList<String> playerVars = new ArrayList<>();
             ArrayList<String> roleTypes = new ArrayList<>();
 
@@ -130,18 +129,11 @@ public class RelationGenerator implements Generator {
             if (insertStatement != null) {
                 insertStatement = insertStatement.isa(relationConfiguration.getConceptType());
                 if (relationConfiguration.getAttributes() != null) {
-                    for (Configuration.HasAttribute hasAttribute : relationConfiguration.getAttributes()) {
-                        ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                                row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
-                                hasAttribute.getConceptType(),
-                                hasAttribute.getConceptValueType(),
-                                hasAttribute.getListSeparator(),
-                                hasAttribute.getPreprocessorConfig(),
-                                row,
-                                filePath,
-                                fileSeparator);
-                        for (ThingConstraint.Value<?> constraintValue : tmp) {
-                            insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+                    for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getAttributes()) {
+                        ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                                row, header, filePath, fileSeparator, constrainingAttribute);
+                        for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                            insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
                         }
                     }
                 }
@@ -166,16 +158,9 @@ public class RelationGenerator implements Generator {
         ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
                 .isa(player.getRoleGetter().getConceptType());
         for (Configuration.ThingGetter ownershipThingGetter : player.getRoleGetter().getOwnershipThingGetters()) {
-            ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                    row[GeneratorUtil.getColumnIndexByName(header, ownershipThingGetter.getColumn())],
-                    ownershipThingGetter.getConceptType(),
-                    ownershipThingGetter.getConceptValueType(),
-                    ownershipThingGetter.getListSeparator(),
-                    ownershipThingGetter.getPreprocessorConfig(),
-                    row,
-                    filePath,
-                    fileSeparator);
-            for (ThingConstraint.Value<?> constraintValue : tmp) {
+            ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                    row, header, filePath, fileSeparator, ownershipThingGetter);
+            for (ThingConstraint.Value<?> constraintValue : constraintValues) {
                 playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getConceptType(), constraintValue));
             }
         }
@@ -184,15 +169,8 @@ public class RelationGenerator implements Generator {
 
     private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
         Configuration.RoleGetter attributeRoleGetter = player.getRoleGetter();
-        ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraints(
-                row[GeneratorUtil.getColumnIndexByName(header, attributeRoleGetter.getColumn())],
-                attributeRoleGetter.getConceptType(),
-                attributeRoleGetter.getConceptValueType(),
-                null,
-                attributeRoleGetter.getPreprocessorConfig(),
-                row,
-                filePath,
-                fileSeparator);
+        ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                row, header, filePath, fileSeparator, attributeRoleGetter);
         if (constraints.size() > 0) {
             return TypeQL.var(playerVar)
                     .constrain(constraints.get(0))
@@ -214,16 +192,9 @@ public class RelationGenerator implements Generator {
             ThingVariable.Thing subPlayerMatchStatement = TypeQL.var(subPlayerVar)
                     .isa(thingGetter.getConceptType());
             for (Configuration.ThingGetter thingThingGetter : thingGetter.getThingGetters()) {
-                ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                        row[GeneratorUtil.getColumnIndexByName(header, thingThingGetter.getColumn())],
-                        thingThingGetter.getConceptType(),
-                        thingThingGetter.getConceptValueType(),
-                        thingThingGetter.getListSeparator(),
-                        thingThingGetter.getPreprocessorConfig(),
-                        row,
-                        filePath,
-                        fileSeparator);
-                for (ThingConstraint.Value<?> constraintValue : tmp) {
+                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                        row, header, filePath, fileSeparator, thingThingGetter);
+                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
                     subPlayerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(thingThingGetter.getConceptType(), constraintValue));
                 }
             }
@@ -292,8 +263,8 @@ public class RelationGenerator implements Generator {
 
         // all required attributes part of the insert statement
         if (relationConfiguration.getRequireNonEmptyAttributes() != null) {
-            for (Configuration.HasAttribute hasAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
-                if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
+            for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
             }
         }
         // all roles that are required must be in the insert statement

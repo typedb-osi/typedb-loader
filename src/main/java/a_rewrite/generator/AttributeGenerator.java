@@ -14,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,22 +62,15 @@ public class AttributeGenerator implements Generator {
 
     public List<TypeQLInsert> generateInsertStatements(String[] row) {
         if (row.length > 0) {
-            ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraints(
-                    row[GeneratorUtil.getColumnIndexByName(header, attributeConfiguration.getColumn())],
-                    attributeConfiguration.getConceptType(),
-                    attributeConfiguration.getConceptValueType(),
-                    attributeConfiguration.getListSeparator(),
-                    attributeConfiguration.getPreprocessorConfig(),
-                    row,
-                    filePath,
-                    fileSeparator);
+            ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                    row, header, filePath, fileSeparator, attributeConfiguration.getAttribute());
 
             List<TypeQLInsert> insertStatements = new ArrayList<>();
             for (ThingConstraint.Value<?> constraint : constraints) {
                 insertStatements.add(TypeQL.insert(
                         TypeQL.var("a")
                                 .constrain(constraint)
-                                .isa(attributeConfiguration.getConceptType())
+                                .isa(attributeConfiguration.getAttribute().getConceptType())
                 ));
             }
             return insertStatements;
@@ -89,7 +81,7 @@ public class AttributeGenerator implements Generator {
     }
 
     private boolean isValid(TypeQLInsert insert) {
-        return insert.toString().contains("isa " + attributeConfiguration.getConceptType());
+        return insert.toString().contains("isa " + attributeConfiguration.getAttribute().getConceptType());
     }
 
     public char getFileSeparator() {

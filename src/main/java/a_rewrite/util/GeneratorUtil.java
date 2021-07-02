@@ -47,14 +47,17 @@ public class GeneratorUtil {
         return null;
     }
 
-    public static ArrayList<ThingConstraint.Value<?>> generateValueConstraints(String token,
-                                                                               String attributeType,
-                                                                               AttributeValueType attributeValueType,
-                                                                               String listSeparator,
-                                                                               Configuration.PreprocessorConfig preprocessor,
-                                                                               String[] row,
-                                                                               String filepath,
-                                                                               char fileSeparator) {
+    public static ArrayList<ThingConstraint.Value<?>> generateValueConstraintsConstrainingAttribute(String[] row,
+                                                                                                    String[] header,
+                                                                                                    String filepath,
+                                                                                                    char fileSeparator,
+                                                                                                    Configuration.ConstrainingAttribute constrainingAttribute) {
+
+        String attributeType = constrainingAttribute.getConceptType();
+        AttributeValueType attributeValueType = constrainingAttribute.getConceptValueType();
+        String listSeparator = constrainingAttribute.getListSeparator();
+        Configuration.PreprocessorConfig preprocessor = constrainingAttribute.getPreprocessorConfig();
+        String token = row[GeneratorUtil.getColumnIndexByName(header, constrainingAttribute.getColumn())];
 
         ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
         if (token != null && !token.isEmpty()) {
@@ -78,6 +81,7 @@ public class GeneratorUtil {
         }
         return valueConstraints;
     }
+
 
     public static ThingConstraint.Value<?> generateValueConstraint(String attributeSchemaType,
                                                                    AttributeValueType attributeValueType,

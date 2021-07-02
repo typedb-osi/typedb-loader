@@ -1,10 +1,7 @@
 package a_rewrite.loader;
 
 import a_rewrite.config.Configuration;
-import a_rewrite.generator.AttributeGenerator;
-import a_rewrite.generator.EntityGenerator;
-import a_rewrite.generator.Generator;
-import a_rewrite.generator.RelationGenerator;
+import a_rewrite.generator.*;
 import a_rewrite.util.TypeDBUtil;
 import a_rewrite.util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -75,7 +72,7 @@ public class AsyncLoaderWorker {
                 }
             }
 
-//            //Load relations
+            //Load relations
             Util.info("loading relations");
             if (dc.getRelations() != null) {
                 for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
@@ -91,6 +88,29 @@ public class AsyncLoaderWorker {
                         Generator gen = new RelationGenerator(fp, relation.getValue(), getSeparator(relation.getValue().getSeparator()));
                         if (!hasError.get()) {
                             asyncLoad(session, fp, gen, getRowsPerCommit(relation.getValue().getRowsPerCommit()));
+                        }
+                    }
+                }
+            }
+
+            //Load appendAttributes
+            Util.info("loading appendAttributes");
+            if (dc.getRelations() != null) {
+                for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
+                    for (String fp : appendAttribute.getValue().getDataPaths()) {
+                        if(appendAttribute.getValue().getAttributes() != null) {
+                            for (int idx = 0; idx < appendAttribute.getValue().getAttributes().length; idx++) {
+                                Util.setAppendAttributeHasAttributeConceptType(appendAttribute.getValue(), idx, session);
+                            }
+                        }
+                        if (appendAttribute.getValue().getThingGetter() != null && appendAttribute.getValue().getThingGetter().getThingGetters() != null) {
+                            for (int idx = 0; idx < appendAttribute.getValue().getThingGetter().getThingGetters().length; idx++) {
+                                Util.setThingGetterEntityHasAttributeConceptType(appendAttribute.getValue().getThingGetter().getThingGetters()[0], idx, session);
+                            }
+                        }
+                        Generator gen = new AppendAttributeGenerator(fp, appendAttribute.getValue(), getSeparator(appendAttribute.getValue().getSeparator()));
+                        if (!hasError.get()) {
+                            asyncLoad(session, fp, gen, getRowsPerCommit(appendAttribute.getValue().getRowsPerCommit()));
                         }
                     }
                 }

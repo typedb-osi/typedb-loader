@@ -10,9 +10,11 @@
         "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
       ],
       "separator": "\t",
-      "column": "values",
-      "conceptType": "is-in-use",
-      "rowsPerCommit": 50
+      "rowsPerCommit": 50,
+      "attribute": {
+        "conceptType": "is-in-use",
+        "column": "values"
+      }
     }
   },
   "entities": {
@@ -323,6 +325,95 @@
               }
             ]
           }
+        }
+      ]
+    }
+  },
+  "appendAttribute": {
+    "append-twitter": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv"
+      ],
+      "rowsPerCommit": 100,
+      "separator": ",",
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "twitter-username",
+          "column": "twitter",
+          "listSeparator": "###",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name"
+        }
+      ]
+    },
+    "append-fakebook": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv"
+      ],
+      "rowsPerCommit": 100,
+      "separator": ",",
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "fakebook-link",
+          "column": "fb",
+          "requireNonEmpty": true,
+          "preprocessorConfig": {
+            "type": "regex",
+            "parameters": {
+              "regexMatch" : "^.*(fakebook\\.com.*)/$",
+              "regexReplace": "$1"
+            }
+          }
+        }
+      ]
+    },
+    "append-call-rating": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-call-rating.csv"
+      ],
+      "rowsPerCommit": 100,
+      "separator": ",",
+      "thingGetter": {
+        "conceptType": "call",
+        "handler": "relation",
+        "thingGetters": [
+          {
+            "conceptType": "started-at",
+            "handler": "ownership",
+            "column": "started_at"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "call-rating",
+          "column": "call_rating",
+          "requireNonEmpty": true
         }
       ]
     }

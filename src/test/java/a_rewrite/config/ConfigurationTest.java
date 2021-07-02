@@ -19,12 +19,12 @@ public class ConfigurationTest {
 
         //attributes
         Assert.assertEquals("src/test/resources/1.0.0/synthetic/names.csv", dc.getAttributes().get("names").getDataPaths()[0]);
-        Assert.assertEquals("name", dc.getAttributes().get("names").getColumn());
-        Assert.assertEquals("name", dc.getAttributes().get("names").getConceptType());
-        Assert.assertNull(dc.getAttributes().get("names").getConceptValueType());
-        Assert.assertNull(dc.getAttributes().get("names").getListSeparator());
-        Assert.assertNull(dc.getAttributes().get("names").getPreprocessorConfig());
-        Assert.assertEquals("###", dc.getAttributes().get("names-list-separated").getListSeparator());
+        Assert.assertEquals("name", dc.getAttributes().get("names").getAttribute().getColumn());
+        Assert.assertEquals("name", dc.getAttributes().get("names").getAttribute().getConceptType());
+        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getConceptValueType());
+        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getListSeparator());
+        Assert.assertNull(dc.getAttributes().get("names").getAttribute().getPreprocessorConfig());
+        Assert.assertEquals("###", dc.getAttributes().get("names-list-separated").getAttribute().getListSeparator());
     }
 
     @Test
@@ -39,12 +39,12 @@ public class ConfigurationTest {
         //attributes
         String att = "is-in-use";
         Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/is-in-use.csv", dc.getAttributes().get(att).getDataPaths()[0]);
-        Assert.assertEquals("values", dc.getAttributes().get(att).getColumn());
-        Assert.assertEquals("is-in-use", dc.getAttributes().get(att).getConceptType());
+        Assert.assertEquals("values", dc.getAttributes().get(att).getAttribute().getColumn());
+        Assert.assertEquals("is-in-use", dc.getAttributes().get(att).getAttribute().getConceptType());
         Assert.assertEquals('\t', dc.getAttributes().get(att).getSeparator().charValue());
-        Assert.assertNull(dc.getAttributes().get(att).getConceptValueType());
-        Assert.assertNull(dc.getAttributes().get(att).getListSeparator());
-        Assert.assertNull(dc.getAttributes().get(att).getPreprocessorConfig());
+        Assert.assertNull(dc.getAttributes().get(att).getAttribute().getConceptValueType());
+        Assert.assertNull(dc.getAttributes().get(att).getAttribute().getListSeparator());
+        Assert.assertNull(dc.getAttributes().get(att).getAttribute().getPreprocessorConfig());
         Assert.assertEquals(50, dc.getAttributes().get(att).getRowsPerCommit().intValue());
 
         //entities
@@ -54,7 +54,7 @@ public class ConfigurationTest {
         Assert.assertEquals(',', dc.getEntities().get(entity).getSeparator().charValue());
         Assert.assertEquals("person", dc.getEntities().get(entity).getConceptType());
         Assert.assertEquals(50, dc.getEntities().get(entity).getRowsPerCommit().intValue());
-        Configuration.HasAttribute[] attributes = dc.getEntities().get(entity).getAttributes();
+        Configuration.ConstrainingAttribute[] attributes = dc.getEntities().get(entity).getAttributes();
         Assert.assertEquals("first-name", attributes[0].getConceptType());
         Assert.assertNull(attributes[0].getConceptValueType());
         Assert.assertEquals("first_name", attributes[0].getColumn());
@@ -137,7 +137,7 @@ public class ConfigurationTest {
         Assert.assertNull(thingGetter.getListSeparator());
 
         attributes = dc.getRelations().get(relation).getAttributes();
-        Configuration.HasAttribute attribute = attributes[0];
+        Configuration.ConstrainingAttribute attribute = attributes[0];
         Assert.assertEquals("started-at", attribute.getConceptType());
         Assert.assertEquals("started_at", attribute.getColumn());
         Assert.assertTrue(attribute.getRequireNonEmpty());
@@ -261,6 +261,29 @@ public class ConfigurationTest {
         Assert.assertEquals("phone-number", thingThingGetter.getConceptType());
         Assert.assertEquals("ownership", thingThingGetter.getHandler().toString());
         Assert.assertEquals("peer_2", thingThingGetter.getColumn());
+
+        //appendAttributes
+        String appendAttribute = "append-twitter";
+        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/append-twitter.csv", dc.getAppendAttribute().get(appendAttribute).getDataPaths()[0]);
+        Assert.assertEquals(',', dc.getAppendAttribute().get(appendAttribute).getSeparator().charValue());
+        Assert.assertEquals(100, dc.getAppendAttribute().get(appendAttribute).getRowsPerCommit().intValue());
+        Assert.assertEquals(1, dc.getAppendAttribute().get(appendAttribute).getAttributes().length);
+
+        Assert.assertEquals("entity", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getHandler().toString());
+        Assert.assertEquals("person", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getConceptType());
+        Assert.assertEquals(1, dc.getAppendAttribute().get(appendAttribute).getThingGetter().getThingGetters().length);
+
+        Assert.assertEquals("phone-number", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getThingGetters()[0].getConceptType());
+        Assert.assertEquals("ownership", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getThingGetters()[0].getHandler().toString());
+        Assert.assertEquals("phone_number", dc.getAppendAttribute().get(appendAttribute).getThingGetter().getThingGetters()[0].getColumn());
+
+        attributes = dc.getAppendAttribute().get(appendAttribute).getAttributes();
+        Assert.assertEquals("twitter-username", attributes[0].getConceptType());
+        Assert.assertNull(attributes[0].getConceptValueType());
+        Assert.assertEquals("twitter", attributes[0].getColumn());
+        Assert.assertTrue(attributes[0].getRequireNonEmpty());
+        Assert.assertNull(attributes[0].getPreprocessorConfig());
+
     }
 
 }

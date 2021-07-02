@@ -40,8 +40,8 @@ public class ConfigurationValidation {
                     String attributeKey = attribute.getKey();
                     String[] filePaths = attribute.getValue().getDataPaths();
                     Character fileSeparator = Objects.requireNonNullElseGet(attribute.getValue().getSeparator(), defaultConfig::getSeparator);
-                    String conceptType = attribute.getValue().getConceptType();
-                    String column = attribute.getValue().getColumn();
+                    String conceptType = attribute.getValue().getAttribute().getConceptType();
+                    String column = attribute.getValue().getAttribute().getColumn();
                     String errorBreadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attributeKey;
                     validateFile(validationReport, errorBreadcrumbs, filePaths, fileSeparator);
                     validateColumnInHeader(validationReport, errorBreadcrumbs, filePaths, column, fileSeparator);
@@ -147,12 +147,12 @@ public class ConfigurationValidation {
 
     private void validateEntityHasAttributes(HashMap<String, ArrayList<String>> validationReport,
                                              TypeDBSession session,
-                                             Configuration.HasAttribute[] hasAttributes,
+                                             Configuration.ConstrainingAttribute[] constrainingAttributes,
                                              String breadcrumbs,
                                              String[] filePaths,
                                              Character fileSeparator) {
-        if (hasAttributes != null) {
-            validateHasAttributes(validationReport, session, hasAttributes, breadcrumbs, filePaths, fileSeparator);
+        if (constrainingAttributes != null) {
+            validateHasAttributes(validationReport, session, constrainingAttributes, breadcrumbs, filePaths, fileSeparator);
         } else {
             validationReport.get("errors").add(breadcrumbs + ".attributes: missing required attributes block");
         }
@@ -160,23 +160,23 @@ public class ConfigurationValidation {
 
     private void validateRelationHasAttributes(HashMap<String, ArrayList<String>> validationReport,
                                                TypeDBSession session,
-                                               Configuration.HasAttribute[] hasAttributes,
+                                               Configuration.ConstrainingAttribute[] constrainingAttributes,
                                                String breadcrumbs,
                                                String[] filePaths,
                                                Character fileSeparator) {
-        if (hasAttributes != null) {
-            validateHasAttributes(validationReport, session, hasAttributes, breadcrumbs, filePaths, fileSeparator);
+        if (constrainingAttributes != null) {
+            validateHasAttributes(validationReport, session, constrainingAttributes, breadcrumbs, filePaths, fileSeparator);
         }
     }
 
     private void validateHasAttributes(HashMap<String, ArrayList<String>> validationReport,
                                        TypeDBSession session,
-                                       Configuration.HasAttribute[] hasAttributes,
+                                       Configuration.ConstrainingAttribute[] constrainingAttributes,
                                        String breadcrumbs,
                                        String[] filePaths,
                                        Character fileSeparator) {
         int entryIdx = 0;
-        for (Configuration.HasAttribute attribute : hasAttributes) {
+        for (Configuration.ConstrainingAttribute attribute : constrainingAttributes) {
             String aBreadcrumbs = breadcrumbs + ".attributes.[" + entryIdx + "]";
 
             if (attribute.getColumn() != null) {

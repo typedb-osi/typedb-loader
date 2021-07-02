@@ -9,16 +9,20 @@
       "dataPaths": [
         "src/test/resources/1.0.0/synthetic/names.csv"
       ],
-      "column": "name",
-      "conceptType": "name"
+      "attribute": {
+        "column": "name",
+        "conceptType": "name"
+      }
     },
     "names-list-separated": {
       "dataPaths": [
         "src/test/resources/1.0.0/synthetic/names-list-separated.csv"
       ],
-      "column": "name",
-      "listSeparator": "###",
-      "conceptType": "name"
+      "attribute": {
+        "column": "name",
+        "listSeparator": "###",
+        "conceptType": "name"
+      }
     }
   }
 }

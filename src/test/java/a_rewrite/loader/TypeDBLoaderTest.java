@@ -42,6 +42,7 @@ public class TypeDBLoaderTest {
         testRelations(session);
         testAttributeRelation(session);
         testNestedRelations(session);
+        testAppendAttribute(session);
 
         session.close();
         client.close();
@@ -217,6 +218,30 @@ public class TypeDBLoaderTest {
         Assert.assertEquals(0, read.query().match(getQuery).count());
         getQuery = TypeQL.match(statements).get("x").limit(1000);
         Assert.assertEquals(0, read.query().match(getQuery).count());
+
+        read.close();
+    }
+
+    public void testAppendAttribute(TypeDBSession session) {
+
+        // Count number of total inserts
+        TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
+        TypeQLMatch.Limited getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("twitter-username", TypeQL.var("x"))).get("p").limit(1000);
+        Assert.assertEquals(6, read.query().match(getQuery).count());
+
+        // Count multi-write using listSeparator
+        getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("phone-number", "+263 498 495 0617").has("twitter-username", TypeQL.var("x"))).get("x").limit(1000);
+        Assert.assertEquals(2, read.query().match(getQuery).count());
+
+        //test relation total inserts
+        getQuery = TypeQL.match(TypeQL.var("c").isa("call").has("call-rating", TypeQL.var("cr"))).get("c").limit(1000);
+        Assert.assertEquals(5, read.query().match(getQuery).count());
+
+        // specific relation write
+        getQuery = TypeQL.match(TypeQL.var("c").isa("call").has("started-at", getDT("2018-09-24T03:16:48")).has("call-rating", TypeQL.var("cr"))).get("cr").limit(1000);
+        read.query().match(getQuery).forEach(answer -> {
+            Assert.assertEquals(5L, answer.get("cr").asAttribute().getValue());
+        });
 
         read.close();
     }

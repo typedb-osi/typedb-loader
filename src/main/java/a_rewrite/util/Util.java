@@ -36,7 +36,8 @@ public class Util {
     public static Configuration initializeDataConfig(String dcPath) {
         try {
             BufferedReader bufferedReader = newBufferedReader(dcPath);
-            Type DataConfigType = new TypeToken<Configuration>(){}.getType();
+            Type DataConfigType = new TypeToken<Configuration>() {
+            }.getType();
             return new Gson().fromJson(bufferedReader, DataConfigType);
         } catch (FileNotFoundException e) {
             appLogger.error("Data Configuration file not found - please check the path: " + dcPath);
@@ -98,7 +99,7 @@ public class Util {
     }
 
     public static void warn(String message,
-                             Object... objects) {
+                            Object... objects) {
         appLogger.warn(message, objects);
     }
 
@@ -122,28 +123,36 @@ public class Util {
     }
 
     public static void setAttributeConceptType(Configuration.Attribute attribute, TypeDBSession session) {
-        attribute.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        attribute.getAttribute().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 
-    public static  void setEntityHasAttributeConceptType(Configuration.Entity entity, int attributeIndex, TypeDBSession session) {
+    public static void setEntityHasAttributeConceptType(Configuration.Entity entity, int attributeIndex, TypeDBSession session) {
         entity.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 
-    public static  void setRelationHasAttributeConceptType(Configuration.Relation relation, int attributeIndex, TypeDBSession session) {
+    public static void setThingGetterEntityHasAttributeConceptType(Configuration.ThingGetter thingGetter, int attributeIndex, TypeDBSession session) {
+        thingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    }
+
+    public static void setRelationHasAttributeConceptType(Configuration.Relation relation, int attributeIndex, TypeDBSession session) {
         relation.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 
-    public static  void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
+    public static void setAppendAttributeHasAttributeConceptType(Configuration.AppendAttribute appendAttribute, int attributeIndex, TypeDBSession session) {
+        appendAttribute.getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+    }
+
+    public static void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
         if (relation.getPlayers()[playerIndex].getRoleGetter() != null) {
             Configuration.ThingGetter[] ownershipThingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getOwnershipThingGetters();
             if (ownershipThingGetters != null) {
-                for (Configuration.ThingGetter ownershipRoleGetter : ownershipThingGetters){
+                for (Configuration.ThingGetter ownershipRoleGetter : ownershipThingGetters) {
                     ownershipRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
                 }
             }
             Configuration.ThingGetter[] thingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getThingGetters();
             if (thingGetters != null) {
-                for (Configuration.ThingGetter thingGetter : thingGetters){
+                for (Configuration.ThingGetter thingGetter : thingGetters) {
                     if (thingGetter != null) {
                         Configuration.ThingGetter[] thingThingGetters = thingGetter.getThingGetters();
                         if (thingThingGetters != null) {
@@ -158,7 +167,7 @@ public class Util {
             }
         }
         Configuration.RoleGetter attributeRoleGetter = relation.getPlayers()[playerIndex].getRoleGetter();
-        if(attributeRoleGetter != null &&attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
+        if (attributeRoleGetter != null && attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
             attributeRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
         }
     }

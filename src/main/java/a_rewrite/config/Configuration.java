@@ -16,6 +16,7 @@ public class Configuration {
     Map<String, Attribute> attributes;
     Map<String, Entity> entities;
     Map<String, Relation> relations;
+    Map<String, AppendAttribute> appendAttribute;
 
     public DefaultConfig getDefaultConfig() {
         return defaultConfig;
@@ -28,6 +29,8 @@ public class Configuration {
     public Map<String, Entity> getEntities() { return entities; }
 
     public Map<String, Relation> getRelations() { return relations; }
+
+    public Map<String, AppendAttribute> getAppendAttribute() { return appendAttribute; }
 
     public class DefaultConfig {
         Character separator;
@@ -45,14 +48,9 @@ public class Configuration {
         public String getSchemaPath() { return schemaPath; }
     }
 
-    public class Attribute {
+    public class Generator {
         String[] dataPaths;
         Character separator;
-        String column;
-        String listSeparator;
-        PreprocessorConfig preprocessorConfig;
-        String conceptType;
-        AttributeValueType conceptValueType;
         Integer rowsPerCommit;
 
         public String[] getDataPaths() {
@@ -61,108 +59,66 @@ public class Configuration {
 
         public Character getSeparator() { return separator; }
 
-        public String getColumn() {
-            return column;
-        }
-
-        public String getListSeparator() { return listSeparator; }
-
-        public PreprocessorConfig getPreprocessorConfig() { return preprocessorConfig; }
-
-        public String getConceptType() {
-            return conceptType;
-        }
-
-        public AttributeValueType getConceptValueType() {
-            return conceptValueType;
-        }
-
         public Integer getRowsPerCommit() { return rowsPerCommit; }
+    }
 
-        public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, conceptType);
+    public class Attribute extends Generator {
+        ConstrainingAttribute attribute;
+
+        public ConstrainingAttribute getAttribute() {
+            return attribute;
         }
     }
 
-    public class Entity {
-        String[] dataPaths;
-        Character separator;
+    public class Entity extends Generator {
         String conceptType;
-        Integer rowsPerCommit;
-        HasAttribute[] attributes;
-
-        public String[] getDataPaths() {
-            return dataPaths;
-        }
-
-        public Character getSeparator() {
-            return separator;
-        }
+        ConstrainingAttribute[] attributes;
 
         public String getConceptType() {
             return conceptType;
         }
 
-        public Integer getRowsPerCommit() {
-            return rowsPerCommit;
-        }
-
-        public HasAttribute[] getAttributes() {
+        public ConstrainingAttribute[] getAttributes() {
             return attributes;
         }
 
-        public HasAttribute[] getRequireNonEmptyAttributes() {
-            ArrayList<HasAttribute> tmp = new ArrayList<>();
-            for (HasAttribute hasAttribute : getAttributes()) {
-                if (hasAttribute.getRequireNonEmpty()) {
-                    tmp.add(hasAttribute);
+        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
+            for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
+                if (constrainingAttribute.getRequireNonEmpty()) {
+                    tmp.add(constrainingAttribute);
                 }
             }
-            HasAttribute[] requireNoneEmptyAttributes = new HasAttribute[tmp.size()];
+            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
             return tmp.toArray(requireNoneEmptyAttributes);
         }
     }
 
-    public class Relation {
-        String[] dataPaths;
-        Character separator;
+    public class Relation extends Generator {
         String conceptType;
-        Integer rowsPerCommit;
-        HasAttribute[] attributes;
+        ConstrainingAttribute[] attributes;
         Player[] players;
-
-        public String[] getDataPaths() {
-            return dataPaths;
-        }
-
-        public Character getSeparator() {
-            return separator;
-        }
 
         public String getConceptType() {
             return conceptType;
         }
 
-        public Integer getRowsPerCommit() {
-            return rowsPerCommit;
-        }
-
-        public HasAttribute[] getAttributes() {
+        public ConstrainingAttribute[] getAttributes() {
             return attributes;
         }
 
-        public HasAttribute[] getRequireNonEmptyAttributes() {
-            ArrayList<HasAttribute> tmp = new ArrayList<>();
+        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
             if (getAttributes() != null) {
-                for (HasAttribute hasAttribute : getAttributes()) {
-                    if (hasAttribute.getRequireNonEmpty()) {
-                        tmp.add(hasAttribute);
+                for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
+                    if (constrainingAttribute.getRequireNonEmpty()) {
+                        tmp.add(constrainingAttribute);
                     }
                 }
-                HasAttribute[] requireNoneEmptyAttributes = new HasAttribute[tmp.size()];
+                ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
                 return tmp.toArray(requireNoneEmptyAttributes);
             } else {
-                return new HasAttribute[0];
+                return new ConstrainingAttribute[0];
             }
 
         }
@@ -181,7 +137,31 @@ public class Configuration {
         }
     }
 
-    public class HasAttribute {
+    public class AppendAttribute extends Generator {
+        ThingGetter thingGetter;
+        ConstrainingAttribute[] attributes;
+
+        public ConstrainingAttribute[] getAttributes() {
+            return attributes;
+        }
+
+        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
+            for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
+                if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
+                    tmp.add(constrainingAttribute);
+                }
+            }
+            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
+            return tmp.toArray(requireNoneEmptyAttributes);
+        }
+
+        public ThingGetter getThingGetter() {
+            return thingGetter;
+        }
+    }
+
+    public class ConstrainingAttribute {
         String conceptType;
         AttributeValueType conceptValueType;
         String column;
@@ -218,59 +198,12 @@ public class Configuration {
         }
     }
 
-    public class Player {
-        String roleType;
-        Boolean requireNonEmpty;
-        RoleGetter roleGetter;
-
-        public String getRoleType() {
-            return roleType;
-        }
-
-        public Boolean getRequireNonEmpty() {
-            return requireNonEmpty;
-        }
-
-        public RoleGetter getRoleGetter() {
-            return roleGetter;
-        }
-    }
-
-    public class RoleGetter {
-        String conceptType;
+    public class RoleGetter extends ConstrainingAttribute{
         String handler;
-        String column;
-        String listSeparator;
-        AttributeValueType conceptValueType;
-        PreprocessorConfig preprocessorConfig;
         ThingGetter[] thingGetters;
-
-        public String getConceptType() {
-            return conceptType;
-        }
 
         public TypeHandler getHandler() {
             return TypeHandler.valueOf(handler.toUpperCase());
-        }
-
-        public String getColumn() {
-            return column;
-        }
-
-        public String getListSeparator() {
-            return listSeparator;
-        }
-
-        public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, conceptType);
-        }
-
-        public AttributeValueType getConceptValueType() {
-            return conceptValueType;
-        }
-
-        public PreprocessorConfig getPreprocessorConfig() {
-            return preprocessorConfig;
         }
 
         public ThingGetter[] getThingGetters() {
@@ -292,52 +225,31 @@ public class Configuration {
         }
     }
 
-    public class ThingGetter {
-        String handler;
-        String conceptType;
-        String column;
-        String listSeparator;
+    public class ThingGetter extends RoleGetter {
         String roleType;
-        AttributeValueType conceptValueType;
-        PreprocessorConfig preprocessorConfig;
-        ThingGetter[] thingGetters;
 
         //TODO Config validation: allow here only a single or a set of attributes, or a single or a set of entities/attributes, not yet a mixture
 
-        public String getConceptType() {
-            return conceptType;
+        public String getRoleType() {
+            return roleType;
         }
+    }
 
-        public TypeHandler getHandler() {
-            return TypeHandler.valueOf(handler.toUpperCase());
-        }
-
-        public String getColumn() {
-            return column;
-        }
-
-        public String getListSeparator() {
-            return listSeparator;
-        }
-
-        public AttributeValueType getConceptValueType() {
-            return conceptValueType;
-        }
-
-        public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, conceptType);
-        }
-
-        public PreprocessorConfig getPreprocessorConfig() {
-            return preprocessorConfig;
-        }
-
-        public ThingGetter[] getThingGetters() {
-            return thingGetters;
-        }
+    public class Player {
+        String roleType;
+        Boolean requireNonEmpty;
+        RoleGetter roleGetter;
 
         public String getRoleType() {
             return roleType;
+        }
+
+        public Boolean getRequireNonEmpty() {
+            return requireNonEmpty;
+        }
+
+        public RoleGetter getRoleGetter() {
+            return roleGetter;
         }
     }
 

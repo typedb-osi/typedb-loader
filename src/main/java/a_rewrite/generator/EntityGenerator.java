@@ -61,18 +61,11 @@ public class EntityGenerator implements Generator {
         if (row.length > 0) {
             ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getConceptType());
 
-            for (Configuration.HasAttribute hasAttribute : entityConfiguration.getAttributes()) {
-                ArrayList<ThingConstraint.Value<?>> tmp = GeneratorUtil.generateValueConstraints(
-                        row[GeneratorUtil.getColumnIndexByName(header, hasAttribute.getColumn())],
-                        hasAttribute.getConceptType(),
-                        hasAttribute.getConceptValueType(),
-                        hasAttribute.getListSeparator(),
-                        hasAttribute.getPreprocessorConfig(),
-                        row,
-                        filePath,
-                        fileSeparator);
-                for (ThingConstraint.Value<?> constraintValue : tmp) {
-                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(hasAttribute.getConceptType(), constraintValue));
+            for (Configuration.ConstrainingAttribute constrainingAttribute : entityConfiguration.getAttributes()) {
+                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                        row, header, filePath, fileSeparator, constrainingAttribute);
+                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
                 }
             }
 
@@ -85,8 +78,8 @@ public class EntityGenerator implements Generator {
     public boolean entityInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + entityConfiguration.getConceptType())) return false;
-        for (Configuration.HasAttribute hasAttribute : entityConfiguration.getRequireNonEmptyAttributes()) {
-            if (!insert.toString().contains("has " + hasAttribute.getConceptType())) return false;
+        for (Configuration.ConstrainingAttribute constrainingAttribute : entityConfiguration.getRequireNonEmptyAttributes()) {
+            if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
         }
         return true;
     }
