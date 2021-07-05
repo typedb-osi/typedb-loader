@@ -53,7 +53,6 @@ public class AsyncLoaderWorker {
         try (TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName)) {
             // Load attributes
             Util.info("loading attributes");
-            FileLogger.getLogger().logToLoadingSummary("loading attributes");
             if (dc.getAttributes() != null) {
                 for (Map.Entry<String, Configuration.Attribute> attribute : dc.getAttributes().entrySet()) {
                     if (orderedGenerators.stream().noneMatch(attribute.getKey()::contains)) {
@@ -69,7 +68,6 @@ public class AsyncLoaderWorker {
 
             // Load entities
             Util.info("loading entities");
-            FileLogger.getLogger().logToLoadingSummary("loading entities");
             if (dc.getEntities() != null) {
                 for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
                     if (orderedGenerators.stream().noneMatch(entity.getKey()::contains)) {
@@ -85,7 +83,6 @@ public class AsyncLoaderWorker {
 
             //Load relations
             Util.info("loading relations");
-            FileLogger.getLogger().logToLoadingSummary("loading relations");
             if (dc.getRelations() != null) {
                 for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
                     if (orderedGenerators.stream().noneMatch(relation.getKey()::contains)) {
@@ -102,7 +99,6 @@ public class AsyncLoaderWorker {
 
             //Load appendAttributes
             Util.info("loading appendAttributes");
-            FileLogger.getLogger().logToLoadingSummary("loading appendAttributes");
             if (dc.getAppendAttribute() != null) {
                 for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
                     if (orderedGenerators.stream().noneMatch(appendAttribute.getKey()::contains)) {
@@ -119,7 +115,6 @@ public class AsyncLoaderWorker {
 
             //Load appendAttributesOrInsertThing
             Util.info("loading appendAttributesOrInsertThing");
-            FileLogger.getLogger().logToLoadingSummary("loading appendAttributesOrInsertThing");
             if (dc.getAppendAttributeOrInsertThing() != null) {
                 for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendAttributeOrInsertThing : dc.getAppendAttributeOrInsertThing().entrySet()) {
                     if (orderedGenerators.stream().noneMatch(appendAttributeOrInsertThing.getKey()::contains)) {
@@ -136,7 +131,6 @@ public class AsyncLoaderWorker {
 
             //Load OrderAfter things...
             Util.info("loading ordered things");
-            FileLogger.getLogger().logToLoadingSummary("loading ordered things");
             if (orderedGenerators.size() > 0) {
                 for (String orderedGenerator : orderedGenerators) {
                     String generatorType = dc.getGeneratorTypeByKey(orderedGenerator);
@@ -195,7 +189,6 @@ public class AsyncLoaderWorker {
 
             //Finished
             Util.info("TypeDB Loader finished");
-            FileLogger.getLogger().logToLoadingSummary("TypeDB Loader finished");
         }
     }
 
@@ -248,7 +241,6 @@ public class AsyncLoaderWorker {
                            Generator gen,
                            int batch) throws IOException, InterruptedException {
         Util.info("async-load (start): {}", filename);
-        FileLogger.getLogger().logToLoadingSummary(String.format("async-load (start): %s", filename));
         LinkedBlockingQueue<Either<List<List<String[]>>, Done>> queue = new LinkedBlockingQueue<>(threads * 4);
         List<CompletableFuture<Void>> asyncWrites = new ArrayList<>(threads);
         for (int i = 0; i < threads; i++) {
@@ -257,7 +249,6 @@ public class AsyncLoaderWorker {
         bufferedRead(filename, gen, batch, queue);
         CompletableFuture.allOf(asyncWrites.toArray(new CompletableFuture[0])).join();
         Util.info("async-load (end): {}", filename);
-        FileLogger.getLogger().logToLoadingSummary(String.format("async-load (end): %s", filename));
     }
 
     private void bufferedRead(String filename,
@@ -296,7 +287,6 @@ public class AsyncLoaderWorker {
                 double average = Util.calculateRate(count, startRead, endBatch);
                 Util.info("buffered-read: source: {}, progress: {}, rate: {}/s, average: {}/s",
                         filename, countFormat.format(count), decimalFormat.format(rate), decimalFormat.format(average));
-                FileLogger.getLogger().logToLoadingSummary(String.format("buffered-read {source: %s, progress: %s, rate: %s/s, average: %s/s}", filename, countFormat.format(count), decimalFormat.format(rate), decimalFormat.format(average)));
                 startBatch = Instant.now();
             }
         }
@@ -304,7 +294,6 @@ public class AsyncLoaderWorker {
         Instant endRead = Instant.now();
         double rate = Util.calculateRate(count, startRead, endRead);
         Util.info("buffered-read: total: {}, rate: {}/s", countFormat.format(count), decimalFormat.format(rate));
-        FileLogger.getLogger().logToLoadingSummary(String.format("buffered-read: total: %s, rate: %s/s", countFormat.format(count), decimalFormat.format(rate)));
     }
 
     private CompletableFuture<Void> asyncWrite(int id,
