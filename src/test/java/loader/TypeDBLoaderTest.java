@@ -1,6 +1,5 @@
 package loader;
 
-import loader.TypeDBLoader;
 import util.TypeDBUtil;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;

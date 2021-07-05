@@ -2,7 +2,9 @@ package generator;
 
 import config.Configuration;
 import config.TypeHandler;
-import io.ErrorFileLogger;
+import io.FileLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
@@ -12,15 +14,14 @@ import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static util.GeneratorUtil.constrainThingWithHasAttributes;
+
 public class RelationGenerator implements Generator {
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tbl.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.Relation relationConfiguration;
@@ -34,14 +35,14 @@ public class RelationGenerator implements Generator {
     }
 
     public void write(TypeDBTransaction tx,
-                      String[] row) throws Exception {
+                      String[] row) {
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
 
         if (row.length > header.length) {
-            ErrorFileLogger.getLogger().logMalformed(fileName, originalRow);
-            dataLogger.warn("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
+            FileLogger.getLogger().logMalformed(fileName, originalRow);
+            dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
         TypeQLInsert statement = generateMatchInsertStatement(row);
@@ -50,12 +51,12 @@ public class RelationGenerator implements Generator {
             try {
                 tx.query().insert(statement);
             } catch (TypeDBClientException typeDBClientException) {
-                ErrorFileLogger.getLogger().logUnavailable(fileName, originalRow);
-                appLogger.warn("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
+                FileLogger.getLogger().logUnavailable(fileName, originalRow);
+                dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
         } else {
-            ErrorFileLogger.getLogger().logInvalid(fileName, originalRow);
-            dataLogger.warn("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: " + statement.toString());
+            FileLogger.getLogger().logInvalid(fileName, originalRow);
+            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + statement.toString().replace("\n", " ") + ">");
         }
     }
 
@@ -105,16 +106,14 @@ public class RelationGenerator implements Generator {
                             playerIdx += 1;
                         }
                     } else {
-                        //TODO: here now identify not by attribute but by players (either entity OR attribute)
                         ArrayList<ThingVariable<?>> playerMatchStatement = getRelationPlayerMatchStatementByPlayer(row, player, playerVar);
-                        if (playerMatchStatement != null) { //TODO: check if this makes sense, see above for examples
+                        if (playerMatchStatement != null) {
                             playerMatchStatements.addAll(playerMatchStatement);
                             playerVars.add(playerVar);
                             roleTypes.add(player.getRoleType());
                             playerIdx += 1;
                         }
                     }
-
                 }
             }
 
@@ -129,13 +128,7 @@ public class RelationGenerator implements Generator {
             if (insertStatement != null) {
                 insertStatement = insertStatement.isa(relationConfiguration.getConceptType());
                 if (relationConfiguration.getAttributes() != null) {
-                    for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getAttributes()) {
-                        ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                                row, header, filePath, fileSeparator, constrainingAttribute);
-                        for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                            insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
-                        }
-                    }
+                    constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, relationConfiguration.getAttributes());
                 }
 
                 return TypeQL.match(playerMatchStatements).insert(insertStatement);
@@ -146,6 +139,8 @@ public class RelationGenerator implements Generator {
             return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
         }
     }
+
+
 
     private boolean nestedRelationByAttribute(Configuration.Player player) {
         for (Configuration.ThingGetter thingGetter : player.getRoleGetter().getThingGetters()) {

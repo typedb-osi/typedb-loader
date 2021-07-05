@@ -4,10 +4,10 @@
         <Console name="Console">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
-        <File name="logFile" fileName="grami-log.log">
+        <File name="logFile" fileName="tbl-load.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
-        <File name="dataLogFile" fileName="grami-data-warn.log">
+        <File name="dataLogFile" fileName="tbl-error.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
         <Async name="AsyncLog">
@@ -18,10 +18,10 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Logger name="com.bayer.dt.grami.data" level="WARN">
+        <Logger name="com.bayer.dt.tbl.error" level="WARN">
             <AppenderRef ref="AsyncData"/>
         </Logger>
-        <Logger name="com.bayer.dt.grami" level="INFO">
+        <Logger name="com.bayer.dt.tbl" level="INFO">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AsyncLog"/>
         </Logger>

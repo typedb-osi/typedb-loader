@@ -1,7 +1,7 @@
 package util;
 
 import config.Configuration;
-import io.ErrorFileLogger;
+import io.FileLogger;
 import type.AttributeValueType;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLToken;
@@ -29,6 +29,21 @@ public class GeneratorUtil {
         cleaned = cleaned.replace("\\", "");
         cleaned = cleaned.trim();
         return cleaned;
+    }
+
+    public static void constrainThingWithHasAttributes(String[] row,
+                                                       String[] header,
+                                                       String filePath,
+                                                       char fileSeparator,
+                                                       ThingVariable<?> insertStatement,
+                                                       Configuration.ConstrainingAttribute[] attributes) {
+        for (Configuration.ConstrainingAttribute constrainingAttribute : attributes) {
+            ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                    row, header, filePath, fileSeparator, constrainingAttribute);
+            for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
+            }
+        }
     }
 
     public static int getColumnIndexByName(String[] header, String column) {
@@ -108,7 +123,7 @@ public class GeneratorUtil {
                     constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     //TODO: write to error file
-                    ErrorFileLogger.getLogger().logColumnWarnings(fileName, originalRow);
+                    FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type long for variable <%s> with non-<long> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
                 break;
@@ -117,7 +132,7 @@ public class GeneratorUtil {
                     constraint = new ThingConstraint.Value.Double(TypeQLToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     //TODO: write to error file
-                    ErrorFileLogger.getLogger().logColumnWarnings(fileName, originalRow);
+                    FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type double for variable <%s> with non-<double> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
                 break;
@@ -128,7 +143,7 @@ public class GeneratorUtil {
                     constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, false);
                 } else {
                     //TODO: write to error file
-                    ErrorFileLogger.getLogger().logColumnWarnings(fileName, originalRow);
+                    FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type boolean for variable <%s> with non-<boolean> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
                 break;
@@ -147,7 +162,7 @@ public class GeneratorUtil {
                     constraint = new ThingConstraint.Value.DateTime(TypeQLToken.Predicate.Equality.EQ, dateTime);
                 } catch (DateTimeException dateTimeException) {
                     //TODO: write to error file
-                    ErrorFileLogger.getLogger().logColumnWarnings(fileName, originalRow);
+                    FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type datetime for variable <%s> with non-<ISO 8601 format> datetime value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
                 break;

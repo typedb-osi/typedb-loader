@@ -1,7 +1,9 @@
 package generator;
 
 import config.Configuration;
-import io.ErrorFileLogger;
+import io.FileLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
@@ -12,15 +14,12 @@ import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class AppendAttributeGenerator implements Generator {
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tbl.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.AppendAttribute appendConfiguration;
@@ -34,14 +33,14 @@ public class AppendAttributeGenerator implements Generator {
     }
 
     public void write(TypeDBTransaction tx,
-                      String[] row) throws Exception {
+                      String[] row) {
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
 
         if (row.length > header.length) {
-            ErrorFileLogger.getLogger().logMalformed(fileName, originalRow);
-            dataLogger.warn("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
+            FileLogger.getLogger().logMalformed(fileName, originalRow);
+            dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
         TypeQLInsert statement = generateMatchInsertStatement(row);
@@ -50,12 +49,12 @@ public class AppendAttributeGenerator implements Generator {
             try {
                 tx.query().insert(statement);
             } catch (TypeDBClientException typeDBClientException) {
-                ErrorFileLogger.getLogger().logUnavailable(fileName, originalRow);
-                appLogger.warn("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
+                FileLogger.getLogger().logUnavailable(fileName, originalRow);
+                dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
         } else {
-            ErrorFileLogger.getLogger().logInvalid(fileName, originalRow);
-            dataLogger.warn("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: " + statement.toString());
+            FileLogger.getLogger().logInvalid(fileName, originalRow);
+            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + statement.toString().replace("\n", " ") + ">");
         }
     }
 

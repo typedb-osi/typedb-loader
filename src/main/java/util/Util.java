@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import io.FileLogger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -18,7 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class Util {
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tbl");
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
     private static final CSVFormat TSV_FORMAT = CSV_FORMAT.withDelimiter('\t').withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
 
@@ -117,12 +118,19 @@ public class Util {
 
     public static void debug(String message,
                              Object... objects) {
-        if (appLogger.isDebugEnabled()) appLogger.debug(message, objects);
+        if (appLogger.isDebugEnabled())
+            appLogger.debug(message, objects);
+    }
+
+    public static void error(String message,
+                             Object... objects) {
+        appLogger.error(message, objects);
     }
 
     public static void warn(String message,
                             Object... objects) {
         appLogger.warn(message, objects);
+
     }
 
     public static void info(String message,
