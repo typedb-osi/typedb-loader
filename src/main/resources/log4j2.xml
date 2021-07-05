@@ -21,7 +21,7 @@
         <Logger name="com.bayer.dt.tbl.error" level="WARN">
             <AppenderRef ref="AsyncData"/>
         </Logger>
-        <Logger name="com.bayer.dt.tbl" level="INFO">
+        <Logger name="com.bayer.dt.tbl.loader" level="INFO">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AsyncLog"/>
         </Logger>

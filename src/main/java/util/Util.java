@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class Util {
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tbl");
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tbl.loader");
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
     private static final CSVFormat TSV_FORMAT = CSV_FORMAT.withDelimiter('\t').withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
 
