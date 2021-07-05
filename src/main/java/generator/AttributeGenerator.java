@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AttributeGenerator implements Generator {
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tbl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.Attribute attributeConfiguration;

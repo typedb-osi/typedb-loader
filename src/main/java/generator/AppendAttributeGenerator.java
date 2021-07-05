@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class AppendAttributeGenerator implements Generator {
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tbl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.AppendAttribute appendConfiguration;

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import static util.GeneratorUtil.constrainThingWithHasAttributes;
 
 public class RelationGenerator implements Generator {
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tbl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.Relation relationConfiguration;

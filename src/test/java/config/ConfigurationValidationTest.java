@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 public class ConfigurationValidationTest {
 
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
     private static final String graknURI = "localhost:1729";
     private static final String databaseName = "1.0.0-config-validation-test";
 

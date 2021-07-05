@@ -13,8 +13,6 @@ import static util.Util.loadSchemaFromFile;
 
 public class TypeDBUtil {
 
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
-
     public static TypeDBClient getClient(String graknURI) {
         return TypeDB.coreClient(graknURI);
     }
@@ -57,10 +55,9 @@ public class TypeDBUtil {
         writeTransaction.close();
         schemaSession.close();
 
-        appLogger.info("Defined schema to database <" + databaseName + ">");
+        Util.info("Defined schema to database <" + databaseName + ">");
     }
 
-    // used by <grami update> command
     public static void loadAndDefineSchema(TypeDBClient client, String databaseName, String schemaPath) {
         String schema = loadSchemaFromFile(schemaPath);
         defineToGrakn(client, databaseName, schema);

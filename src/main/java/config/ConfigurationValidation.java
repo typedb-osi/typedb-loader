@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class ConfigurationValidation {
 
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
+    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
     private final Configuration configuration;
 
     public ConfigurationValidation(Configuration configuration) {

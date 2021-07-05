@@ -2,7 +2,6 @@ package loader;
 
 import config.Configuration;
 import config.ConfigurationValidation;
-import io.FileLogger;
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.TypeDB;

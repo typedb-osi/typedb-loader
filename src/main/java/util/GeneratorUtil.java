@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 public class GeneratorUtil {
 
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
 
     private static String cleanToken(String token) {
         String cleaned = token.replace("\"", "");
@@ -122,7 +122,6 @@ public class GeneratorUtil {
                 try {
                     constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Integer.parseInt(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    //TODO: write to error file
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type long for variable <%s> with non-<long> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
@@ -131,7 +130,6 @@ public class GeneratorUtil {
                 try {
                     constraint = new ThingConstraint.Value.Double(TypeQLToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
-                    //TODO: write to error file
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type double for variable <%s> with non-<double> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
@@ -142,7 +140,6 @@ public class GeneratorUtil {
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
                     constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, false);
                 } else {
-                    //TODO: write to error file
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type boolean for variable <%s> with non-<boolean> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }
@@ -161,7 +158,6 @@ public class GeneratorUtil {
                     }
                     constraint = new ThingConstraint.Value.DateTime(TypeQLToken.Predicate.Equality.EQ, dateTime);
                 } catch (DateTimeException dateTimeException) {
-                    //TODO: write to error file
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type datetime for variable <%s> with non-<ISO 8601 format> datetime value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
                 }

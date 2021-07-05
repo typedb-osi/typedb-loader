@@ -2,7 +2,7 @@ package loader;
 
 import config.Configuration;
 import generator.*;
-import io.FileLogger;
+
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -10,8 +10,6 @@ import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -27,7 +25,6 @@ public class AsyncLoaderWorker {
 
     private static final DecimalFormat countFormat = new DecimalFormat("#,###");
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
     public final ExecutorService executor;
     private final int threads = Runtime.getRuntime().availableProcessors();
     private final String databaseName;
@@ -321,7 +318,7 @@ public class AsyncLoaderWorker {
                 if (queueItem.isSecond()) queue.put(queueItem);
             } catch (Throwable e) {
                 hasError.set(true);
-                appLogger.error("async-writer-" + id + ": " + e.getMessage());
+                Util.error("async-writer-" + id + ": " + e.getMessage());
                 throw new RuntimeException(e);
             } finally {
                 Util.debug("async-writer-{} (end): {}", id, filename);
