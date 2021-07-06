@@ -274,7 +274,7 @@ public class AsyncLoaderWorker {
 
             if (count % 50_000 == 0) {
                 Instant endBatch = Instant.now();
-                double rate = Util.calculateRate(10_000, startBatch, endBatch);
+                double rate = Util.calculateRate(50_000, startBatch, endBatch);
                 double average = Util.calculateRate(count, startRead, endBatch);
                 Util.info("buffered-read: source: {}, progress: {}, rate: {}/s, average: {}/s",
                         filename, countFormat.format(count), decimalFormat.format(rate), decimalFormat.format(average));
