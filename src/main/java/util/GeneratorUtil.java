@@ -24,6 +24,7 @@ public class GeneratorUtil {
 
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
 
+    //TODO: remove this function and all the complications it provides... this would need to be either solved by a regex preprocessor, or is already solved by CSV.withIgnoreSurroundingSpaces()
     private static String cleanToken(String token) {
         String cleaned = token.replace("\"", "");
         cleaned = cleaned.replace("\\", "");
@@ -72,7 +73,15 @@ public class GeneratorUtil {
         AttributeValueType attributeValueType = constrainingAttribute.getConceptValueType();
         String listSeparator = constrainingAttribute.getListSeparator();
         Configuration.PreprocessorConfig preprocessor = constrainingAttribute.getPreprocessorConfig();
-        String token = row[GeneratorUtil.getColumnIndexByName(header, constrainingAttribute.getColumn())];
+        String token;
+
+        int colIdx = GeneratorUtil.getColumnIndexByName(header, constrainingAttribute.getColumn());
+        if (colIdx < row.length) {
+            token = row[colIdx];
+        } else {
+            return new ArrayList<>();
+        }
+
 
         ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
         if (token != null && !token.isEmpty()) {

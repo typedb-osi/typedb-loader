@@ -21,8 +21,9 @@ import java.util.Objects;
 
 public class Util {
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
+    //TODO: disallow duplicate header names, and why does ignoreEmptyLines not work???
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
-    private static final CSVFormat TSV_FORMAT = CSV_FORMAT.withDelimiter('\t').withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
+    private static final CSVFormat TSV_FORMAT = CSVFormat.DEFAULT.withDelimiter('\t').withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
 
     public static String[] getFileHeader(String filePath, char separator) throws IOException, IllegalArgumentException {
         BufferedReader br = newBufferedReader(filePath);
@@ -83,19 +84,41 @@ public class Util {
         }
     }
 
-    public static String[] parseCSV(String line) throws IOException {
+    public static String[] parseCSV(String line) {
         if (!line.isEmpty()) {
-            CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
-            return parse(csv);
+            try {
+                CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+                return parse(csv);
+            } catch (IOException ioException) {
+                line = line.replace("\"", "");
+                try {
+                    CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+                    return parse(csv);
+                } catch (IOException ioException2) {
+                    //TODO LOG INTO ERRORS
+                    return new String[0];
+                }
+            }
         } else {
             return new String[0];
         }
     }
 
-    public static String[] parseTSV(String line) throws IOException {
+    public static String[] parseTSV(String line) {
         if (!line.isEmpty()) {
-            CSVRecord tsv = CSVParser.parse(line, TSV_FORMAT).getRecords().get(0);
-            return parse(tsv);
+            try {
+                CSVRecord tsv = CSVParser.parse(line, TSV_FORMAT).getRecords().get(0);
+                return parse(tsv);
+            } catch (IOException ioException) {
+                line = line.replace("\"", "");
+                try {
+                    CSVRecord tsv = CSVParser.parse(line, TSV_FORMAT).getRecords().get(0);
+                    return parse(tsv);
+                } catch (IOException ioException2) {
+                    //TODO LOG INTO ERRORS
+                    return new String[0];
+                }
+            }
         } else {
             return new String[0];
         }

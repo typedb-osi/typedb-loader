@@ -44,6 +44,7 @@ public class TypeDBLoader {
             Util.info("cleaned database and migrated schema...");
         }
 
+        Util.info("validating your config...");
         TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
@@ -58,6 +59,7 @@ public class TypeDBLoader {
         }
         schemaSession.close();
         schemaClient.close();
+        Util.info("finished validating your config...");
 
         Instant start = Instant.now();
         try {
