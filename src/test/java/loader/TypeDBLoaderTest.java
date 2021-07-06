@@ -228,8 +228,8 @@ public class TypeDBLoaderTest {
 
         // Count number of total inserts
         TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
-        TypeQLMatch.Limited getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("twitter-username", TypeQL.var("x"))).get("p").limit(1000);
-        Assert.assertEquals(6, read.query().match(getQuery).count());
+        TypeQLMatch.Limited getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("twitter-username", TypeQL.var("x"))).get("x").limit(1000);
+        Assert.assertEquals(7, read.query().match(getQuery).count());
 
         // Count multi-write using listSeparator
         getQuery = TypeQL.match(TypeQL.var("p").isa("person").has("phone-number", "+263 498 495 0617").has("twitter-username", TypeQL.var("x"))).get("x").limit(1000);
@@ -250,8 +250,8 @@ public class TypeDBLoaderTest {
 
     public void testInsertOrAppend(TypeDBSession session) {
         TypeDBTransaction read = session.transaction(TypeDBTransaction.Type.READ);
-        TypeQLMatch getQuery = TypeQL.match(TypeQL.var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("e");
-        Assert.assertEquals(8, read.query().match(getQuery).count());
+        TypeQLMatch getQuery = TypeQL.match(TypeQL.var("e").isa("person").has("nick-name", UnboundVariable.named("x"))).get("x");
+        Assert.assertEquals(12, read.query().match(getQuery).count());
 
         // test new ones present (middle and at end)
         read = session.transaction(TypeDBTransaction.Type.READ);

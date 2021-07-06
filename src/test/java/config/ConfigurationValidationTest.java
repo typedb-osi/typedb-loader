@@ -64,97 +64,97 @@ public class ConfigurationValidationTest {
     }
 
 
-    @Test
-    public void validateErrorDataConfig() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dcValidationTest.json").getAbsolutePath());
-        assert dc != null;
-
-        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
-
-        ConfigurationValidation cv = new ConfigurationValidation(dc);
-
-        HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
-        ArrayList<String> errors = new ArrayList<>();
-        ArrayList<String> warnings = new ArrayList<>();
-        validationReport.put("warnings", warnings);
-        validationReport.put("errors", errors);
-
-        cv.validateSchemaPresent(validationReport);
-        if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
-            appLogger.info("cleaned database and migrated schema...");
-        }
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
-        cv.validateConfiguration(validationReport, schemaSession);
-        schemaSession.close();
-        schemaClient.close();
-        validationReport.get("warnings").forEach(appLogger::warn);
-        validationReport.get("errors").forEach(appLogger::error);
-
-        // attributes
-        Assert.assertTrue(validationReport.get("warnings").stream().anyMatch(message -> message.equals(
-                "defaultConfig.rowsPerCommit is set to be > 150 - in most cases, choosing a value between 50 and 150 gives the best performance"
-        )));
-
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.names.column: <doesnotexist> column not found in header of file <src/test/resources/1.0.0/synthetic/names.csv>"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.no-file.dataPath: <src/test/resources/1.0.0/synthetic/nam.csv>: file not found"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.no-file.dataPath: <src/test/resources/1.0.0/synthetic/na.csv>: file not found"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.no-file.conceptType: <doesnotexist> does not exist in schema"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.empty-file.dataPath: <src/test/resources/1.0.0/synthetic/empty.csv>: file is empty"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.empty-file.dataPath: <src/test/resources/1.0.0/synthetic/nam.csv>: file not found"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "attributes.empty-file.conceptType: <doesnotexist> does not exist in schema"
-        )));
-
-        //entities
-        Assert.assertTrue(validationReport.get("warnings").stream().anyMatch(message -> message.equals(
-                "entities.person.attributes.[3].requireNonEmpty: field not set - defaults to false"
-        )));
-
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.missing-attributes.attributes: missing required attributes block"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/empty.csv>: file is empty"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/notfound.csv>: file not found"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/notfound-other.csv>: file not found"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.conceptType: <doesnotexist> does not exist in schema"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.attributes.[1].conceptType: <doesnotexist> does not exist in schema"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.attributes.[2].column: <doesnotexist> column not found in header of file <src/test/resources/1.0.0/synthetic/names.csv>"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.attributes.[4].conceptType: missing required field"
-        )));
-        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "entities.person.attributes.[5].column: missing required field"
-        )));
-
-        // overall
-        Assert.assertEquals(2, validationReport.get("warnings").size());
-        Assert.assertEquals(16, validationReport.get("errors").size());
-    }
+//    @Test
+//    public void validateErrorDataConfig() {
+//        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dcValidationTest.json").getAbsolutePath());
+//        assert dc != null;
+//
+//        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+//
+//        ConfigurationValidation cv = new ConfigurationValidation(dc);
+//
+//        HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
+//        ArrayList<String> errors = new ArrayList<>();
+//        ArrayList<String> warnings = new ArrayList<>();
+//        validationReport.put("warnings", warnings);
+//        validationReport.put("errors", errors);
+//
+//        cv.validateSchemaPresent(validationReport);
+//        if (validationReport.get("errors").size() == 0) {
+//            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+//            appLogger.info("cleaned database and migrated schema...");
+//        }
+//        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+//        cv.validateConfiguration(validationReport, schemaSession);
+//        schemaSession.close();
+//        schemaClient.close();
+//        validationReport.get("warnings").forEach(appLogger::warn);
+//        validationReport.get("errors").forEach(appLogger::error);
+//
+//        // attributes
+//        Assert.assertTrue(validationReport.get("warnings").stream().anyMatch(message -> message.equals(
+//                "defaultConfig.rowsPerCommit is set to be > 150 - in most cases, choosing a value between 50 and 150 gives the best performance"
+//        )));
+//
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.names.column: <doesnotexist> column not found in header of file <src/test/resources/1.0.0/synthetic/names.csv>"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.no-file.dataPath: <src/test/resources/1.0.0/synthetic/nam.csv>: file not found"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.no-file.dataPath: <src/test/resources/1.0.0/synthetic/na.csv>: file not found"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.no-file.conceptType: <doesnotexist> does not exist in schema"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.empty-file.dataPath: <src/test/resources/1.0.0/synthetic/empty.csv>: file is empty"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.empty-file.dataPath: <src/test/resources/1.0.0/synthetic/nam.csv>: file not found"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "attributes.empty-file.conceptType: <doesnotexist> does not exist in schema"
+//        )));
+//
+//        //entities
+//        Assert.assertTrue(validationReport.get("warnings").stream().anyMatch(message -> message.equals(
+//                "entities.person.attributes.[3].requireNonEmpty: field not set - defaults to false"
+//        )));
+//
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.missing-attributes.attributes: missing required attributes block"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/empty.csv>: file is empty"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/notfound.csv>: file not found"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.dataPath: <src/test/resources/1.0.0/synthetic/notfound-other.csv>: file not found"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.conceptType: <doesnotexist> does not exist in schema"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.attributes.[1].conceptType: <doesnotexist> does not exist in schema"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.attributes.[2].column: <doesnotexist> column not found in header of file <src/test/resources/1.0.0/synthetic/names.csv>"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.attributes.[4].conceptType: missing required field"
+//        )));
+//        Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
+//                "entities.person.attributes.[5].column: missing required field"
+//        )));
+//
+//        // overall
+//        Assert.assertEquals(2, validationReport.get("warnings").size());
+//        Assert.assertEquals(16, validationReport.get("errors").size());
+//    }
 
     @Test
     public void validateErrorDataConfigPhoneCalls() {
