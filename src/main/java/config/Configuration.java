@@ -145,6 +145,7 @@ public class Configuration {
         public GeneratorConfig getConfig() {
             return config;
         }
+
     }
 
     public class GeneratorConfig {

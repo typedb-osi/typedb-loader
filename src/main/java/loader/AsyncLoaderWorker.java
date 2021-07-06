@@ -3,6 +3,9 @@ package loader;
 import config.Configuration;
 import generator.*;
 
+import static util.Util.getSeparator;
+import static util.Util.getRowsPerCommit;
+
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -55,9 +58,9 @@ public class AsyncLoaderWorker {
                     if (orderedGenerators.stream().noneMatch(attribute.getKey()::contains)) {
                         initializeAttributeConceptValueType(session, attribute.getValue());
                         for (String fp : attribute.getValue().getDataPaths()) {
-                            Generator gen = new AttributeGenerator(fp, attribute.getValue(), getSeparator(attribute.getValue().getConfig().getSeparator()));
+                            Generator gen = new AttributeGenerator(fp, attribute.getValue(), getSeparator(dc, attribute.getValue().getConfig()));
                             if (!hasError.get())
-                                asyncLoad(session, fp, gen, getRowsPerCommit(attribute.getValue().getConfig().getRowsPerCommit()));
+                                asyncLoad(session, fp, gen, getRowsPerCommit(dc, attribute.getValue().getConfig()));
                         }
                     }
                 }
@@ -70,9 +73,9 @@ public class AsyncLoaderWorker {
                     if (orderedGenerators.stream().noneMatch(entity.getKey()::contains)) {
                         initializeEntityAttributeConceptValueTypes(session, entity.getValue());
                         for (String fp : entity.getValue().getDataPaths()) {
-                            Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(entity.getValue().getConfig().getSeparator()));
+                            Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(dc, entity.getValue().getConfig()));
                             if (!hasError.get())
-                                asyncLoad(session, fp, gen, getRowsPerCommit(entity.getValue().getConfig().getRowsPerCommit()));
+                                asyncLoad(session, fp, gen, getRowsPerCommit(dc, entity.getValue().getConfig()));
                         }
                     }
                 }
@@ -85,9 +88,9 @@ public class AsyncLoaderWorker {
                     if (orderedGenerators.stream().noneMatch(relation.getKey()::contains)) {
                         initializeRelationAttributeConceptValueTypes(session, relation.getValue());
                         for (String fp : relation.getValue().getDataPaths()) {
-                            Generator gen = new RelationGenerator(fp, relation.getValue(), getSeparator(relation.getValue().getConfig().getSeparator()));
+                            Generator gen = new RelationGenerator(fp, relation.getValue(), getSeparator(dc, relation.getValue().getConfig()));
                             if (!hasError.get()) {
-                                asyncLoad(session, fp, gen, getRowsPerCommit(relation.getValue().getConfig().getRowsPerCommit()));
+                                asyncLoad(session, fp, gen, getRowsPerCommit(dc, relation.getValue().getConfig()));
                             }
                         }
                     }
@@ -101,9 +104,9 @@ public class AsyncLoaderWorker {
                     if (orderedGenerators.stream().noneMatch(appendAttribute.getKey()::contains)) {
                         initializeAppendAttributeConceptValueTypes(session, appendAttribute.getValue());
                         for (String fp : appendAttribute.getValue().getDataPaths()) {
-                            Generator gen = new AppendAttributeGenerator(fp, appendAttribute.getValue(), getSeparator(appendAttribute.getValue().getConfig().getSeparator()));
+                            Generator gen = new AppendAttributeGenerator(fp, appendAttribute.getValue(), getSeparator(dc, appendAttribute.getValue().getConfig()));
                             if (!hasError.get()) {
-                                asyncLoad(session, fp, gen, getRowsPerCommit(appendAttribute.getValue().getConfig().getRowsPerCommit()));
+                                asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttribute.getValue().getConfig()));
                             }
                         }
                     }
@@ -117,9 +120,9 @@ public class AsyncLoaderWorker {
                     if (orderedGenerators.stream().noneMatch(appendAttributeOrInsertThing.getKey()::contains)) {
                         initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing.getValue());
                         for (String fp : appendAttributeOrInsertThing.getValue().getDataPaths()) {
-                            Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing.getValue(), getSeparator(appendAttributeOrInsertThing.getValue().getConfig().getSeparator()));
+                            Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing.getValue(), getSeparator(dc, appendAttributeOrInsertThing.getValue().getConfig()));
                             if (!hasError.get()) {
-                                asyncLoad(session, fp, gen, getRowsPerCommit(appendAttributeOrInsertThing.getValue().getConfig().getRowsPerCommit()));
+                                asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttributeOrInsertThing.getValue().getConfig()));
                             }
                         }
                     }
@@ -137,36 +140,36 @@ public class AsyncLoaderWorker {
                             Configuration.Attribute attribute = (Configuration.Attribute) generatorConfig;
                             initializeAttributeConceptValueType(session, attribute);
                             for (String fp : attribute.getDataPaths()) {
-                                Generator gen = new AttributeGenerator(fp, attribute, getSeparator(attribute.getConfig().getSeparator()));
+                                Generator gen = new AttributeGenerator(fp, attribute, getSeparator(dc, attribute.getConfig()));
                                 if (!hasError.get())
-                                    asyncLoad(session, fp, gen, getRowsPerCommit(attribute.getConfig().getRowsPerCommit()));
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, attribute.getConfig()));
                             }
                             break;
                         case "entities":
                             Configuration.Entity entity = (Configuration.Entity) generatorConfig;
                             initializeEntityAttributeConceptValueTypes(session, entity);
                             for (String fp : entity.getDataPaths()) {
-                                Generator gen = new EntityGenerator(fp, entity, getSeparator(entity.getConfig().getSeparator()));
+                                Generator gen = new EntityGenerator(fp, entity, getSeparator(dc, entity.getConfig()));
                                 if (!hasError.get())
-                                    asyncLoad(session, fp, gen, getRowsPerCommit(entity.getConfig().getRowsPerCommit()));
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, entity.getConfig()));
                             }
                             break;
                         case "relations":
                             Configuration.Relation relation = (Configuration.Relation) generatorConfig;
                             initializeRelationAttributeConceptValueTypes(session, relation);
                             for (String fp : relation.getDataPaths()) {
-                                Generator gen = new RelationGenerator(fp, relation, getSeparator(relation.getConfig().getSeparator()));
+                                Generator gen = new RelationGenerator(fp, relation, getSeparator(dc, relation.getConfig()));
                                 if (!hasError.get())
-                                    asyncLoad(session, fp, gen, getRowsPerCommit(relation.getConfig().getRowsPerCommit()));
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, relation.getConfig()));
                             }
                             break;
                         case "appendAttribute":
                             Configuration.AppendAttribute appendAttribute = (Configuration.AppendAttribute) generatorConfig;
                             initializeAppendAttributeConceptValueTypes(session, appendAttribute);
                             for (String fp : appendAttribute.getDataPaths()) {
-                                Generator gen = new AppendAttributeGenerator(fp, appendAttribute, getSeparator(appendAttribute.getConfig().getSeparator()));
+                                Generator gen = new AppendAttributeGenerator(fp, appendAttribute, getSeparator(dc, appendAttribute.getConfig()));
                                 if (!hasError.get()) {
-                                    asyncLoad(session, fp, gen, getRowsPerCommit(appendAttribute.getConfig().getRowsPerCommit()));
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttribute.getConfig()));
                                 }
                             }
                             break;
@@ -174,9 +177,9 @@ public class AsyncLoaderWorker {
                             Configuration.AppendAttributeOrInsertThing appendAttributeOrInsertThing = (Configuration.AppendAttributeOrInsertThing) generatorConfig;
                             initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing);
                             for (String fp : appendAttributeOrInsertThing.getDataPaths()) {
-                                Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing, getSeparator(appendAttributeOrInsertThing.getConfig().getSeparator()));
+                                Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing, getSeparator(dc, appendAttributeOrInsertThing.getConfig()));
                                 if (!hasError.get()) {
-                                    asyncLoad(session, fp, gen, getRowsPerCommit(appendAttributeOrInsertThing.getConfig().getRowsPerCommit()));
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttributeOrInsertThing.getConfig()));
                                 }
                             }
                             break;
@@ -222,15 +225,6 @@ public class AsyncLoaderWorker {
         for (int idx = 0; idx < relation.getPlayers().length; idx++) {
             Util.setGetterAttributeConceptType(relation, idx, session);
         }
-    }
-
-
-    private int getRowsPerCommit(Integer rowsPerCommit) {
-        return Objects.requireNonNullElseGet(rowsPerCommit, () -> dc.getDefaultConfig().getRowsPerCommit());
-    }
-
-    private Character getSeparator(Character separator) {
-        return Objects.requireNonNullElseGet(separator, () -> dc.getDefaultConfig().getSeparator());
     }
 
     private void asyncLoad(TypeDBSession session,

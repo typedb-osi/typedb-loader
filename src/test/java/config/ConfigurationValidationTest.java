@@ -1,7 +1,5 @@
 package config;
 
-import config.Configuration;
-import config.ConfigurationValidation;
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -23,7 +21,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateNoSchemaDataConfig() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dcNoSchema.json").getAbsolutePath());
+        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dcNoSchema.json").getAbsolutePath());
         assert dc != null;
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
@@ -45,7 +43,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateSchemaFileNotFoundDataConfig() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dcSchemaNotFound.json").getAbsolutePath());
+        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dcSchemaNotFound.json").getAbsolutePath());
         assert dc != null;
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
@@ -68,7 +66,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateErrorDataConfig() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dcValidationTest.json").getAbsolutePath());
+        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dcValidationTest.json").getAbsolutePath());
         assert dc != null;
 
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
@@ -190,7 +188,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateDataConfig() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/synthetic/dc.json").getAbsolutePath());
+        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath());
         assert dc != null;
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
 

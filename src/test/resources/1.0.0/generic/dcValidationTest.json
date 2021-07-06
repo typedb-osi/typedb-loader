@@ -9,8 +9,10 @@
       "dataPaths": [
         "src/test/resources/1.0.0/synthetic/names.csv"
       ],
-      "column": "doesnotexist",
-      "conceptType": "name"
+      "attribute": {
+        "column": "doesnotexist",
+        "conceptType": "name"
+      },
     },
     "no-file": {
       "dataPaths": [

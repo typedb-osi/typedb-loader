@@ -17,6 +17,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 public class Util {
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
@@ -138,6 +139,11 @@ public class Util {
         appLogger.info(message, objects);
     }
 
+    public static void trace(String message,
+                             Object... objects) {
+        appLogger.trace(message, objects);
+    }
+
     public static double calculateRate(double count,
                                        Instant start,
                                        Instant end) {
@@ -185,6 +191,22 @@ public class Util {
         Configuration.RoleGetter attributeRoleGetter = relation.getPlayers()[playerIndex].getRoleGetter();
         if (attributeRoleGetter != null && attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
             attributeRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        }
+    }
+
+    public static int getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
+        if (config != null) {
+            return Objects.requireNonNullElseGet(config.getRowsPerCommit(), () -> dc.getDefaultConfig().getRowsPerCommit());
+        } else {
+            return dc.getDefaultConfig().getRowsPerCommit();
+        }
+    }
+
+    public static Character getSeparator(Configuration dc, Configuration.GeneratorConfig config) {
+        if (config != null) {
+            return Objects.requireNonNullElseGet(config.getSeparator(), () -> dc.getDefaultConfig().getSeparator());
+        } else {
+            return dc.getDefaultConfig().getSeparator();
         }
     }
 }

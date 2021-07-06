@@ -7,17 +7,16 @@ import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static util.Util.getSeparator;
+
 public class ConfigurationValidation {
 
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
     private final Configuration configuration;
 
     public ConfigurationValidation(Configuration configuration) {
@@ -39,7 +38,7 @@ public class ConfigurationValidation {
                 for (Map.Entry<String, Configuration.Attribute> attribute : configuration.getAttributes().entrySet()) {
                     String attributeKey = attribute.getKey();
                     String[] filePaths = attribute.getValue().getDataPaths();
-                    Character fileSeparator = Objects.requireNonNullElseGet(attribute.getValue().getConfig().getSeparator(), defaultConfig::getSeparator);
+                    Character fileSeparator = getSeparator(configuration, attribute.getValue().getConfig());
                     String conceptType = attribute.getValue().getAttribute().getConceptType();
                     String column = attribute.getValue().getAttribute().getColumn();
                     String errorBreadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attributeKey;
@@ -54,7 +53,7 @@ public class ConfigurationValidation {
                 for (Map.Entry<String, Configuration.Entity> entity : configuration.getEntities().entrySet()) {
                     String entityKey = entity.getKey();
                     String[] filePaths = entity.getValue().getDataPaths();
-                    Character fileSeparator = Objects.requireNonNullElseGet(entity.getValue().getConfig().getSeparator(), defaultConfig::getSeparator);
+                    Character fileSeparator = getSeparator(configuration, entity.getValue().getConfig());
                     String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entityKey;
                     validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
                     String conceptType = entity.getValue().getConceptType();
@@ -68,7 +67,7 @@ public class ConfigurationValidation {
 //                for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
 //                    String relationKey = relation.getKey();
 //                    String[] filePaths = relation.getValue().getDataPaths();
-//                    Character fileSeparator = Objects.requireNonNullElseGet(relation.getValue().getSeparator(), defaultConfig::getSeparator);
+//                    Character fileSeparator = getSeparator(configuration, relation.getValue().getConfig());
 //                    String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relationKey;
 //                    validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
 //                    String conceptType = relation.getValue().getConceptType();
@@ -134,7 +133,7 @@ public class ConfigurationValidation {
         TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.var("t").type(conceptType));
         try {
-            appLogger.trace(txn.query().match(query).count());
+            Util.trace(Integer.toString((int) txn.query().match(query).count()));
             txn.close();
         } catch (TypeDBClientException typeDBClientException) {
             if (typeDBClientException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
