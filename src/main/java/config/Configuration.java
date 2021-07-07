@@ -18,7 +18,8 @@ public class Configuration {
     Map<String, Relation> relations;
     Map<String, AppendAttribute> appendAttribute;
     Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
-    ArrayList<String> orderedGenerators;
+    ArrayList<String> orderedBeforeGenerators;
+    ArrayList<String> orderedAfterGenerators;
 
     public static AttributeValueType getValueType(TypeDBTransaction txn, String conceptType) {
         AttributeValueType valueType = null;
@@ -52,6 +53,14 @@ public class Configuration {
 
     public Map<String, AppendAttributeOrInsertThing> getAppendAttributeOrInsertThing() {
         return appendAttributeOrInsertThing;
+    }
+
+    public ArrayList<String> getOrderedAfterGenerators() {
+        return orderedAfterGenerators;
+    }
+
+    public ArrayList<String> getOrderedBeforeGenerators() {
+        return orderedBeforeGenerators;
     }
 
     public Generator getGeneratorByKey(String key){
@@ -112,9 +121,6 @@ public class Configuration {
         return null;
     }
 
-    public ArrayList<String> getOrderedGenerators() {
-        return orderedGenerators;
-    }
 
     public class DefaultConfig {
         Character separator;

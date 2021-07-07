@@ -45,17 +45,83 @@ public class AsyncLoaderWorker {
 
     public void run(TypeDBClient client) throws IOException, InterruptedException {
 
-        ArrayList<String> orderedGenerators = dc.getOrderedGenerators();
-        if (orderedGenerators == null) {
-            orderedGenerators = new ArrayList<>();
+        ArrayList<String> orderedBeforeGenerators = dc.getOrderedAfterGenerators();
+        if (orderedBeforeGenerators == null) {
+            orderedBeforeGenerators = new ArrayList<>();
+        }
+
+        ArrayList<String> orderedAfterGenerators = dc.getOrderedAfterGenerators();
+        if (orderedAfterGenerators == null) {
+            orderedAfterGenerators = new ArrayList<>();
         }
 
         try (TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName)) {
+
+            //Load OrderBefore things...
+            Util.info("loading ordered before things");
+            if (orderedBeforeGenerators.size() > 0) {
+                for (String orderedGenerator : orderedBeforeGenerators) {
+                    String generatorType = dc.getGeneratorTypeByKey(orderedGenerator);
+                    Configuration.Generator generatorConfig = dc.getGeneratorByKey(orderedGenerator);
+                    switch (generatorType) {
+                        case "attributes":
+                            Configuration.Attribute attribute = (Configuration.Attribute) generatorConfig;
+                            initializeAttributeConceptValueType(session, attribute);
+                            for (String fp : attribute.getDataPaths()) {
+                                Generator gen = new AttributeGenerator(fp, attribute, getSeparator(dc, attribute.getConfig()));
+                                if (!hasError.get())
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, attribute.getConfig()));
+                            }
+                            break;
+                        case "entities":
+                            Configuration.Entity entity = (Configuration.Entity) generatorConfig;
+                            initializeEntityAttributeConceptValueTypes(session, entity);
+                            for (String fp : entity.getDataPaths()) {
+                                Generator gen = new EntityGenerator(fp, entity, getSeparator(dc, entity.getConfig()));
+                                if (!hasError.get())
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, entity.getConfig()));
+                            }
+                            break;
+                        case "relations":
+                            Configuration.Relation relation = (Configuration.Relation) generatorConfig;
+                            initializeRelationAttributeConceptValueTypes(session, relation);
+                            for (String fp : relation.getDataPaths()) {
+                                Generator gen = new RelationGenerator(fp, relation, getSeparator(dc, relation.getConfig()));
+                                if (!hasError.get())
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, relation.getConfig()));
+                            }
+                            break;
+                        case "appendAttribute":
+                            Configuration.AppendAttribute appendAttribute = (Configuration.AppendAttribute) generatorConfig;
+                            initializeAppendAttributeConceptValueTypes(session, appendAttribute);
+                            for (String fp : appendAttribute.getDataPaths()) {
+                                Generator gen = new AppendAttributeGenerator(fp, appendAttribute, getSeparator(dc, appendAttribute.getConfig()));
+                                if (!hasError.get()) {
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttribute.getConfig()));
+                                }
+                            }
+                            break;
+                        case "appendAttributeOrInsertThing":
+                            Configuration.AppendAttributeOrInsertThing appendAttributeOrInsertThing = (Configuration.AppendAttributeOrInsertThing) generatorConfig;
+                            initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing);
+                            for (String fp : appendAttributeOrInsertThing.getDataPaths()) {
+                                Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing, getSeparator(dc, appendAttributeOrInsertThing.getConfig()));
+                                if (!hasError.get()) {
+                                    asyncLoad(session, fp, gen, getRowsPerCommit(dc, appendAttributeOrInsertThing.getConfig()));
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+
+
             // Load attributes
             Util.info("loading attributes");
             if (dc.getAttributes() != null) {
                 for (Map.Entry<String, Configuration.Attribute> attribute : dc.getAttributes().entrySet()) {
-                    if (orderedGenerators.stream().noneMatch(attribute.getKey()::contains)) {
+                    if (orderedAfterGenerators.stream().noneMatch(attribute.getKey()::contains) &&
+                            orderedBeforeGenerators.stream().noneMatch(attribute.getKey()::contains)) {
                         initializeAttributeConceptValueType(session, attribute.getValue());
                         for (String fp : attribute.getValue().getDataPaths()) {
                             Generator gen = new AttributeGenerator(fp, attribute.getValue(), getSeparator(dc, attribute.getValue().getConfig()));
@@ -70,7 +136,8 @@ public class AsyncLoaderWorker {
             Util.info("loading entities");
             if (dc.getEntities() != null) {
                 for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
-                    if (orderedGenerators.stream().noneMatch(entity.getKey()::contains)) {
+                    if (orderedAfterGenerators.stream().noneMatch(entity.getKey()::contains) &&
+                            orderedBeforeGenerators.stream().noneMatch(entity.getKey()::contains)) {
                         initializeEntityAttributeConceptValueTypes(session, entity.getValue());
                         for (String fp : entity.getValue().getDataPaths()) {
                             Generator gen = new EntityGenerator(fp, entity.getValue(), getSeparator(dc, entity.getValue().getConfig()));
@@ -85,7 +152,8 @@ public class AsyncLoaderWorker {
             Util.info("loading relations");
             if (dc.getRelations() != null) {
                 for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
-                    if (orderedGenerators.stream().noneMatch(relation.getKey()::contains)) {
+                    if (orderedAfterGenerators.stream().noneMatch(relation.getKey()::contains) &&
+                            orderedBeforeGenerators.stream().noneMatch(relation.getKey()::contains)) {
                         initializeRelationAttributeConceptValueTypes(session, relation.getValue());
                         for (String fp : relation.getValue().getDataPaths()) {
                             Generator gen = new RelationGenerator(fp, relation.getValue(), getSeparator(dc, relation.getValue().getConfig()));
@@ -101,7 +169,8 @@ public class AsyncLoaderWorker {
             Util.info("loading appendAttributes");
             if (dc.getAppendAttribute() != null) {
                 for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
-                    if (orderedGenerators.stream().noneMatch(appendAttribute.getKey()::contains)) {
+                    if (orderedAfterGenerators.stream().noneMatch(appendAttribute.getKey()::contains) &&
+                            orderedBeforeGenerators.stream().noneMatch(appendAttribute.getKey()::contains)) {
                         initializeAppendAttributeConceptValueTypes(session, appendAttribute.getValue());
                         for (String fp : appendAttribute.getValue().getDataPaths()) {
                             Generator gen = new AppendAttributeGenerator(fp, appendAttribute.getValue(), getSeparator(dc, appendAttribute.getValue().getConfig()));
@@ -117,7 +186,8 @@ public class AsyncLoaderWorker {
             Util.info("loading appendAttributesOrInsertThing");
             if (dc.getAppendAttributeOrInsertThing() != null) {
                 for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendAttributeOrInsertThing : dc.getAppendAttributeOrInsertThing().entrySet()) {
-                    if (orderedGenerators.stream().noneMatch(appendAttributeOrInsertThing.getKey()::contains)) {
+                    if (orderedAfterGenerators.stream().noneMatch(appendAttributeOrInsertThing.getKey()::contains) &&
+                            orderedBeforeGenerators.stream().noneMatch(appendAttributeOrInsertThing.getKey()::contains)) {
                         initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing.getValue());
                         for (String fp : appendAttributeOrInsertThing.getValue().getDataPaths()) {
                             Generator gen = new AppendAttributeOrInsertThingGenerator(fp, appendAttributeOrInsertThing.getValue(), getSeparator(dc, appendAttributeOrInsertThing.getValue().getConfig()));
@@ -130,9 +200,9 @@ public class AsyncLoaderWorker {
             }
 
             //Load OrderAfter things...
-            Util.info("loading ordered things");
-            if (orderedGenerators.size() > 0) {
-                for (String orderedGenerator : orderedGenerators) {
+            Util.info("loading ordered after things");
+            if (orderedAfterGenerators.size() > 0) {
+                for (String orderedGenerator : orderedAfterGenerators) {
                     String generatorType = dc.getGeneratorTypeByKey(orderedGenerator);
                     Configuration.Generator generatorConfig = dc.getGeneratorByKey(orderedGenerator);
                     switch (generatorType) {

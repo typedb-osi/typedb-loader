@@ -614,8 +614,10 @@
       ]
     }
   },
-  "orderedGenerators": [
-    "person-1",
+  "orderedBeforeGenerators": [
+    "person-1"
+  ],
+  "orderedAfterGenerators": [
     "person-2",
     "person-3"
   ]
