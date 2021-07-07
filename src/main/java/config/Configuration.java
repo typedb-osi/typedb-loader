@@ -184,7 +184,7 @@ public class Configuration {
         public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
             ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
             for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
-                if (constrainingAttribute.getRequireNonEmpty()) {
+                if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
                     tmp.add(constrainingAttribute);
                 }
             }
@@ -210,7 +210,7 @@ public class Configuration {
             ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
             if (getAttributes() != null) {
                 for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
-                    if (constrainingAttribute.getRequireNonEmpty()) {
+                    if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
                         tmp.add(constrainingAttribute);
                     }
                 }
@@ -229,8 +229,10 @@ public class Configuration {
         public Player[] getRequiredNonEmptyPlayers() {
             ArrayList<Player> tmp = new ArrayList<>();
             for (Player player : getPlayers()) {
-                if (player.getRequireNonEmpty()) {
-                    tmp.add(player);
+                if (player.getRequireNonEmpty() != null) {
+                    if (player.getRequireNonEmpty()) {
+                        tmp.add(player);
+                    }
                 }
             }
             Player[] requireNoneEmptyAttributes = new Player[tmp.size()];
