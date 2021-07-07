@@ -45,7 +45,7 @@ public class AsyncLoaderWorker {
 
     public void run(TypeDBClient client) throws IOException, InterruptedException {
 
-        ArrayList<String> orderedBeforeGenerators = dc.getOrderedAfterGenerators();
+        ArrayList<String> orderedBeforeGenerators = dc.getOrderedBeforeGenerators();
         if (orderedBeforeGenerators == null) {
             orderedBeforeGenerators = new ArrayList<>();
         }
