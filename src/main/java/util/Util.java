@@ -217,7 +217,7 @@ public class Util {
         }
     }
 
-    public static int getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
+    public static Integer getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
         if (config != null) {
             return Objects.requireNonNullElseGet(config.getRowsPerCommit(), () -> dc.getDefaultConfig().getRowsPerCommit());
         } else {

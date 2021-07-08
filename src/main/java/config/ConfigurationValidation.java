@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static util.Util.getRowsPerCommit;
 import static util.Util.getSeparator;
 
 public class ConfigurationValidation {
@@ -26,60 +27,168 @@ public class ConfigurationValidation {
     public void validateConfiguration(HashMap<String, ArrayList<String>> validationReport,
                                       TypeDBSession session) {
 
-        // validate defaultConfig:
+        // DEFAULT CONFIG (note: schema will be validated beforehand in TypeDBLoader.java because need migrated schema for validation that follows):
         Configuration.DefaultConfig defaultConfig = configuration.getDefaultConfig();
         if (defaultConfig != null) {
-            if (defaultConfig.getRowsPerCommit() > 150) {
-                validationReport.get("warnings").add("defaultConfig.rowsPerCommit is set to be > 150 - in most cases, choosing a value between 50 and 150 gives the best performance");
-            }
-
-            // validate attributes:
-            if (configuration.getAttributes() != null) {
-                for (Map.Entry<String, Configuration.Attribute> attribute : configuration.getAttributes().entrySet()) {
-                    String attributeKey = attribute.getKey();
-                    String[] filePaths = attribute.getValue().getDataPaths();
-                    Character fileSeparator = getSeparator(configuration, attribute.getValue().getConfig());
-                    String conceptType = attribute.getValue().getAttribute().getConceptType();
-                    String column = attribute.getValue().getAttribute().getColumn();
-                    String errorBreadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attributeKey;
-                    validateFile(validationReport, errorBreadcrumbs, filePaths, fileSeparator);
-                    validateColumnInHeader(validationReport, errorBreadcrumbs, filePaths, column, fileSeparator);
-                    validateConceptType(validationReport, session, errorBreadcrumbs, conceptType);
+            //ROWS PER COMMIT
+            if (defaultConfig.getRowsPerCommit() != null) {
+                if (defaultConfig.getRowsPerCommit() > 150) {
+                    validationReport.get("warnings").add("defaultConfig.rowsPerCommit is set to be > 150 - in most cases, choosing a value between 50 and 150 gives the best performance");
                 }
+            } else {
+                validationReport.get("warnings").add("defaultConfig.rowsPerCommit is not set - it must therefore be set individually for each generator");
             }
-
-            // validate entities:
-            if (configuration.getEntities() != null) {
-                for (Map.Entry<String, Configuration.Entity> entity : configuration.getEntities().entrySet()) {
-                    String entityKey = entity.getKey();
-                    String[] filePaths = entity.getValue().getDataPaths();
-                    Character fileSeparator = getSeparator(configuration, entity.getValue().getConfig());
-                    String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entityKey;
-                    validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
-                    String conceptType = entity.getValue().getConceptType();
-                    validateConceptType(validationReport, session, breadcrumbs, conceptType);
-                    validateEntityHasAttributes(validationReport, session, entity.getValue().getAttributes(), breadcrumbs, filePaths, fileSeparator);
-                }
+            //SEPARATOR
+            if (defaultConfig.getSeparator() == null) {
+                validationReport.get("warnings").add("defaultConfig.separator is not set - it must therefore be set individually for each generator");
             }
-
-            // validate relations:
-//            if (configuration.getRelations() != null) {
-//                for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
-//                    String relationKey = relation.getKey();
-//                    String[] filePaths = relation.getValue().getDataPaths();
-//                    Character fileSeparator = getSeparator(configuration, relation.getValue().getConfig());
-//                    String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relationKey;
-//                    validateFile(validationReport, breadcrumbs, filePaths, fileSeparator);
-//                    String conceptType = relation.getValue().getConceptType();
-//                    validateConceptType(validationReport, session, breadcrumbs, conceptType);
-//                    validateRelationHasAttributes(validationReport, session, relation.getValue().getAttributes(), breadcrumbs, filePaths, fileSeparator);
-//                    validateRelationPlayers(validationReport, session, conceptType, relation.getValue().getPlayers(), breadcrumbs, filePaths, fileSeparator);
-//                }
-//            }
-
         } else {
             validationReport.get("errors").add("defaultConfig does not exist");
         }
+
+        // ATTRIBUTES:
+        if (configuration.getAttributes() != null) {
+            for (Map.Entry<String, Configuration.Attribute> attribute : configuration.getAttributes().entrySet()) {
+                // Breadcrumbs
+                String breadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attribute.getKey();
+                // CONFIG
+                boolean gc = valGeneratorConfig(validationReport, breadcrumbs, configuration, attribute.getValue().getConfig());
+                // DATAPATHS
+                boolean dps = valDataPaths(validationReport, breadcrumbs, attribute.getValue());
+                // ATTRIBUTE
+                if (gc && dps) {
+                    valAttributeAttribute(validationReport, breadcrumbs, configuration, attribute.getValue(), attribute.getValue().getAttribute(), session);
+                }
+            }
+        }
+
+        // validate entities:
+        if (configuration.getEntities() != null) {
+            for (Map.Entry<String, Configuration.Entity> entity : configuration.getEntities().entrySet()) {
+                // Breadcrumbs
+                String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entity.getKey();
+                // CONFIG
+                boolean gc = valGeneratorConfig(validationReport, breadcrumbs, configuration, entity.getValue().getConfig());
+                // DATAPATHS
+                boolean dps = valDataPaths(validationReport, breadcrumbs, entity.getValue());
+                // ENTITY
+                if (gc && dps) {
+                    String conceptType = entity.getValue().getConceptType();
+                    boolean entityExists = valConceptTypeInSchema(validationReport, session, breadcrumbs, conceptType);
+                    if (entityExists) {
+                        valEntityHasAttributes(validationReport, breadcrumbs, configuration, entity.getValue(), entity.getValue().getAttributes(), session);
+                    }
+                }
+            }
+        }
+
+        // validate relations:
+        if (configuration.getRelations() != null) {
+            for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
+                // Breadcrumbs
+                String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relation.getKey();
+                // CONFIG
+                boolean gc = valGeneratorConfig(validationReport, breadcrumbs, configuration, relation.getValue().getConfig());
+                // DATAPATHS
+                boolean dps = valDataPaths(validationReport, breadcrumbs, relation.getValue());
+                // RELATION
+                if (gc && dps) {
+                    String conceptType = relation.getValue().getConceptType();
+                    boolean relationExists = valConceptTypeInSchema(validationReport, session, breadcrumbs, conceptType);
+                    if (relationExists) {
+                        valRelationHasAttributes(validationReport, breadcrumbs, configuration, relation.getValue(), relation.getValue().getAttributes(), session);
+                        valRelationPlayers(validationReport, breadcrumbs, configuration, relation.getValue(), session);
+                    }
+                }
+            }
+        }
+
+        // validate appendAttribute:
+        if (configuration.getAppendAttribute() != null) {
+            for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : configuration.getAppendAttribute().entrySet()) {
+                // Breadcrumbs
+//                String breadcrumbs = ConfigurationHandler.APPEND_ATTRIBUTE + "." + appendAttribute.getKey();
+//                // CONFIG
+//                boolean gc = valGeneratorConfig(validationReport, breadcrumbs, configuration, appendAttribute.getValue().getConfig());
+//                // DATAPATHS
+//                boolean dps = valDataPaths(validationReport, breadcrumbs, appendAttribute.getValue());
+//                // APPEND_ATTRIBUTE
+//                if (gc && dps) {
+//                    String conceptType = appendAttribute.getValue().getConceptType();
+//                    boolean relationExists = valConceptTypeInSchema(validationReport, session, breadcrumbs, conceptType);
+//                    if (relationExists) {
+//                        valRelationHasAttributes(validationReport, breadcrumbs, configuration, relation.getValue(), relation.getValue().getAttributes(), session);
+//                        valRelationPlayers(validationReport, breadcrumbs, configuration, relation.getValue(), session);
+//                    }
+//                }
+            }
+        }
+
+        // validate appendOrInsertAttribute:
+        if (configuration.getAppendAttributeOrInsertThing() != null) {
+            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendOrInsertAttribute : configuration.getAppendAttributeOrInsertThing().entrySet()) {
+                // Breadcrumbs
+                String breadcrumbs = ConfigurationHandler.APPEND_ATTRIBUTE_OR_INSERT_THING + "." + appendOrInsertAttribute.getKey();
+                // CONFIG
+                boolean gc = valGeneratorConfig(validationReport, breadcrumbs, configuration, appendOrInsertAttribute.getValue().getConfig());
+                // DATAPATHS
+                boolean dps = valDataPaths(validationReport, breadcrumbs, appendOrInsertAttribute.getValue());
+            }
+        }
+    }
+
+    public void valAttributeAttribute(HashMap<String, ArrayList<String>> validationReport,
+                                      String breadcrumbs,
+                                      Configuration configuration,
+                                      Configuration.Generator generator,
+                                      Configuration.ConstrainingAttribute attribute,
+                                      TypeDBSession session) {
+        breadcrumbs = breadcrumbs + ".attribute";
+        if (attribute == null) {
+            validationReport.get("error").add(breadcrumbs + ": missing required object (note: not <.attributes> but <.attribute>)");
+        } else {
+            valConstrainingAttribute(validationReport, breadcrumbs, configuration, generator, attribute, session);
+        }
+
+    }
+
+    public void valConstrainingAttribute(HashMap<String, ArrayList<String>> validationReport,
+                                         String breadcrumbs,
+                                         Configuration configuration,
+                                         Configuration.Generator generator,
+                                         Configuration.ConstrainingAttribute attribute,
+                                         TypeDBSession session) {
+        if (attribute.getConceptType() == null) {
+            validationReport.get("error").add(breadcrumbs + ".conceptType: missing required field");
+        } else {
+            valConceptTypeInSchema(validationReport, session, breadcrumbs, attribute.getConceptType());
+        }
+        if (attribute.getColumn() == null) {
+            validationReport.get("error").add(breadcrumbs + ".column: missing required field");
+        } else {
+            valColumnInHeader(validationReport, breadcrumbs, configuration, generator, attribute.getColumn());
+        }
+        if (attribute.getRequireNonEmpty() == null) {
+            validationReport.get("warnings").add(breadcrumbs + ".requireNonEmpty: field not set - defaults to false");
+        }
+    }
+
+
+    public boolean valGeneratorConfig(HashMap<String, ArrayList<String>> validationReport,
+                                      String breadcrumbs,
+                                      Configuration dc,
+                                      Configuration.GeneratorConfig config) {
+        boolean valid = true;
+        breadcrumbs = breadcrumbs + ".config";
+        if (getSeparator(dc, config) == null) {
+            validationReport.get("error").add(breadcrumbs + ".separator: missing required field: file separator must be specified here or in defaultConfig");
+            valid = false;
+        }
+        if (getRowsPerCommit(dc, config) == null) {
+            validationReport.get("error").add(breadcrumbs + ".rowsPerCommit: missing required field: rowsPerCommit must be specified here or in defaultConfig");
+            valid = false;
+        }
+        return valid;
     }
 
     public void validateSchemaPresent(HashMap<String, ArrayList<String>> validationReport) {
@@ -95,41 +204,63 @@ public class ConfigurationValidation {
         }
     }
 
-    private void validateFile(HashMap<String, ArrayList<String>> validationReport,
-                              String breadcrumbs,
-                              String[] filepaths,
-                              Character fileSeparator) {
-        for (String filepath : filepaths) {
-            try {
-                Util.getFileHeader(filepath, fileSeparator);
-            } catch (IOException fileNotFoundException) {
-                validationReport.get("errors").add(breadcrumbs + ".dataPath: <" + filepath + ">: file not found");
-            } catch (IllegalArgumentException ioException) {
-                validationReport.get("errors").add(breadcrumbs + ".dataPath: <" + filepath + ">: file is empty");
+    private boolean valDataPaths(HashMap<String, ArrayList<String>> validationReport,
+                                 String breadcrumbs,
+                                 Configuration.Generator generator) {
+        boolean valid = true;
+
+        String[] dataPaths = generator.getDataPaths();
+
+        // dataPaths missing
+        if (dataPaths == null) {
+            validationReport.get("errors").add(breadcrumbs + ".dataPaths: missing required field");
+            valid = false;
+        }
+        // dataPaths empty
+        if (dataPaths != null && dataPaths.length < 1) {
+            validationReport.get("errors").add(breadcrumbs + ".dataPaths: provided empty list - must have at least one file");
+            valid = false;
+        }
+
+        // file missing or empty
+        Character fileSeparator = getSeparator(configuration, generator.getConfig());
+        if (dataPaths != null && fileSeparator != null) {
+            for (String filepath : dataPaths) {
+                try {
+                    Util.getFileHeader(filepath, fileSeparator);
+                } catch (IOException fileNotFoundException) {
+                    validationReport.get("errors").add(breadcrumbs + ".dataPaths: <" + filepath + ">: file not found");
+                    valid = false;
+                } catch (IllegalArgumentException ioException) {
+                    validationReport.get("errors").add(breadcrumbs + ".dataPaths: <" + filepath + ">: file is empty");
+                    valid = false;
+                }
             }
         }
+        return valid;
     }
 
-    private void validateColumnInHeader(HashMap<String, ArrayList<String>> validationReport,
-                                        String breadcrumbs,
-                                        String[] filepaths,
-                                        String column,
-                                        Character fileSeparator) {
-        for (String filepath : filepaths) {
+    private void valColumnInHeader(HashMap<String, ArrayList<String>> validationReport,
+                                   String breadcrumbs,
+                                   Configuration configuration,
+                                   Configuration.Generator generator,
+                                   String column) {
+        for (String dataPath : generator.getDataPaths()) {
             try {
-                String[] header = Util.getFileHeader(filepath, fileSeparator);
+                String[] header = Util.getFileHeader(dataPath, getSeparator(configuration, generator.getConfig()));
                 if (Arrays.stream(header).noneMatch(headerColumn -> headerColumn.equals(column))) {
-                    validationReport.get("errors").add(breadcrumbs + ".column: <" + column + "> column not found in header of file <" + filepath + ">");
+                    validationReport.get("errors").add(breadcrumbs + ".column: <" + column + "> column not found in header of file <" + dataPath + ">");
                 }
             } catch (IOException | IllegalArgumentException ignored) {
             }
         }
     }
 
-    private void validateConceptType(HashMap<String, ArrayList<String>> validationReport,
-                                     TypeDBSession session,
-                                     String breadcrumbs,
-                                     String conceptType) {
+    private boolean valConceptTypeInSchema(HashMap<String, ArrayList<String>> validationReport,
+                                           TypeDBSession session,
+                                           String breadcrumbs,
+                                           String conceptType) {
+        boolean valid = true;
         TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.var("t").type(conceptType));
         try {
@@ -138,117 +269,188 @@ public class ConfigurationValidation {
         } catch (TypeDBClientException typeDBClientException) {
             if (typeDBClientException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
                 validationReport.get("errors").add(breadcrumbs + ".conceptType: <" + conceptType + "> does not exist in schema");
+                valid = false;
             } else {
                 throw typeDBClientException;
             }
         }
+        return valid;
     }
 
-    private void validateEntityHasAttributes(HashMap<String, ArrayList<String>> validationReport,
-                                             TypeDBSession session,
-                                             Configuration.ConstrainingAttribute[] constrainingAttributes,
-                                             String breadcrumbs,
-                                             String[] filePaths,
-                                             Character fileSeparator) {
-        if (constrainingAttributes != null) {
-            validateHasAttributes(validationReport, session, constrainingAttributes, breadcrumbs, filePaths, fileSeparator);
+    private void valEntityHasAttributes(HashMap<String, ArrayList<String>> validationReport,
+                                        String breadcrumbs,
+                                        Configuration configuration,
+                                        Configuration.Generator generator,
+                                        Configuration.ConstrainingAttribute[] constrainingAttributes,
+                                        TypeDBSession session) {
+        if (constrainingAttributes == null) {
+            validationReport.get("errors").add(breadcrumbs + ".attributes: missing required attributes list");
         } else {
-            validationReport.get("errors").add(breadcrumbs + ".attributes: missing required attributes block");
+            valHasAttributes(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session);
         }
     }
 
-    private void validateRelationHasAttributes(HashMap<String, ArrayList<String>> validationReport,
-                                               TypeDBSession session,
-                                               Configuration.ConstrainingAttribute[] constrainingAttributes,
-                                               String breadcrumbs,
-                                               String[] filePaths,
-                                               Character fileSeparator) {
+    private void valRelationHasAttributes(HashMap<String, ArrayList<String>> validationReport,
+                                          String breadcrumbs,
+                                          Configuration configuration,
+                                          Configuration.Generator generator,
+                                          Configuration.ConstrainingAttribute[] constrainingAttributes,
+                                          TypeDBSession session) {
         if (constrainingAttributes != null) {
-            validateHasAttributes(validationReport, session, constrainingAttributes, breadcrumbs, filePaths, fileSeparator);
+            valHasAttributes(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session);
         }
     }
 
-    private void validateHasAttributes(HashMap<String, ArrayList<String>> validationReport,
-                                       TypeDBSession session,
-                                       Configuration.ConstrainingAttribute[] constrainingAttributes,
-                                       String breadcrumbs,
-                                       String[] filePaths,
-                                       Character fileSeparator) {
+    private void valHasAttributes(HashMap<String, ArrayList<String>> validationReport,
+                                  String breadcrumbs,
+                                  Configuration configuration,
+                                  Configuration.Generator generator,
+                                  Configuration.ConstrainingAttribute[] constrainingAttributes,
+                                  TypeDBSession session
+    ) {
         int entryIdx = 0;
         for (Configuration.ConstrainingAttribute attribute : constrainingAttributes) {
             String aBreadcrumbs = breadcrumbs + ".attributes.[" + entryIdx + "]";
-
-            if (attribute.getColumn() != null) {
-                validateColumnInHeader(validationReport, aBreadcrumbs, filePaths, attribute.getColumn(), fileSeparator);
-            } else {
-                validationReport.get("errors").add(aBreadcrumbs + ".column: missing required field");
-            }
-
-            if (attribute.getConceptType() != null) {
-                validateConceptType(validationReport, session, aBreadcrumbs, attribute.getConceptType());
-            } else {
-                validationReport.get("errors").add(aBreadcrumbs + ".conceptType: missing required field");
-            }
-
-            if (attribute.getRequireNonEmpty() == null) {
-                validationReport.get("warnings").add(aBreadcrumbs + ".requireNonEmpty: field not set - defaults to false");
-            }
+            valConstrainingAttribute(validationReport, aBreadcrumbs, configuration, generator, attribute, session);
             entryIdx += 1;
         }
     }
 
-    private void validateRelationPlayers(HashMap<String, ArrayList<String>> validationReport,
-                                         TypeDBSession session,
-                                         String relationConceptType,
-                                         Configuration.Player[] players,
-                                         String breadcrumbs,
-                                         String[] filePaths,
-                                         Character fileSeparator) {
+    private void valRelationPlayers(HashMap<String, ArrayList<String>> validationReport,
+                                    String breadcrumbs,
+                                    Configuration configuration,
+                                    Configuration.Relation relation,
+                                    TypeDBSession session) {
         int playerIdx = 0;
-        for (Configuration.Player player : players) {
-            String pBreadcrumbs = breadcrumbs + ".players.[" + playerIdx + "]";
-            if (player.getRoleType() != null) {
-                validateRoleType(validationReport, session, pBreadcrumbs, relationConceptType, player.getRoleType());
+        for (Configuration.Player player : relation.getPlayers()) {
+
+
+            // Role Type exists
+            if (player.getRoleType() == null) {
+                validationReport.get("errors").add(breadcrumbs + ".players.[" + playerIdx + "]" + ".roleType: missing required field");
             } else {
-                validationReport.get("errors").add(pBreadcrumbs + ".roleType: missing required field");
+                valRoleType(validationReport, session, breadcrumbs + ".players.[" + playerIdx + "]", relation.getConceptType(), player.getRoleType());
             }
 
+            String pBreadcrumbs = breadcrumbs + ".players." + player.getRoleType();
+            // requireNonEmpty
             if (player.getRequireNonEmpty() == null) {
                 validationReport.get("warnings").add(pBreadcrumbs + ".requireNonEmpty: field not set - defaults to false");
             }
 
+            // Role Getter
             if (player.getRoleGetter() != null) {
-                validateGetterComposition(validationReport, player.getRoleGetter(), pBreadcrumbs);
-
-                int getterIdx = 0;
-                Configuration.RoleGetter roleGetter = player.getRoleGetter();
                 String gBreadcrumbs = pBreadcrumbs + ".roleGetter";
 
-                if (roleGetter.getHandler() == null) {
-                    validationReport.get("errors").add(gBreadcrumbs + ".handler: missing required field (one of [entity, relation, attribute, ownership])");
-                }
+                Configuration.RoleGetter roleGetter = player.getRoleGetter();
+                // CONCEPT_TYPE
                 if (roleGetter.getConceptType() == null) {
                     validationReport.get("errors").add(gBreadcrumbs + ".conceptType: missing required field");
                 } else {
-                    validateConceptType(validationReport, session, gBreadcrumbs, roleGetter.getConceptType());
+                    valConceptTypeInSchema(validationReport, session, gBreadcrumbs, roleGetter.getConceptType());
                 }
 
-                if (roleGetter.getColumn() != null) {
-                    validateColumnInHeader(validationReport, gBreadcrumbs, filePaths, roleGetter.getColumn(), fileSeparator);
+                // HANDLER
+                if (roleGetter.getHandler() == null) {
+                    validationReport.get("errors").add(gBreadcrumbs + ".handler: missing required field");
+                } else {
+                    if (roleGetter.getHandler() != TypeHandler.ENTITY &&
+                            roleGetter.getHandler() != TypeHandler.RELATION &&
+                            roleGetter.getHandler() != TypeHandler.ATTRIBUTE) {
+                        validationReport.get("errors").add(gBreadcrumbs + ".handler: must be either \"attribute\", \"entity\", or \"relation\", but is: " + roleGetter.getHandler());
+                    } else {
+                        if (roleGetter.getHandler().equals(TypeHandler.ATTRIBUTE)) {
+                            // thingGetters must not be set
+                            if (roleGetter.getThingGetters() != null) {
+                                validationReport.get("error").add(gBreadcrumbs + ".thingGetters: .handler=\"attribute\" is directly gotten by setting .column");
+                            }
+                            // COLUMN
+                            if (roleGetter.getColumn() == null) {
+                                validationReport.get("error").add(breadcrumbs + ".column: missing required field");
+                            } else {
+                                valColumnInHeader(validationReport, breadcrumbs, configuration, relation, roleGetter.getColumn());
+                            }
+                        } else if (roleGetter.getHandler().equals(TypeHandler.ENTITY)) {
+                            valThingGettersEntity(validationReport, breadcrumbs, configuration, relation, roleGetter.getThingGetters(), session);
+                        } else if (roleGetter.getHandler().equals(TypeHandler.RELATION)) {
+                            valThingGettersRelation(validationReport, breadcrumbs, configuration, relation, roleGetter.getThingGetters(), session);
+                        }
+                    }
                 }
             } else {
-                validationReport.get("errors").add(pBreadcrumbs + ".players: missing required players block");
+                validationReport.get("errors").add(pBreadcrumbs + ".roleGetter: missing required roleGetter object");
             }
 
             playerIdx += 1;
         }
     }
 
-    private void validateRoleType(HashMap<String, ArrayList<String>> validationReport,
-                                  TypeDBSession session,
-                                  String breadcrumbs,
-                                  String relationConceptType,
-                                  String roleType) {
+    public void valThingGettersEntity(HashMap<String, ArrayList<String>> validationReport,
+                                      String breadcrumbs,
+                                      Configuration configuration,
+                                      Configuration.Relation relation,
+                                      Configuration.ThingGetter[] thingGetters,
+                                      TypeDBSession session) {
+
+        int tgi = 0;
+        if (thingGetters == null) {
+            validationReport.get("errors").add(breadcrumbs + ".thingGetters: missing required object");
+        } else {
+            if (thingGetters.length < 1) {
+                validationReport.get("errors").add(breadcrumbs + ".thingGetters: must contain at least one ownership attribute");
+            } else {
+                for (Configuration.ThingGetter thingGetter : thingGetters) {
+                    String tgBreadcrumbs = breadcrumbs + ".thingGetters.[" + tgi + "]";
+                    // HANDLER
+                    if (thingGetter.getHandler() == null) {
+                        validationReport.get("errors").add(tgBreadcrumbs + ".handler: missing required field");
+                    } else {
+                        if (!thingGetter.getHandler().equals(TypeHandler.OWNERSHIP)) {
+                            validationReport.get("errors").add(tgBreadcrumbs + ".handler: when getting entities, .handler must be of type \"ownership\"");
+                        }
+                    }
+                    // CONCEPT_TYPE
+                    if (thingGetter.getConceptType() == null) {
+                        validationReport.get("errors").add(tgBreadcrumbs + ".conceptType: missing required field");
+                    } else {
+                        valConceptTypeInSchema(validationReport, session, tgBreadcrumbs, thingGetter.getConceptType());
+                    }
+                    // COLUMN
+                    if (thingGetter.getColumn() == null) {
+                        validationReport.get("errors").add(tgBreadcrumbs + ".column: missing required field");
+                    } else {
+                        valColumnInHeader(validationReport, tgBreadcrumbs, configuration, relation, thingGetter.getColumn());
+                    }
+                    tgi = tgi + 1;
+                }
+            }
+        }
+    }
+
+    public void valThingGettersRelation(HashMap<String, ArrayList<String>> validationReport,
+                                        String breadcrumbs,
+                                        Configuration configuration,
+                                        Configuration.Relation relation,
+                                        Configuration.ThingGetter[] thingGetters,
+                                        TypeDBSession session) {
+        if (thingGetters == null) {
+            validationReport.get("errors").add(breadcrumbs + ".thingGetters: missing required object");
+        } else {
+            if (thingGetters.length < 1) {
+                validationReport.get("errors").add(breadcrumbs + ".thingGetters: must contain at least one ownership or entity entry");
+            } else {
+                //TODO by attribute
+
+                //TODO by players
+            }
+        }
+    }
+
+    private void valRoleType(HashMap<String, ArrayList<String>> validationReport,
+                             TypeDBSession session,
+                             String breadcrumbs,
+                             String relationConceptType,
+                             String roleType) {
         TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.type(relationConceptType).relates(TypeQL.var("r"))).get("r");
         Stream<ConceptMap> answers = txn.query().match(query);
@@ -257,75 +459,5 @@ public class ConfigurationValidation {
         }
         txn.close();
     }
-
-    private void validateGetterComposition(HashMap<String, ArrayList<String>> validationReport,
-                                           Configuration.RoleGetter roleGetter,
-                                           String breadcrumbs) {
-        int attributeCounter = 0;
-        int entityCounter = 0;
-        int relationCounter = 0;
-        int ownershipCounter = 0;
-
-
-        if (roleGetter.getHandler().equals(TypeHandler.ATTRIBUTE)) {
-            attributeCounter += 1;
-        }
-        if (roleGetter.getHandler().equals(TypeHandler.ENTITY)) {
-            entityCounter += 1;
-        }
-        if (roleGetter.getHandler().equals(TypeHandler.RELATION)) {
-            relationCounter += 1;
-        }
-        if (roleGetter.getHandler().equals(TypeHandler.OWNERSHIP)) {
-            ownershipCounter += 1;
-        }
-
-        int typeHandlerSum = attributeCounter + entityCounter + relationCounter;
-
-        if (typeHandlerSum != 1) {
-            validationReport.get("errors").add(breadcrumbs + ".getter: each getter block must contain exactly one getter with handler <attribute>, <entity>, or <relation>");
-        } else {
-            if (attributeCounter == 1) {
-                if (ownershipCounter > 0) {
-                    validationReport.get("errors").add(breadcrumbs + ".getter: each getter block with an <attribute> must not contain any other getters of any other type");
-                }
-            } else {
-                if (ownershipCounter < 1) {
-                    validationReport.get("errors").add(breadcrumbs + ".getter: each getter block with an <entity> or <relation> must contain one or more getters with handler <ownership>");
-                }
-            }
-        }
-    }
-
-//    private TypeHandler getPlayerType(Configuration.Player player) {
-//        int entityGetter = 0;
-//        int attributeGetter = 0;
-//        int relationGetter = 0;
-//
-//        for (Configuration.Getter playerGetter : player.getGetter()) {
-//            switch (playerGetter.getHandler().toString()) {
-//                case "attribute":
-//                    attributeGetter++; break;
-//                case "entity":
-//                    entityGetter++; break;
-//                case "relation":
-//                    relationGetter++; break;
-//            }
-//        }
-//
-//        if (entityGetter + attributeGetter + relationGetter == 1) {
-//            if (attributeGetter == 1) {
-//                return TypeHandler.ATTRIBUTE;
-//            } else if (entityGetter == 1) {
-//                return TypeHandler.ENTITY;
-//            } else if (relationGetter == 1) {
-//                return TypeHandler.RELATION;
-//            } else {
-//                return null;
-//            }
-//        } else {
-//            return null;
-//        }
-//    }
 
 }

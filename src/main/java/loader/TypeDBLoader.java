@@ -29,22 +29,20 @@ public class TypeDBLoader {
 
     public void load() {
 
+        Util.info("validating your config...");
         TypeDBClient schemaClient = TypeDBUtil.getClient(typeDBURI);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
-
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
         ArrayList<String> errors = new ArrayList<>();
         ArrayList<String> warnings = new ArrayList<>();
         validationReport.put("warnings", warnings);
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
-
         if (validationReport.get("errors").size() == 0) {
             TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
             Util.info("cleaned database and migrated schema...");
         }
 
-        Util.info("validating your config...");
         TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
