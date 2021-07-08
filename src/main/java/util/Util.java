@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
+import static io.FileToInputStream.getInputStream;
+
 public class Util {
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
     //TODO: disallow duplicate header names, and why does ignoreEmptyLines not work???
@@ -70,7 +72,12 @@ public class Util {
     }
 
     public static BufferedReader newBufferedReader(String filePath) throws FileNotFoundException {
-        return new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+        InputStream is = getInputStream(filePath);
+        if (is != null) {
+            return new BufferedReader(new InputStreamReader(is));
+        } else {
+            throw new FileNotFoundException();
+        }
     }
 
     public static String[] parseBySeparator(String line, char separator) throws IOException {

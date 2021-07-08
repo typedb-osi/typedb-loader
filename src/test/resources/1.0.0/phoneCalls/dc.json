@@ -267,7 +267,7 @@
   "relations": {
     "contract": {
       "dataPaths": [
-        "src/test/resources/1.0.0/phoneCalls/contract.csv"
+        "src/test/resources/1.0.0/phoneCalls/contract.csv.gz"
       ],
       "config": {
         "separator": ",",

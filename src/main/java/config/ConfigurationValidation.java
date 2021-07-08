@@ -87,6 +87,7 @@ public class ConfigurationValidation {
         }
 
         // validate relations:
+
         if (configuration.getRelations() != null) {
             for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
                 // Breadcrumbs
@@ -98,6 +99,7 @@ public class ConfigurationValidation {
                 // RELATION
                 if (gc && dps) {
                     String conceptType = relation.getValue().getConceptType();
+
                     boolean relationExists = valConceptTypeInSchema(validationReport, session, breadcrumbs, conceptType);
                     if (relationExists) {
                         valRelationHasAttributes(validationReport, breadcrumbs, configuration, relation.getValue(), relation.getValue().getAttributes(), session);
@@ -106,6 +108,7 @@ public class ConfigurationValidation {
                 }
             }
         }
+        System.out.println("rel end");
 
         // validate appendAttribute:
         if (configuration.getAppendAttribute() != null) {
@@ -458,6 +461,7 @@ public class ConfigurationValidation {
         TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.type(relationConceptType).relates(TypeQL.var("r"))).get("r");
         Stream<ConceptMap> answers = txn.query().match(query);
+
         if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
             validationReport.get("errors").add(breadcrumbs + ".roleType: <" + roleType + "> is not a role for relation of type <" + relationConceptType + "> in schema");
         }
