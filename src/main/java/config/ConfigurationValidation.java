@@ -28,19 +28,23 @@ public class ConfigurationValidation {
                                       TypeDBSession session) {
 
         // DEFAULT CONFIG (note: schema will be validated beforehand in TypeDBLoader.java because need migrated schema for validation that follows):
-        Configuration.DefaultConfig defaultConfig = configuration.getDefaultConfig();
-        if (defaultConfig != null) {
+        Configuration.GlobalConfig globalConfig = configuration.getGlobalConfig();
+        if (globalConfig != null) {
             //ROWS PER COMMIT
-            if (defaultConfig.getRowsPerCommit() != null) {
-                if (defaultConfig.getRowsPerCommit() > 150) {
+            if (globalConfig.getRowsPerCommit() != null) {
+                if (globalConfig.getRowsPerCommit() > 150) {
                     validationReport.get("warnings").add("defaultConfig.rowsPerCommit is set to be > 150 - in most cases, choosing a value between 50 and 150 gives the best performance");
                 }
             } else {
                 validationReport.get("warnings").add("defaultConfig.rowsPerCommit is not set - it must therefore be set individually for each generator");
             }
             //SEPARATOR
-            if (defaultConfig.getSeparator() == null) {
+            if (globalConfig.getSeparator() == null) {
                 validationReport.get("warnings").add("defaultConfig.separator is not set - it must therefore be set individually for each generator");
+            }
+            //IGNORE_GENERATORS
+            if (globalConfig.getIgnoreGenerators() != null) {
+                validationReport.get("warnings").add("defaultConfig.ignoreGenerators: ignoring generators: [" + String.join(", ", globalConfig.getIgnoreGenerators()) + "]");
             }
         } else {
             validationReport.get("errors").add("defaultConfig does not exist");
@@ -192,7 +196,7 @@ public class ConfigurationValidation {
     }
 
     public void validateSchemaPresent(HashMap<String, ArrayList<String>> validationReport) {
-        String schemaPath = configuration.getDefaultConfig().getSchemaPath();
+        String schemaPath = configuration.getGlobalConfig().getSchemaPath();
         if (schemaPath == null) {
             validationReport.get("errors").add("defaultConfig.schemaPath: missing required field");
         } else {

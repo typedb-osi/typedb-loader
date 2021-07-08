@@ -39,7 +39,7 @@ public class TypeDBLoader {
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getDefaultConfig().getSchemaPath());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchemaPath());
             Util.info("cleaned database and migrated schema...");
         }
 

@@ -6,7 +6,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
-import io.FileLogger;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -219,17 +218,17 @@ public class Util {
 
     public static Integer getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
         if (config != null) {
-            return Objects.requireNonNullElseGet(config.getRowsPerCommit(), () -> dc.getDefaultConfig().getRowsPerCommit());
+            return Objects.requireNonNullElseGet(config.getRowsPerCommit(), () -> dc.getGlobalConfig().getRowsPerCommit());
         } else {
-            return dc.getDefaultConfig().getRowsPerCommit();
+            return dc.getGlobalConfig().getRowsPerCommit();
         }
     }
 
     public static Character getSeparator(Configuration dc, Configuration.GeneratorConfig config) {
         if (config != null) {
-            return Objects.requireNonNullElseGet(config.getSeparator(), () -> dc.getDefaultConfig().getSeparator());
+            return Objects.requireNonNullElseGet(config.getSeparator(), () -> dc.getGlobalConfig().getSeparator());
         } else {
-            return dc.getDefaultConfig().getSeparator();
+            return dc.getGlobalConfig().getSeparator();
         }
     }
 }

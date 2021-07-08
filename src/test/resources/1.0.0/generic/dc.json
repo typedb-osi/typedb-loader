@@ -1,5 +1,5 @@
 {
-  "defaultConfig": {
+  "globalConfig": {
     "separator": ',',
     "rowsPerCommit": 100,
     "schemaPath": "src/test/resources/1.0.0/generic/schema.gql"

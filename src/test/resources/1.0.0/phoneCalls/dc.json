@@ -1,8 +1,18 @@
 {
-  "defaultConfig": {
+  "globalConfig": {
     "separator": ',',
     "rowsPerCommit": 100,
-    "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema.gql"
+    "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema.gql",
+    "orderedBeforeGenerators": [
+      "person-1"
+    ],
+    "orderedAfterGenerators": [
+      "person-2",
+      "person-3"
+    ],
+    "ignoreGenerators": [
+      "person-ignored"
+    ]
   },
   "attributes": {
     "is-in-use": {
@@ -168,6 +178,49 @@
       ]
     },
     "person-3": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-ignored": {
       "dataPaths": [
         "src/test/resources/1.0.0/phoneCalls/person3.csv"
       ],
@@ -613,12 +666,5 @@
         }
       ]
     }
-  },
-  "orderedBeforeGenerators": [
-    "person-1"
-  ],
-  "orderedAfterGenerators": [
-    "person-2",
-    "person-3"
-  ]
+  }
 }

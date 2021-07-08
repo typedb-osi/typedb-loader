@@ -2,7 +2,6 @@ package generator;
 
 
 import config.Configuration;
-import generator.AppendAttributeOrInsertThingGenerator;
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -50,7 +49,7 @@ public class AppendAttributeOrInsertThingGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv").getAbsolutePath();
         AppendAttributeOrInsertThingGenerator gen = new AppendAttributeOrInsertThingGenerator(dp,
                 dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         String[] row = Util.parseCSV(iterator.next());

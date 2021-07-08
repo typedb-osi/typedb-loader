@@ -42,7 +42,7 @@ public class EntityGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/generic/entity1.tsv").getAbsolutePath();
         EntityGenerator gen = new EntityGenerator(dp,
                 dc.getEntities().get(entityKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         String tmp = "insert $e isa entity1, has entity1-id \"entity1id0\", has entity1-name \"entity1name0\", has entity1-exp \"entity1id0exp0\";";
@@ -108,7 +108,7 @@ public class EntityGeneratorTest {
 
         dp = new File("src/test/resources/1.0.0/generic/entity2.tsv").getAbsolutePath();
         gen = new EntityGenerator(dp, dc.getEntities().get(entityKeys.get(1)),
-                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(1)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(1)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         tmp = "insert $e isa entity2, has entity2-id \"entity2id0\", has entity2-bool true, has entity2-double 0.0;";
@@ -147,7 +147,7 @@ public class EntityGeneratorTest {
 
         dp = new File("src/test/resources/1.0.0/generic/entity3.tsv").getAbsolutePath();
         gen = new EntityGenerator(dp, dc.getEntities().get(entityKeys.get(2)),
-                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(2)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(2)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         tmp = "insert $e isa entity3, has entity3-id \"entity3id0\", has entity3-int 0;";
@@ -202,7 +202,7 @@ public class EntityGeneratorTest {
         }
         EntityGenerator gen = new EntityGenerator(dp,
                 dc.getEntities().get(entityKey),
-                Objects.requireNonNullElseGet(dc.getEntities().get(entityKey).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getEntities().get(entityKey).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
 
         session.close();
         client.close();

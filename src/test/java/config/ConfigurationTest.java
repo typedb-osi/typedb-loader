@@ -15,7 +15,7 @@ public class ConfigurationTest {
         Assert.assertNotNull(dc);
 
         //default config
-        Assert.assertEquals(',', dc.getDefaultConfig().getSeparator().charValue());
+        Assert.assertEquals(',', dc.getGlobalConfig().getSeparator().charValue());
 
         //attributes
         String att = "is-in-use";

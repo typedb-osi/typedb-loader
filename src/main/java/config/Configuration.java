@@ -12,14 +12,12 @@ import java.util.stream.Collectors;
 
 public class Configuration {
 
-    DefaultConfig defaultConfig;
+    GlobalConfig globalConfig;
     Map<String, Attribute> attributes;
     Map<String, Entity> entities;
     Map<String, Relation> relations;
     Map<String, AppendAttribute> appendAttribute;
     Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
-    ArrayList<String> orderedBeforeGenerators;
-    ArrayList<String> orderedAfterGenerators;
 
     public static AttributeValueType getValueType(TypeDBTransaction txn, String conceptType) {
         AttributeValueType valueType = null;
@@ -31,8 +29,8 @@ public class Configuration {
         return valueType;
     }
 
-    public DefaultConfig getDefaultConfig() {
-        return defaultConfig;
+    public GlobalConfig getGlobalConfig() {
+        return globalConfig;
     }
 
     public Map<String, Attribute> getAttributes() {
@@ -55,13 +53,7 @@ public class Configuration {
         return appendAttributeOrInsertThing;
     }
 
-    public ArrayList<String> getOrderedAfterGenerators() {
-        return orderedAfterGenerators;
-    }
 
-    public ArrayList<String> getOrderedBeforeGenerators() {
-        return orderedBeforeGenerators;
-    }
 
     public Generator getGeneratorByKey(String key){
         for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
@@ -122,10 +114,13 @@ public class Configuration {
     }
 
 
-    public class DefaultConfig {
+    public class GlobalConfig {
         Character separator;
         Integer rowsPerCommit;
         String schemaPath;
+        ArrayList<String> orderedBeforeGenerators;
+        ArrayList<String> orderedAfterGenerators;
+        ArrayList<String> ignoreGenerators;
 
         public Character getSeparator() {
             return separator;
@@ -138,6 +133,16 @@ public class Configuration {
         public String getSchemaPath() {
             return schemaPath;
         }
+
+        public ArrayList<String> getOrderedAfterGenerators() {
+            return orderedAfterGenerators;
+        }
+
+        public ArrayList<String> getOrderedBeforeGenerators() {
+            return orderedBeforeGenerators;
+        }
+
+        public ArrayList<String> getIgnoreGenerators() { return ignoreGenerators; }
     }
 
     public class Generator {

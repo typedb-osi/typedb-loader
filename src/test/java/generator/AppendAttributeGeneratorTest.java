@@ -1,7 +1,6 @@
 package generator;
 
 import config.Configuration;
-import generator.AppendAttributeGenerator;
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -53,7 +52,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(0)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -120,7 +119,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(1)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(1)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(1)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
@@ -154,7 +153,7 @@ public class AppendAttributeGeneratorTest {
         String dp = new File("src/test/resources/1.0.0/phoneCalls/append-call-rating.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(2)),
-                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(2)).getConfig().getSeparator(), () -> dc.getDefaultConfig().getSeparator()));
+                Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(2)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
