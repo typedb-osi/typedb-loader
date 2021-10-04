@@ -18,13 +18,15 @@ public class TypeDBLoader {
     private final Configuration dc;
     private final String databaseName;
     private final String typeDBURI;
+    private final boolean cleanMigration;
 
     public TypeDBLoader(String dcPath,
                         String databaseName,
-                        String typeDBURI) {
+                        String typeDBURI, boolean cleanMigration) {
         this.dc = Util.initializeDataConfig(dcPath);
         this.databaseName = databaseName;
         this.typeDBURI = typeDBURI;
+        this.cleanMigration = cleanMigration;
     }
 
     public void load() {
@@ -38,7 +40,7 @@ public class TypeDBLoader {
         validationReport.put("warnings", warnings);
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
-        if (validationReport.get("errors").size() == 0) {
+        if (validationReport.get("errors").size() == 0 && cleanMigration) {
             TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchemaPath());
             Util.info("cleaned database and migrated schema...");
         }

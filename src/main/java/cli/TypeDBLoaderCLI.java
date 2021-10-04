@@ -29,7 +29,7 @@ class LoadCommand implements Runnable {
     @CommandLine.Option(names = {"-tdb", "--typedb"}, description = "optional - TypeDB server in format: server:port (default: localhost:1729)", defaultValue = "localhost:1729")
     private String typedbURI;
 
-    @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists")
+    @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists", defaultValue = "false")
     private boolean cleanMigration;
 
     @Override
@@ -41,7 +41,7 @@ class LoadCommand implements Runnable {
         spec.commandLine().getOut().println("\tTypeDB server: " + typedbURI);
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
 
-        TypeDBLoader loader = new TypeDBLoader(dataConfigFilePath, databaseName, typedbURI);
+        TypeDBLoader loader = new TypeDBLoader(dataConfigFilePath, databaseName, typedbURI, cleanMigration);
         loader.load();
     }
 }
