@@ -29,7 +29,7 @@ public class AsyncLoaderWorker {
     private static final DecimalFormat countFormat = new DecimalFormat("#,###");
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
     public final ExecutorService executor;
-    private final int threads = Runtime.getRuntime().availableProcessors() * 12;
+    private final int threads = Runtime.getRuntime().availableProcessors() * 4;
     private final String databaseName;
     private final AtomicBoolean hasError;
     private final int batchGroup;
