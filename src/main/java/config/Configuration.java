@@ -53,8 +53,6 @@ public class Configuration {
         return appendAttributeOrInsertThing;
     }
 
-
-
     public Generator getGeneratorByKey(String key){
         for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
             if (generator.getKey().equals(key)) {
@@ -117,6 +115,7 @@ public class Configuration {
     public class GlobalConfig {
         Character separator;
         Integer rowsPerCommit;
+        Integer parallelisation;
         String schemaPath;
         ArrayList<String> orderedBeforeGenerators;
         ArrayList<String> orderedAfterGenerators;
@@ -128,6 +127,10 @@ public class Configuration {
 
         public Integer getRowsPerCommit() {
             return rowsPerCommit;
+        }
+
+        public Integer getParallelisation() {
+            return parallelisation;
         }
 
         public String getSchemaPath() {

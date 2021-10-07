@@ -2,6 +2,7 @@
   "defaultConfig": {
     "separator": ',',
     "rowsPerCommit": 200,
+    "parallelisation": 64,
     "schemaPath": "src/test/resources/1.0.0/synthetic/schema.gql"
   },
   "attributes": {

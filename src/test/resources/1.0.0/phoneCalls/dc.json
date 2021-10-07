@@ -2,6 +2,7 @@
   "globalConfig": {
     "separator": ',',
     "rowsPerCommit": 100,
+    "parallelisation": 64,
     "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema.gql",
     "orderedBeforeGenerators": [
       "person-1"
