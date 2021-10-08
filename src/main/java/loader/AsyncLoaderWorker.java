@@ -28,18 +28,19 @@ public class AsyncLoaderWorker {
 
     private static final DecimalFormat countFormat = new DecimalFormat("#,###");
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
-    public final ExecutorService executor;
-    private final int threads = Runtime.getRuntime().availableProcessors();
+    private final int threads;
     private final String databaseName;
     private final AtomicBoolean hasError;
     private final int batchGroup;
     private final Configuration dc;
+    final ExecutorService executor;
 
     public AsyncLoaderWorker(Configuration dc, String databaseName) {
         this.dc = dc;
+        this.threads = dc.getGlobalConfig().getParallelisation();
         this.databaseName = databaseName;
-        hasError = new AtomicBoolean(false);
-        this.batchGroup = 8;
+        this.hasError = new AtomicBoolean(false);
+        this.batchGroup = 32;
         this.executor = Executors.newFixedThreadPool(threads, new NamedThreadFactory(databaseName));
     }
 
@@ -311,7 +312,7 @@ public class AsyncLoaderWorker {
                            Generator gen,
                            int batch) throws IOException, InterruptedException {
         Util.info("async-load (start): {}", filename);
-        LinkedBlockingQueue<Either<List<List<String[]>>, Done>> queue = new LinkedBlockingQueue<>(threads * 4);
+        LinkedBlockingQueue<Either<List<List<String[]>>, Done>> queue = new LinkedBlockingQueue<>(threads * 2);
         List<CompletableFuture<Void>> asyncWrites = new ArrayList<>(threads);
         for (int i = 0; i < threads; i++) {
             asyncWrites.add(asyncWrite(i + 1, filename, gen, session, queue));
