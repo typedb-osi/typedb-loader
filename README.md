@@ -27,6 +27,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - migrate required/optional role players (entity & relations)
     - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
     - migrate list-like player columns as n players
+    - **migrate entity if not present - if present, either do not write or append attributes**
  - Data Validation:
     - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
  - Performance:
@@ -35,6 +36,7 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - tracking of your migration status to stop/restart, or restart after failure
  - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami/wiki/Schema-Updating) for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
  - [Appending Attributes](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-Attributes) to existing things
+ - [Append-If-Present-Else-Insert](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-If-Present-Else-Insert)
  - [Basic Column Preprocessing using RegEx's](https://github.com/bayer-science-for-a-better-life/grami/wiki/Preprocessing)
 
 After creating your processor configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json)) and data configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json)), you can use GraMi
@@ -105,10 +107,10 @@ public class Migration {
     private static final String graknURI = "127.0.0.1:1729";               // defines which grakn server to migrate into
     private static final String databaseName = "yourFavoriteDatabase";      // defines which keyspace to migrate into
 
-    private static final MigrationConfig migrationConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
+    private static final MigrationConfig loaderLoadConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
 
     public static void main(String[] args) throws IOException {
-        GraknMigrator mig = new GraknMigrator(migrationConfig, migrationStatus, true);
+        GraknMigrator mig = new GraknMigrator(loaderLoadConfig, migrationStatus, true);
         mig.migrate();
     }
 }

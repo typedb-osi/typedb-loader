@@ -1,0 +1,163 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 100,
+    "schemaPath": "src/test/resources/1.0.0/generic/schema.gql"
+  },
+  "entities": {
+    "entity1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity1.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "conceptType": "entity1",
+      "attributes": [
+        {
+          "conceptType": "entity1-id",
+          "column": "entity1-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity1-name",
+          "column": "entity1-name",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        },
+        {
+          "conceptType": "entity1-exp",
+          "column": "entity1-exp",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        }
+      ]
+    },
+    "entity2": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity2.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "conceptType": "entity2",
+      "attributes": [
+        {
+          "conceptType": "entity2-id",
+          "column": "entity2-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity2-bool",
+          "column": "entity2-bool",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity2-double",
+          "column": "entity2-double",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        }
+      ]
+    },
+    "entity3": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/entity3.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "conceptType": "entity3",
+      "attributes": [
+        {
+          "conceptType": "entity3-id",
+          "column": "entity3-id",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "entity3-int",
+          "column": "entity3-int",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        }
+      ]
+    }
+  },
+  "relations": {
+    "rel1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/generic/rel1.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "conceptType": "rel1",
+      "players": [
+        {
+          "roleType": "player-one",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "entity1",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity1-id",
+                "handler": "ownership",
+                "column": "entity1-id",
+                "listSeparator": "###"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "player-two",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "entity2",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity2-id",
+                "handler": "ownership",
+                "column": "entity2-id"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "player-optional",
+          "requireNonEmpty": false,
+          "roleGetter": {
+            "conceptType": "entity3",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "entity3-id",
+                "handler": "ownership",
+                "column": "entity3-id"
+              }
+            ]
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "conceptType": "relAt-1",
+          "column": "relAt-1",
+          "requireNonEmpty": true,
+          "listSeparator": "###"
+        },
+        {
+          "conceptType": "relAt-2",
+          "column": "relAt-2",
+          "requireNonEmpty": false,
+          "listSeparator": "###"
+        }
+      ]
+    }
+  }
+}

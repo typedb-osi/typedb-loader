@@ -1,0 +1,82 @@
+{
+  "defaultConfig": {
+    "separator": ',',
+    "rowsPerCommit": 200,
+    "schemaPath": "src/test/resources/1.0.0/synthetic/schema.gql"
+  },
+  "attributes": {
+    "names": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/synthetic/names.csv"
+      ],
+      "attribute": {
+        "column": "doesnotexist",
+        "conceptType": "name"
+      },
+    },
+    "no-file": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/synthetic/nam.csv",
+        "src/test/resources/1.0.0/synthetic/na.csv"
+      ],
+      "column": "values",
+      "conceptType": "doesnotexist"
+    },
+    "empty-file": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/synthetic/empty.csv",
+        "src/test/resources/1.0.0/synthetic/nam.csv"
+      ],
+      "column": "values",
+      "conceptType": "doesnotexist"
+    }
+  },
+  "entities": {
+    "missing-attributes": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/synthetic/names.csv"
+      ],
+      "column": "name",
+      "conceptType": "person"
+    },
+    "person": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/synthetic/names.csv",
+        "src/test/resources/1.0.0/synthetic/empty.csv",
+        "src/test/resources/1.0.0/synthetic/notfound.csv",
+        "src/test/resources/1.0.0/synthetic/notfound-other.csv"
+      ],
+      "conceptType": "doesnotexist",
+      "separator": ",",
+      "attributes": [
+        {
+          "conceptType": "name",
+          "column": "name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "doesnotexist",
+          "column": "name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "name",
+          "column": "doesnotexist",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "name",
+          "column": "name"
+        },
+        {
+          "column": "name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "name",
+          "requireNonEmpty": false
+        }
+      ]
+    }
+  }
+}

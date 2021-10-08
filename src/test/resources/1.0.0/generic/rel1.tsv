@@ -1,0 +1,24 @@
+entity1-id	entity2-id	entity3-id	relAt-1	relAt-2
+entity1id1	entity2id1	entity3id1	att0###explosion0	opt0
+entity1id1	entity2id1	entity3id1	att1###explosion1###explo1	opt1
+entity1id1	entity2id1	entity3id1	att2	opt2
+entity1id1	entity2id1	entity3id1	att3###	opt3
+entity1id1	entity2id1	entity3id1	att4### 	opt4
+entity1id1	entity2id1	entity3id1	att5###  	opt5
+entity1id1	entity2id1	entity3id1	###att6	opt6
+entity1id1	entity2id1	entity3id1	 ###att7	opt7
+entity1id1	entity2id1	entity3id1	  ###att8	opt8
+entity1id1	entity2id1	entity3id1	######att9	opt9
+entity1id1	entity2id1	entity3id1	att10	
+entity1id1	entity2id1	  	att19	
+entity1id1	entity2id1	  	att20	opt20
+entity1id1	entity2id1	  	att21###explosion21	optional21
+entity1id1	entity2id1	entity3id1	att22	
+entity1id1	entity2id1	entity3id1		opt25
+entity1id1	entity2id1	entity3id1		
+	entity2id1	entity3id1	att34	opt33
+entity1id1		entity3id1	att37	opt36
+entity1id1###entity1id2	entity2id1	entity3id1	att39	opt39
+entity1id1###entity1id2	entity2id1		att40	
+###	entity2id1	entity3id1	att41	opt41
+

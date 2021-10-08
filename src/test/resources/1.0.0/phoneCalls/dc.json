@@ -1,0 +1,670 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 100,
+    "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema.gql",
+    "orderedBeforeGenerators": [
+      "person-1"
+    ],
+    "orderedAfterGenerators": [
+      "person-2",
+      "person-3"
+    ],
+    "ignoreGenerators": [
+      "person-ignored"
+    ]
+  },
+  "attributes": {
+    "is-in-use": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "attribute": {
+        "conceptType": "is-in-use",
+        "column": "values"
+      }
+    }
+  },
+  "entities": {
+    "person": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person.csv",
+        "src/test/resources/1.0.0/phoneCalls/person_nextfile.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "company": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/company.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "company",
+      "attributes": [
+        {
+          "conceptType": "name",
+          "column": "name",
+          "requireNonEmpty": true
+        }
+      ]
+    },
+    "person-1": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person1.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-2": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person2.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-3": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    },
+    "person-ignored": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "person",
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "phone-number",
+          "column": "phone_number",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "city",
+          "column": "city",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": false
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name",
+          "listSeparator": ";",
+          "requireNonEmpty": false
+        }
+      ]
+    }
+  },
+  "relations": {
+    "contract": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/contract.csv.gz"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "contract",
+      "players": [
+        {
+          "roleType": "provider",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "company",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "name",
+                "column": "company_name"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "customer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "person_id",
+                "listSeparator": "###"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "call": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/call.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "call",
+      "players": [
+        {
+          "roleType": "caller",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "caller_id"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "callee",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "callee_id"
+              }
+            ]
+          }
+        }
+      ],
+      "attributes": [
+        {
+          "conceptType": "started-at",
+          "column": "started_at",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "duration",
+          "column": "duration",
+          "requireNonEmpty": true
+        }
+      ]
+    },
+    "in-use": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/in-use.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "in-use",
+      "players": [
+        {
+          "roleType": "status",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "is-in-use",
+            "handler": "attribute",
+            "column": "in_use"
+          }
+        },
+        {
+          "roleType": "account",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "phone-number",
+            "handler": "attribute",
+            "column": "pn"
+          }
+        }
+      ]
+    },
+    "communication-channel": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "communication-channel",
+      "players": [
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "phone-number",
+                "handler": "ownership",
+                "column": "peer_1"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "peer_2"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "past-call",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "call",
+            "handler": "relation",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "started-at",
+                "column": "call_started_at",
+                "listSeparator": "###"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "communication-channel-pm": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "conceptType": "communication-channel",
+      "players": [
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "conceptType": "phone-number",
+                "handler": "ownership",
+                "column": "peer_1"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "peer",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "person",
+            "handler": "entity",
+            "thingGetters": [
+              {
+                "handler": "ownership",
+                "conceptType": "phone-number",
+                "column": "peer_2"
+              }
+            ]
+          }
+        },
+        {
+          "roleType": "past-call",
+          "requireNonEmpty": true,
+          "roleGetter": {
+            "conceptType": "call",
+            "handler": "relation",
+            "thingGetters": [
+              {
+                "handler": "entity",
+                "conceptType": "person",
+                "roleType": "caller",
+                "thingGetters": [
+                  {
+                    "handler": "ownership",
+                    "conceptType": "phone-number",
+                    "column": "peer_1"
+                  }
+                ]
+              },
+              {
+                "handler": "entity",
+                "conceptType": "person",
+                "roleType": "callee",
+                "thingGetters": [
+                  {
+                    "handler": "ownership",
+                    "conceptType": "phone-number",
+                    "column": "peer_2"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "appendAttribute": {
+    "append-twitter": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "twitter-username",
+          "column": "twitter",
+          "listSeparator": "###",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name"
+        }
+      ]
+    },
+    "append-fakebook": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "fakebook-link",
+          "column": "fb",
+          "requireNonEmpty": true,
+          "preprocessorConfig": {
+            "type": "regex",
+            "parameters": {
+              "regexMatch": "^.*(fakebook\\.com.*)/$",
+              "regexReplace": "$1"
+            }
+          }
+        }
+      ]
+    },
+    "append-call-rating": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/append-call-rating.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "thingGetter": {
+        "conceptType": "call",
+        "handler": "relation",
+        "thingGetters": [
+          {
+            "conceptType": "started-at",
+            "handler": "ownership",
+            "column": "started_at"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "call-rating",
+          "column": "call_rating",
+          "requireNonEmpty": true
+        }
+      ]
+    }
+  },
+  "appendAttributeOrInsertThing": {
+    "append-or-insert-person": {
+      "dataPaths": [
+        "src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "thingGetter": {
+        "conceptType": "person",
+        "handler": "entity",
+        "thingGetters": [
+          {
+            "conceptType": "phone-number",
+            "handler": "ownership",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "conceptType": "first-name",
+          "column": "first_name"
+        },
+        {
+          "conceptType": "last-name",
+          "column": "last_name"
+        },
+        {
+          "conceptType": "city",
+          "column": "city"
+        },
+        {
+          "conceptType": "age",
+          "column": "age",
+          "requireNonEmpty": true
+        },
+        {
+          "conceptType": "nick-name",
+          "column": "nick_name"
+        }
+      ]
+    }
+  }
+}

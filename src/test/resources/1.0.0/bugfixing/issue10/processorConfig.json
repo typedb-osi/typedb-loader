@@ -1,0 +1,56 @@
+{
+  "processors":
+  [
+    {
+      "processor": "text",
+      "processorType": "entity",
+      "schemaType": "text",
+      "conceptProcessors": {
+        "attributes": {
+          "uid": {
+            "attributeType": "uid",
+            "valueType": "long",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "processor": "label",
+      "processorType": "entity",
+      "schemaType": "label",
+      "conceptProcessors": {
+        "attributes": {
+          "name": {
+            "attributeType": "name",
+            "valueType": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    {
+      "processor": "tag",
+      "processorType": "relation",
+      "schemaType": "tag",
+      "conceptProcessors": {
+        "players": {
+          "tagger": {
+            "playerType": "label",
+            "roleType": "tagger",
+            "required": true,
+            "uniquePlayerId": "name",
+            "idValueType": "string"
+          },
+          "tagged": {
+            "playerType": "text",
+            "roleType": "tagged",
+            "required": true,
+            "uniquePlayerId": "uid",
+            "idValueType": "long"
+          }
+        }
+      }
+    }
+  ]
+}
