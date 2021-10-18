@@ -112,7 +112,10 @@ public class Configuration {
     }
 
 
-    public class GlobalConfig {
+    public static class GlobalConfig {
+
+        private static final int DEFAULT_PARALLELISATION = Runtime.getRuntime().availableProcessors() * 8;
+
         Character separator;
         Integer rowsPerCommit;
         Integer parallelisation;
@@ -130,7 +133,8 @@ public class Configuration {
         }
 
         public Integer getParallelisation() {
-            return parallelisation;
+            if (parallelisation == null) return DEFAULT_PARALLELISATION;
+            else return parallelisation;
         }
 
         public String getSchemaPath() {
