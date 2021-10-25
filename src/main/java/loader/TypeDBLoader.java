@@ -18,13 +18,16 @@ public class TypeDBLoader {
     private final Configuration dc;
     private final String databaseName;
     private final String typeDBURI;
+    private final boolean clean;
 
     public TypeDBLoader(String dcPath,
                         String databaseName,
-                        String typeDBURI) {
+                        String typeDBURI,
+                        boolean clean) {
         this.dc = Util.initializeDataConfig(dcPath);
         this.databaseName = databaseName;
         this.typeDBURI = typeDBURI;
+        this.clean = clean;
     }
 
     public void load() {
@@ -38,9 +41,11 @@ public class TypeDBLoader {
         validationReport.put("warnings", warnings);
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
-        if (validationReport.get("errors").size() == 0) {
+        if (validationReport.get("errors").size() == 0 && clean) {
             TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchemaPath());
             Util.info("cleaned database and migrated schema...");
+        } else {
+            Util.info("continuing load...");
         }
 
         TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);

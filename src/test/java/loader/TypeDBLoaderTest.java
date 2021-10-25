@@ -25,7 +25,7 @@ public class TypeDBLoaderTest {
     public void loadSyntheticTest() {
         String dcPath = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
         String databaseName = "generic-test";
-        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri);
+        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri, true);
         typeDBLoader.load();
     }
 
@@ -33,7 +33,7 @@ public class TypeDBLoaderTest {
     public void loadPhoneCallsTest() {
         String dcPath = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         String databaseName = "phone-calls-test";
-        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri);
+        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri, true);
         typeDBLoader.load();
 
         TypeDBClient client = TypeDBUtil.getClient(graknUri, 4);

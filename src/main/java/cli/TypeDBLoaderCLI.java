@@ -41,7 +41,7 @@ class LoadCommand implements Runnable {
         spec.commandLine().getOut().println("\tTypeDB server: " + typedbURI);
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
 
-        TypeDBLoader loader = new TypeDBLoader(dataConfigFilePath, databaseName, typedbURI);
+        TypeDBLoader loader = new TypeDBLoader(dataConfigFilePath, databaseName, typedbURI, cleanMigration);
         loader.load();
     }
 }

@@ -274,7 +274,7 @@ public class RelationGeneratorTest {
     }
 
     private void testContracts(Configuration dc, ArrayList<String> relationKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv.gz").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
