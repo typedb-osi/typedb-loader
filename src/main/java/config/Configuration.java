@@ -53,8 +53,6 @@ public class Configuration {
         return appendAttributeOrInsertThing;
     }
 
-
-
     public Generator getGeneratorByKey(String key){
         Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
         if (attributeGenerators != null) {
@@ -148,9 +146,13 @@ public class Configuration {
     }
 
 
-    public class GlobalConfig {
+    public static class GlobalConfig {
+
+        private static final int DEFAULT_PARALLELISATION = Runtime.getRuntime().availableProcessors() * 8;
+
         Character separator;
         Integer rowsPerCommit;
+        Integer parallelisation;
         String schemaPath;
         ArrayList<String> orderedBeforeGenerators;
         ArrayList<String> orderedAfterGenerators;
@@ -162,6 +164,11 @@ public class Configuration {
 
         public Integer getRowsPerCommit() {
             return rowsPerCommit;
+        }
+
+        public Integer getParallelisation() {
+            if (parallelisation == null) return DEFAULT_PARALLELISATION;
+            else return parallelisation;
         }
 
         public String getSchemaPath() {

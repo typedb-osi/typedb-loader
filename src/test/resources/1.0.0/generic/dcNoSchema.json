@@ -1,6 +1,7 @@
 {
   "defaultConfig": {
     "separator": ',',
-    "rowsPerCommit": 200
+    "rowsPerCommit": 200,
+    "parallelisation": 64
   }
 }

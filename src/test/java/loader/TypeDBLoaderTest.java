@@ -1,5 +1,6 @@
 package loader;
 
+import cli.LoadOptions;
 import util.TypeDBUtil;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -19,13 +20,20 @@ import static util.QueryUtilTest.getDT;
 
 public class TypeDBLoaderTest {
 
-    String graknUri = "localhost:1729";
+    String typeDBUri = "localhost:1729";
 
     @Test
     public void loadSyntheticTest() {
         String dcPath = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
         String databaseName = "generic-test";
-        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri, true);
+        String[] args = {
+                "load",
+                "-c", dcPath,
+                "-db", databaseName,
+                "-tdb", typeDBUri,
+                "-cm"
+        };
+        TypeDBLoader typeDBLoader = new TypeDBLoader(LoadOptions.parse(args));
         typeDBLoader.load();
     }
 
@@ -33,10 +41,18 @@ public class TypeDBLoaderTest {
     public void loadPhoneCallsTest() {
         String dcPath = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         String databaseName = "phone-calls-test";
-        TypeDBLoader typeDBLoader = new TypeDBLoader(dcPath, databaseName, graknUri, true);
+
+        String[] args = {
+                "load",
+                "-c", dcPath,
+                "-db", databaseName,
+                "-tdb", typeDBUri,
+                "-cm"
+        };
+        TypeDBLoader typeDBLoader = new TypeDBLoader(LoadOptions.parse(args));
         typeDBLoader.load();
 
-        TypeDBClient client = TypeDBUtil.getClient(graknUri, 4);
+        TypeDBClient client = TypeDBUtil.getClient(typeDBUri, 4);
         TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName);
 
         testAttributes(session);

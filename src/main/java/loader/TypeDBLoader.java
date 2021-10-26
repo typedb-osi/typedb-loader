@@ -1,13 +1,14 @@
 package loader;
 
-import config.Configuration;
-import config.ConfigurationValidation;
-import util.TypeDBUtil;
-import util.Util;
+import cli.LoadOptions;
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
+import config.Configuration;
+import config.ConfigurationValidation;
+import util.TypeDBUtil;
+import util.Util;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,25 +16,17 @@ import java.util.HashMap;
 
 public class TypeDBLoader {
 
+    private final LoadOptions options;
     private final Configuration dc;
-    private final String databaseName;
-    private final String typeDBURI;
-    private final boolean clean;
 
-    public TypeDBLoader(String dcPath,
-                        String databaseName,
-                        String typeDBURI,
-                        boolean clean) {
-        this.dc = Util.initializeDataConfig(dcPath);
-        this.databaseName = databaseName;
-        this.typeDBURI = typeDBURI;
-        this.clean = clean;
+    public TypeDBLoader(LoadOptions options) {
+        this.options = options;
+        this.dc = Util.initializeDataConfig(options.dataConfigFilePath);
     }
 
     public void load() {
-
         Util.info("validating your config...");
-        TypeDBClient schemaClient = TypeDBUtil.getClient(typeDBURI);
+        TypeDBClient schemaClient = TypeDBUtil.getClient(options.typedbURI);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
         ArrayList<String> errors = new ArrayList<>();
@@ -41,14 +34,18 @@ public class TypeDBLoader {
         validationReport.put("warnings", warnings);
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
-        if (validationReport.get("errors").size() == 0 && clean) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchemaPath());
-            Util.info("cleaned database and migrated schema...");
-        } else {
-            Util.info("continuing load...");
+
+        if (validationReport.get("errors").size() == 0) {
+            if (options.cleanMigration) {
+                TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, options.databaseName, dc.getGlobalConfig().getSchemaPath());
+                Util.info("cleaned database and migrated schema...");
+            } else if (options.loadSchema) {
+                TypeDBUtil.loadAndDefineSchema(schemaClient, options.databaseName, dc.getGlobalConfig().getSchemaPath());
+                Util.info("loaded schema...");
+            }
         }
 
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, options.databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
         if (validationReport.get("warnings").size() > 0) {
@@ -67,11 +64,11 @@ public class TypeDBLoader {
         Instant start = Instant.now();
         try {
             AsyncLoaderWorker asyncLoaderWorker = null;
-            try (TypeDBClient client = TypeDB.coreClient(typeDBURI, Runtime.getRuntime().availableProcessors())) {
+            try (TypeDBClient client = TypeDB.coreClient(options.typedbURI, Runtime.getRuntime().availableProcessors())) {
                 Runtime.getRuntime().addShutdownHook(
                         NamedThreadFactory.create(AsyncLoaderWorker.class, "shutdown").newThread(client::close)
                 );
-                asyncLoaderWorker = new AsyncLoaderWorker(dc, databaseName);
+                asyncLoaderWorker = new AsyncLoaderWorker(dc, options.databaseName);
                 asyncLoaderWorker.run(client);
             } finally {
                 if (asyncLoaderWorker != null) asyncLoaderWorker.executor.shutdown();
