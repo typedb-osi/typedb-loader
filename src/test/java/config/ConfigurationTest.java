@@ -47,7 +47,7 @@ public class ConfigurationTest {
 
         //entity-relations
         String relation = "contract";
-        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/contract.csv", dc.getRelations().get(relation).getDataPaths()[0]);
+        Assert.assertEquals("src/test/resources/1.0.0/phoneCalls/contract.csv.gz", dc.getRelations().get(relation).getDataPaths()[0]);
         Assert.assertEquals(',', dc.getRelations().get(relation).getConfig().getSeparator().charValue());
         Assert.assertEquals("contract", dc.getRelations().get(relation).getConceptType());
         Assert.assertEquals(50, dc.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());

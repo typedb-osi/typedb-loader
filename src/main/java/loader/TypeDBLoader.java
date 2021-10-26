@@ -34,6 +34,7 @@ public class TypeDBLoader {
         validationReport.put("warnings", warnings);
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
+
         if (validationReport.get("errors").size() == 0) {
             if (options.cleanMigration) {
                 TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, options.databaseName, dc.getGlobalConfig().getSchemaPath());
@@ -47,10 +48,10 @@ public class TypeDBLoader {
         TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, options.databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
-        if (validationReport.get("warnings"). size() > 0) {
+        if (validationReport.get("warnings").size() > 0) {
             validationReport.get("warnings").forEach(Util::warn);
         }
-        if (validationReport.get("errors"). size() > 0) {
+        if (validationReport.get("errors").size() > 0) {
             validationReport.get("errors").forEach(Util::error);
             schemaSession.close();
             schemaClient.close();

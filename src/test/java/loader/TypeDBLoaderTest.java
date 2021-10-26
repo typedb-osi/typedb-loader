@@ -1,7 +1,6 @@
 package loader;
 
 import cli.LoadOptions;
-import cli.TypeDBLoaderCLI;
 import util.TypeDBUtil;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
@@ -42,6 +41,7 @@ public class TypeDBLoaderTest {
     public void loadPhoneCallsTest() {
         String dcPath = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
         String databaseName = "phone-calls-test";
+
         String[] args = {
                 "load",
                 "-c", dcPath,

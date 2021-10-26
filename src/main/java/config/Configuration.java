@@ -54,58 +54,92 @@ public class Configuration {
     }
 
     public Generator getGeneratorByKey(String key){
-        for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return generator.getValue();
+        Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
+        if (attributeGenerators != null) {
+            for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return generator.getValue();
+                }
             }
         }
-        for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return generator.getValue();
+        Map<String, Configuration.Entity> entityGenerators = getEntities();
+        if (entityGenerators != null) {
+            for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return generator.getValue();
+                }
             }
         }
-        for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return generator.getValue();
+        Map<String, Configuration.Relation> relationGenerators = getRelations();
+        if (relationGenerators != null) {
+            for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return generator.getValue();
+                }
             }
         }
-        for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return generator.getValue();
+        Map<String, Configuration.AppendAttribute> aaGenerators = getAppendAttribute();
+        if (aaGenerators != null) {
+            for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return generator.getValue();
+                }
             }
         }
-        for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return generator.getValue();
+        Map<String, Configuration.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
+        if (aiGenerators != null) {
+            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return generator.getValue();
+                }
             }
         }
         return null;
     }
 
     public String getGeneratorTypeByKey(String key){
-        for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return "attributes";
+        Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
+        if (attributeGenerators != null) {
+            for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return "attributes";
+                }
             }
         }
-        for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return "entities";
+
+        Map<String, Configuration.Entity> entityGenerators = getEntities();
+        if (entityGenerators != null) {
+            for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return "entities";
+                }
             }
         }
-        for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return "relations";
+
+        Map<String, Configuration.Relation> relationGenerators = getRelations();
+        if (relationGenerators != null) {
+            for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return "relations";
+                }
             }
         }
-        for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return "appendAttribute";
+
+        Map<String, Configuration.AppendAttribute> aaGenerators = getAppendAttribute();
+        if (aaGenerators != null) {
+            for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return "appendAttribute";
+                }
             }
         }
-        for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
-            if (generator.getKey().equals(key)) {
-                return "appendAttributeOrInsertThing";
+
+        Map<String, Configuration.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
+        if (aiGenerators != null) {
+            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
+                if (generator.getKey().equals(key)) {
+                    return "appendAttributeOrInsertThing";
+                }
             }
         }
         return null;
