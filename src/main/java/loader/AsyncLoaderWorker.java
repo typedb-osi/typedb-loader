@@ -40,7 +40,7 @@ public class AsyncLoaderWorker {
         this.threads = dc.getGlobalConfig().getParallelisation();
         this.databaseName = databaseName;
         this.hasError = new AtomicBoolean(false);
-        this.batchGroup = 32;
+        this.batchGroup = 4;
         this.executor = Executors.newFixedThreadPool(threads, new NamedThreadFactory(databaseName));
     }
 
