@@ -32,7 +32,6 @@ public class AsyncLoaderWorker {
     private final int threads;
     private final String databaseName;
     private final AtomicBoolean hasError;
-    private final int batchGroup;
     private final Configuration dc;
 
     public AsyncLoaderWorker(Configuration dc, String databaseName) {
@@ -40,7 +39,6 @@ public class AsyncLoaderWorker {
         this.threads = dc.getGlobalConfig().getParallelisation();
         this.databaseName = databaseName;
         this.hasError = new AtomicBoolean(false);
-        this.batchGroup = 32;
         this.executor = Executors.newFixedThreadPool(threads, new NamedThreadFactory(databaseName));
     }
 
@@ -313,7 +311,7 @@ public class AsyncLoaderWorker {
                            Generator gen,
                            int batch) throws IOException, InterruptedException {
         Util.info("async-load (start): {} reading from {}", generatorKey, filename);
-        LinkedBlockingQueue<Either<List<List<String[]>>, Done>> queue = new LinkedBlockingQueue<>(threads * 4);
+        LinkedBlockingQueue<Either<List<String[]>, Done>> queue = new LinkedBlockingQueue<>(threads * 2);
         List<CompletableFuture<Void>> asyncWrites = new ArrayList<>(threads);
         for (int i = 0; i < threads; i++) {
             asyncWrites.add(asyncWrite(i + 1, filename, gen, session, queue));
@@ -326,9 +324,8 @@ public class AsyncLoaderWorker {
     private void bufferedRead(String filename,
                               Generator gen,
                               int batch,
-                              LinkedBlockingQueue<Either<List<List<String[]>>, AsyncLoaderWorker.Done>> queue) throws InterruptedException, IOException {
+                              LinkedBlockingQueue<Either<List<String[]>, AsyncLoaderWorker.Done>> queue) throws InterruptedException, IOException {
         Iterator<String> iterator = Util.newBufferedReader(filename).lines().skip(1).iterator();
-        List<List<String[]>> rowGroups = new ArrayList<>(batchGroup);
         List<String[]> rows = new ArrayList<>(batch);
 
         int count = 0;
@@ -345,12 +342,8 @@ public class AsyncLoaderWorker {
             Util.debug("buffered-read: (line {}): {}", count, Arrays.toString(rowTokens));
             rows.add(rowTokens);
             if (rows.size() == batch || !iterator.hasNext()) {
-                rowGroups.add(rows);
+                queue.put(Either.first(rows));
                 rows = new ArrayList<>(batch);
-                if (rowGroups.size() == batchGroup || !iterator.hasNext()) {
-                    queue.put(Either.first(rowGroups));
-                    rowGroups = new ArrayList<>(batchGroup);
-                }
             }
 
             if (count % 50_000 == 0) {
@@ -372,21 +365,19 @@ public class AsyncLoaderWorker {
                                                String filename,
                                                Generator gen,
                                                TypeDBSession session,
-                                               LinkedBlockingQueue<Either<List<List<String[]>>, AsyncLoaderWorker.Done>> queue) {
+                                               LinkedBlockingQueue<Either<List<String[]>, AsyncLoaderWorker.Done>> queue) {
         return CompletableFuture.runAsync(() -> {
             Util.debug("async-writer-{} (start): {}", id, filename);
-            Either<List<List<String[]>>, Done> queueItem;
+            Either<List<String[]>, Done> queueItem;
             try {
                 while ((queueItem = queue.take()).isFirst() && !hasError.get()) {
-                    List<List<String[]>> rowGroups = queueItem.first();
-                    for (List<String[]> rows : rowGroups) {
-                        try (TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.WRITE)) {
-                            rows.forEach(csv -> {
-                                Util.debug("async-writer-{}: {}", id, csv);
-                                gen.write(tx, csv);
-                            });
-                            tx.commit();
-                        }
+                    List<String[]> rows = queueItem.first();
+                    try (TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.WRITE)) {
+                        rows.forEach(csv -> {
+                            Util.debug("async-writer-{}: {}", id, csv);
+                            gen.write(tx, csv);
+                        });
+                        tx.commit();
                     }
                 }
                 assert queueItem.isSecond() || hasError.get();
