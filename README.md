@@ -143,7 +143,7 @@ GraknMigrator was built @[Bayer AG](https://www.bayer.com/) in the Semantic and 
 
 ## Licensing
 
-This repository includes software developed at [Bayer AG](https://www.bayer.com/).  It is released under a [GNU-3 General Public License](https://www.gnu.org/licenses/gpl-3.0.de.html).
+This repository includes software developed at [Bayer AG](https://www.bayer.com/).  It is released under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
  
 ## Credits
 
