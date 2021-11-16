@@ -49,11 +49,12 @@ public class TypeDBUtil {
         TypeDBSession schemaSession = getSchemaSession(client, databaseName);
         TypeQLDefine q = TypeQL.parseQuery(schemaAsString);
 
-        TypeDBTransaction writeTransaction = schemaSession.transaction(TypeDBTransaction.Type.WRITE);
-        writeTransaction.query().define(q);
-        writeTransaction.commit();
-        writeTransaction.close();
-        schemaSession.close();
+        try (TypeDBTransaction writeTransaction = schemaSession.transaction(TypeDBTransaction.Type.WRITE)) {
+            writeTransaction.query().define(q);
+            writeTransaction.commit();
+            writeTransaction.close();
+            schemaSession.close();
+        }
 
         Util.info("Defined schema to database <" + databaseName + ">");
     }

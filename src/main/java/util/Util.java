@@ -188,38 +188,42 @@ public class Util {
     }
 
     public static void setConstrainingAttributeConceptType(Configuration.ConstrainingAttribute[] attributes, TypeDBSession session) {
-        for (Configuration.ConstrainingAttribute attribute : attributes) {
-            attribute.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        try (TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.READ)) {
+            for (Configuration.ConstrainingAttribute attribute : attributes) {
+                attribute.setConceptValueType(tx);
+            }
         }
     }
 
     public static void setGetterAttributeConceptType(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
-        if (relation.getPlayers()[playerIndex].getRoleGetter() != null) {
-            Configuration.ThingGetter[] ownershipThingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getOwnershipThingGetters();
-            if (ownershipThingGetters != null) {
-                for (Configuration.ThingGetter ownershipRoleGetter : ownershipThingGetters) {
-                    ownershipRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        try (TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.READ)) {
+            if (relation.getPlayers()[playerIndex].getRoleGetter() != null) {
+                Configuration.ThingGetter[] ownershipThingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getOwnershipThingGetters();
+                if (ownershipThingGetters != null) {
+                    for (Configuration.ThingGetter ownershipRoleGetter : ownershipThingGetters) {
+                        ownershipRoleGetter.setConceptValueType(tx);
+                    }
                 }
-            }
-            Configuration.ThingGetter[] thingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getThingGetters();
-            if (thingGetters != null) {
-                for (Configuration.ThingGetter thingGetter : thingGetters) {
-                    if (thingGetter != null) {
-                        Configuration.ThingGetter[] thingThingGetters = thingGetter.getThingGetters();
-                        if (thingThingGetters != null) {
-                            for (Configuration.ThingGetter thingThingGetter : thingThingGetters) {
-                                if (thingThingGetter.getHandler() == TypeHandler.OWNERSHIP) {
-                                    thingThingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+                Configuration.ThingGetter[] thingGetters = relation.getPlayers()[playerIndex].getRoleGetter().getThingGetters();
+                if (thingGetters != null) {
+                    for (Configuration.ThingGetter thingGetter : thingGetters) {
+                        if (thingGetter != null) {
+                            Configuration.ThingGetter[] thingThingGetters = thingGetter.getThingGetters();
+                            if (thingThingGetters != null) {
+                                for (Configuration.ThingGetter thingThingGetter : thingThingGetters) {
+                                    if (thingThingGetter.getHandler() == TypeHandler.OWNERSHIP) {
+                                        thingThingGetter.setConceptValueType(tx);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        Configuration.RoleGetter attributeRoleGetter = relation.getPlayers()[playerIndex].getRoleGetter();
-        if (attributeRoleGetter != null && attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
-            attributeRoleGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+            Configuration.RoleGetter attributeRoleGetter = relation.getPlayers()[playerIndex].getRoleGetter();
+            if (attributeRoleGetter != null && attributeRoleGetter.getHandler() == TypeHandler.ATTRIBUTE) {
+                attributeRoleGetter.setConceptValueType(tx);
+            }
         }
     }
 
