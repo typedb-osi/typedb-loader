@@ -69,7 +69,7 @@ public class Configuration {
         return appendAttributeOrInsertThing;
     }
 
-    public Generator getGeneratorByKey(String key){
+    public Generator getGeneratorByKey(String key) {
         Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
         if (attributeGenerators != null) {
             for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
@@ -113,7 +113,7 @@ public class Configuration {
         return null;
     }
 
-    public String getGeneratorTypeByKey(String key){
+    public String getGeneratorTypeByKey(String key) {
         Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
         if (attributeGenerators != null) {
             for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
@@ -199,21 +199,22 @@ public class Configuration {
             return orderedBeforeGenerators;
         }
 
-        public ArrayList<String> getIgnoreGenerators() { return ignoreGenerators; }
+        public ArrayList<String> getIgnoreGenerators() {
+            return ignoreGenerators;
+        }
     }
 
     public class Generator {
-        String[] dataPaths;
+        String[] data;
         GeneratorConfig config;
 
-        public String[] getDataPaths() {
-            return dataPaths;
+        public String[] getData() {
+            return data;
         }
 
         public GeneratorConfig getConfig() {
             return config;
         }
-
     }
 
     public class GeneratorConfig {
@@ -229,122 +230,25 @@ public class Configuration {
         }
     }
 
+
     public class Attribute extends Generator {
-        ConstrainingAttribute attribute;
+        ConstrainingAttribute insert;
 
-        public ConstrainingAttribute getAttribute() {
-            return attribute;
+        public ConstrainingAttribute getInsert() {
+            return insert;
         }
-    }
-
-    public class Entity extends Generator {
-        String conceptType;
-        ConstrainingAttribute[] attributes;
-
-        public String getConceptType() {
-            return conceptType;
-        }
-
-        public ConstrainingAttribute[] getAttributes() {
-            return attributes;
-        }
-
-        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
-                if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
-                    tmp.add(constrainingAttribute);
-                }
-            }
-            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
-        }
-    }
-
-    public class Relation extends Generator {
-        String conceptType;
-        ConstrainingAttribute[] attributes;
-        Player[] players;
-
-        public String getConceptType() {
-            return conceptType;
-        }
-
-        public ConstrainingAttribute[] getAttributes() {
-            return attributes;
-        }
-
-        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            if (getAttributes() != null) {
-                for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
-                    if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
-                        tmp.add(constrainingAttribute);
-                    }
-                }
-                ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-                return tmp.toArray(requireNoneEmptyAttributes);
-            } else {
-                return new ConstrainingAttribute[0];
-            }
-
-        }
-
-        public Player[] getPlayers() {
-            return players;
-        }
-
-        public Player[] getRequiredNonEmptyPlayers() {
-            ArrayList<Player> tmp = new ArrayList<>();
-            for (Player player : getPlayers()) {
-                if (player.getRequireNonEmpty() != null) {
-                    if (player.getRequireNonEmpty()) {
-                        tmp.add(player);
-                    }
-                }
-            }
-            Player[] requireNoneEmptyAttributes = new Player[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
-        }
-    }
-
-    public class AppendAttribute extends Generator {
-        ThingGetter thingGetter;
-        ConstrainingAttribute[] attributes;
-
-        public ConstrainingAttribute[] getAttributes() {
-            return attributes;
-        }
-
-        public ConstrainingAttribute[] getRequireNonEmptyAttributes() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            for (ConstrainingAttribute constrainingAttribute : getAttributes()) {
-                if (constrainingAttribute.getRequireNonEmpty() != null && constrainingAttribute.getRequireNonEmpty()) {
-                    tmp.add(constrainingAttribute);
-                }
-            }
-            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
-        }
-
-        public ThingGetter getThingGetter() {
-            return thingGetter;
-        }
-    }
-
-    public class AppendAttributeOrInsertThing extends AppendAttribute {
     }
 
     public class ConstrainingAttribute {
-        String conceptType;
+        String attribute;
         AttributeValueType conceptValueType;
         String column;
-        Boolean requireNonEmpty;
+        Boolean required;
         String listSeparator;
         PreprocessorConfig preprocessorConfig;
 
-        public String getConceptType() {
-            return conceptType;
+        public String getAttribute() {
+            return attribute;
         }
 
         public AttributeValueType getConceptValueType() {
@@ -352,15 +256,15 @@ public class Configuration {
         }
 
         public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, conceptType);
+            this.conceptValueType = getValueType(txn, attribute);
         }
 
         public String getColumn() {
             return column;
         }
 
-        public Boolean getRequireNonEmpty() {
-            return requireNonEmpty;
+        public Boolean getRequired() {
+            return required;
         }
 
         public String getListSeparator() {
@@ -370,65 +274,15 @@ public class Configuration {
         public PreprocessorConfig getPreprocessorConfig() {
             return preprocessorConfig;
         }
-    }
 
-    public class RoleGetter extends ConstrainingAttribute {
-        String handler;
-        ThingGetter[] thingGetters;
-
-        public TypeHandler getHandler() {
-            return TypeHandler.valueOf(handler.toUpperCase());
-        }
-
-        public ThingGetter[] getThingGetters() {
-            return thingGetters;
-        }
-
-        public ThingGetter[] getOwnershipThingGetters() {
-            ArrayList<ThingGetter> tmp = new ArrayList<>();
-            ThingGetter[] thingGetters = getThingGetters();
-            if (thingGetters != null) {
-                for (ThingGetter thingGetter : getThingGetters()) {
-                    if (thingGetter.getHandler() == TypeHandler.OWNERSHIP) tmp.add(thingGetter);
-                }
-                ThingGetter[] ownershipThingGetter = new ThingGetter[tmp.size()];
-                return tmp.toArray(ownershipThingGetter);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    public class ThingGetter extends RoleGetter {
-        String roleType;
-        //TODO Config validation: allow here only a single or a set of attributes, or a single or a set of entities/attributes, not yet a mixture
-
-        public String getRoleType() {
-            return roleType;
-        }
-    }
-
-    public class Player {
-        String roleType;
-        Boolean requireNonEmpty;
-        RoleGetter roleGetter;
-
-        public String getRoleType() {
-            return roleType;
-        }
-
-        public Boolean getRequireNonEmpty() {
-            return requireNonEmpty;
-        }
-
-        public RoleGetter getRoleGetter() {
-            return roleGetter;
+        public void setAttribute(String attribute) {
+            this.attribute = attribute;
         }
     }
 
     public class PreprocessorConfig {
-        private String type;
-        private PreprocessorParameters parameters;
+        String type;
+        PreprocessorParameters parameters;
 
         public String getType() {
             return type;
@@ -451,4 +305,190 @@ public class Configuration {
             }
         }
     }
+
+    public class Entity extends Generator {
+        EntityInsert insert;
+
+        public EntityInsert getInsert() {
+            return insert;
+        }
+    }
+
+    public class EntityInsert {
+        String entity;
+        ConstrainingAttribute[] ownerships;
+
+        public String getEntity() {
+            return entity;
+        }
+
+        public ConstrainingAttribute[] getOwnerships() {
+            return ownerships;
+        }
+
+        public ConstrainingAttribute[] getRequiredOwnerships() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
+            for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
+                if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
+                    tmp.add(constrainingAttribute);
+                }
+            }
+            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
+            return tmp.toArray(requireNoneEmptyAttributes);
+        }
+    }
+
+    public class Relation extends Generator {
+        RelationInsert insert;
+
+        public RelationInsert getInsert() {
+            return insert;
+        }
+    }
+
+    public class RelationInsert {
+        String relation;
+        ConstrainingAttribute[] ownerships;
+        Player[] players;
+
+        public String getRelation() {
+            return relation;
+        }
+
+        public ConstrainingAttribute[] getOwnerships() {
+            return ownerships;
+        }
+
+        public ConstrainingAttribute[] getRequiredOwnerships() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
+            if (getOwnerships() != null) {
+                for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
+                    if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
+                        tmp.add(constrainingAttribute);
+                    }
+                }
+                ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
+                return tmp.toArray(requireNoneEmptyAttributes);
+            } else {
+                return new ConstrainingAttribute[0];
+            }
+        }
+
+        public Player[] getPlayers() {
+            return players;
+        }
+
+        public Player[] getRequiredPlayers() {
+            ArrayList<Player> tmp = new ArrayList<>();
+            for (Player player : getPlayers()) {
+                if (player.getRequired() != null) {
+                    if (player.getRequired()) {
+                        tmp.add(player);
+                    }
+                }
+            }
+            Player[] requireNoneEmptyAttributes = new Player[tmp.size()];
+            return tmp.toArray(requireNoneEmptyAttributes);
+        }
+    }
+
+    public class Player {
+        String role;
+        Boolean required;
+        RoleGetter match;
+
+        public String getRole() {
+            return role;
+        }
+
+        public Boolean getRequired() {
+            return required;
+        }
+
+        public RoleGetter getMatch() {
+            return match;
+        }
+    }
+
+    public class RoleGetter {
+        String type;
+        ConstrainingAttribute attribute;
+        ConstrainingAttribute[] ownerships;
+        Player[] players;
+
+        public String getType() {
+            return type;
+        }
+
+        public ConstrainingAttribute[] getOwnerships() {
+            return ownerships;
+        }
+
+        public Player[] getPlayers() {
+            return players;
+        }
+
+        public ConstrainingAttribute getAttribute() { return attribute; }
+
+        public Player[] getRequiredPlayers() {
+            ArrayList<Player> tmp = new ArrayList<>();
+            for (Player player : getPlayers()) {
+                if (player.getRequired() != null) {
+                    if (player.getRequired()) {
+                        tmp.add(player);
+                    }
+                }
+            }
+            Player[] requiredPlayers = new Player[tmp.size()];
+            return tmp.toArray(requiredPlayers);
+        }
+    }
+
+    public class AppendAttribute extends Generator {
+        AppendAttributeMatch match;
+        AppendAttributeInsert insert;
+
+        public AppendAttributeMatch getMatch() {
+            return match;
+        }
+
+        public AppendAttributeInsert getInsert() {
+            return insert;
+        }
+    }
+
+    public class AppendAttributeMatch {
+        String type;
+        ConstrainingAttribute[] ownerships;
+
+        public String getType() {
+            return type;
+        }
+
+        public ConstrainingAttribute[] getOwnerships() {
+            return ownerships;
+        }
+    }
+
+    public class AppendAttributeInsert {
+        ConstrainingAttribute[] ownerships;
+
+        public ConstrainingAttribute[] getOwnerships() {
+            return ownerships;
+        }
+
+        public ConstrainingAttribute[] getRequiredOwnerships() {
+            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
+            for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
+                if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
+                    tmp.add(constrainingAttribute);
+                }
+            }
+            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
+            return tmp.toArray(requireNoneEmptyAttributes);
+        }
+    }
+
+    public class AppendAttributeOrInsertThing extends AppendAttribute { }
+
 }

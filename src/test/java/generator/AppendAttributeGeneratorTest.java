@@ -47,12 +47,12 @@ public class AppendAttributeGeneratorTest {
         ArrayList<String> appendKeys = new ArrayList<>(List.of("append-twitter", "append-fakebook", "append-call-rating"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String appendkey : appendKeys) {
-            Configuration.ConstrainingAttribute[] hasAttributes = dc.getAppendAttribute().get(appendkey).getAttributes();
+            Configuration.ConstrainingAttribute[] hasAttributes = dc.getAppendAttribute().get(appendkey).getInsert().getOwnerships();
             if (hasAttributes != null) {
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
-            if (dc.getAppendAttribute().get(appendkey).getThingGetter() != null && dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters() != null) {
-                Configuration.ConstrainingAttribute[] thingGetterAttributes = dc.getAppendAttribute().get(appendkey).getThingGetter().getThingGetters();
+            if (dc.getAppendAttribute().get(appendkey).getMatch() != null && dc.getAppendAttribute().get(appendkey).getMatch().getOwnerships() != null) {
+                Configuration.ConstrainingAttribute[] thingGetterAttributes = dc.getAppendAttribute().get(appendkey).getMatch().getOwnerships();
                 Util.setConstrainingAttributeConceptType(thingGetterAttributes, session);
             }
         }

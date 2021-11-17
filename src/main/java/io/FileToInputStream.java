@@ -16,6 +16,7 @@
 
 package io;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,9 +29,9 @@ public class FileToInputStream {
             if (filepath == null) {
                 return null;
             } else if (filepath.endsWith(".gz")) {
-                return new GZIPInputStream(new FileInputStream(filepath));
+                return new BufferedInputStream(new GZIPInputStream(new FileInputStream(filepath)), 128_000);
             } else {
-                return new FileInputStream(filepath);
+                return new BufferedInputStream(new FileInputStream(filepath), 128_000);
             }
         } catch (IOException e) {
             e.printStackTrace();

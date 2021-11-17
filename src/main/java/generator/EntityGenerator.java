@@ -59,7 +59,7 @@ public class EntityGenerator implements Generator {
         }
 
         TypeQLInsert statement = generateThingInsertStatement(row);
-        if (entityInsertStatementValid(statement)) {
+        if (valid(statement)) {
             try {
                 tx.query().insert(statement);
             } catch (TypeDBClientException typeDBClientException) {
@@ -74,9 +74,9 @@ public class EntityGenerator implements Generator {
 
     public TypeQLInsert generateThingInsertStatement(String[] row) {
         if (row.length > 0) {
-            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getConceptType());
+            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(entityConfiguration.getInsert().getEntity());
 
-            constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, entityConfiguration.getAttributes());
+            constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, entityConfiguration.getInsert().getOwnerships());
 
             return TypeQL.insert(insertStatement);
         } else {
@@ -84,11 +84,11 @@ public class EntityGenerator implements Generator {
         }
     }
 
-    public boolean entityInsertStatementValid(TypeQLInsert insert) {
+    public boolean valid(TypeQLInsert insert) {
         if (insert == null) return false;
-        if (!insert.toString().contains("isa " + entityConfiguration.getConceptType())) return false;
-        for (Configuration.ConstrainingAttribute constrainingAttribute : entityConfiguration.getRequireNonEmptyAttributes()) {
-            if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
+        if (!insert.toString().contains("isa " + entityConfiguration.getInsert().getEntity())) return false;
+        for (Configuration.ConstrainingAttribute constrainingAttribute : entityConfiguration.getInsert().getRequiredOwnerships()) {
+            if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
         }
         return true;
     }

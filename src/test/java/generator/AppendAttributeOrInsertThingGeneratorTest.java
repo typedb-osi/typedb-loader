@@ -48,11 +48,11 @@ public class AppendAttributeOrInsertThingGeneratorTest {
         ArrayList<String> appendOrInsertKeys = new ArrayList<>(List.of("append-or-insert-person"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String appendOrInsertkey : appendOrInsertKeys) {
-            if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getAttributes() != null) {
-                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getAttributes(), session);
+            if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getInsert().getOwnerships() != null) {
+                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getInsert().getOwnerships(), session);
             }
-            if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter() != null && dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters() != null) {
-                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getThingGetter().getThingGetters(), session);
+            if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getMatch() != null && dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getMatch().getOwnerships() != null) {
+                Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getMatch().getOwnerships(), session);
             }
         }
         session.close();

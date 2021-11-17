@@ -48,12 +48,12 @@ public class RelationGeneratorTest {
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
-            if (dc.getRelations().get(relationKey).getAttributes() != null) {
-                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getAttributes();
+            if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
+                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
-            for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
-                Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
+            for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
+                Util.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
             }
         }
         session.close();
@@ -271,12 +271,19 @@ public class RelationGeneratorTest {
         ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel", "communication-channel-pm"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
-            if (dc.getRelations().get(relationKey).getAttributes() != null) {
-                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getAttributes();
+            if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
+                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
-            for (int idx = 0; idx < dc.getRelations().get(relationKey).getPlayers().length; idx++) {
-                Util.setGetterAttributeConceptType(dc.getRelations().get(relationKey), idx, session);
+            for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
+                Util.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
+                if (dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers() != null) {
+                    for (Configuration.Player player : dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers()) {
+                        if (player.getMatch().getOwnerships() != null) {
+                            Util.setConstrainingAttributeConceptType(player.getMatch().getOwnerships(), session);
+                        }
+                    }
+                }
             }
         }
         session.close();
@@ -586,18 +593,20 @@ public class RelationGeneratorTest {
         tmp = "match\n" +
                 "$player-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
                 "$player-1-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
-                "$player-1 (caller: $player-1-0) isa call;\n" +
+                "$player-1 (caller: $player-1-0, callee: $player-1-1) isa call;\n" +
                 "insert $rel (peer: $player-0, past-call: $player-1) isa communication-channel;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
+        tmp = "match $player-0 (caller: $player-0-0, callee: $player-0-1) isa call;\n" +
+                "insert $rel (past-call: $player-0) isa communication-channel;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
+        tmp = "match $player-0 (caller: $player-0-0, callee: $player-0-1) isa call;\n" +
+                "insert $rel (past-call: $player-0) isa communication-channel;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));
 
@@ -609,8 +618,8 @@ public class RelationGeneratorTest {
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "match\n" +
                 "$player-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
-                "$player-1-0 isa person, has phone-number \"+261 860 539 4754\";\n" +
-                "$player-1 (caller: $player-1-0) isa call;\n" +
+                "$player-1-1 isa person, has phone-number \"+261 860 539 4754\";\n" +
+                "$player-1 (caller: $player-1-0, callee: $player-1-1) isa call;\n" +
                 "insert $rel (peer: $player-0, past-call: $player-1) isa communication-channel;";
         Assert.assertEquals(tmp, statement.toString());
         Assert.assertFalse(gen.relationInsertStatementValid(statement));

@@ -77,25 +77,25 @@ public class AppendAttributeGenerator implements Generator {
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
             ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
-                    .isa(appendConfiguration.getThingGetter().getConceptType());
-            for (Configuration.ThingGetter ownershipThingGetter : appendConfiguration.getThingGetter().getThingGetters()) {
+                    .isa(appendConfiguration.getMatch().getType());
+            for (Configuration.ConstrainingAttribute consAtt : appendConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                        row, header, filePath, fileSeparator, ownershipThingGetter);
+                        row, header, filePath, fileSeparator, consAtt);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                    entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getConceptType(), constraintValue));
+                    entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(consAtt.getAttribute(), constraintValue));
                 }
             }
 
             UnboundVariable insertUnboundVar = TypeQL.var("thing");
             ThingVariable.Thing insertStatement = null;
-            for (Configuration.ConstrainingAttribute attributeToAppend : appendConfiguration.getAttributes()) {
+            for (Configuration.ConstrainingAttribute attributeToAppend : appendConfiguration.getInsert().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
                     if (insertStatement == null) {
-                        insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getConceptType(), constraintValue));
+                        insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
                     } else {
-                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getConceptType(), constraintValue));
+                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
                     }
                 }
             }
@@ -112,13 +112,13 @@ public class AppendAttributeGenerator implements Generator {
 
     public boolean appendAttributeInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
-        if (!insert.toString().contains("isa " + appendConfiguration.getThingGetter().getConceptType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendConfiguration.getThingGetter().getOwnershipThingGetters()) {
-            if (!insert.toString().contains(", has " + ownershipThingGetter.getConceptType())) return false;
+        if (!insert.toString().contains("isa " + appendConfiguration.getMatch().getType())) return false;
+        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendConfiguration.getMatch().getOwnerships()) {
+            if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
         }
-        if (appendConfiguration.getRequireNonEmptyAttributes() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendConfiguration.getRequireNonEmptyAttributes()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
+        if (appendConfiguration.getInsert().getRequiredOwnerships() != null) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : appendConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
             }
         }
         return true;

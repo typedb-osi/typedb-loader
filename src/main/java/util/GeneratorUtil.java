@@ -58,7 +58,7 @@ public class GeneratorUtil {
             ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, constrainingAttribute);
             for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
+                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getAttribute(), constraintValue));
             }
         }
     }
@@ -85,7 +85,7 @@ public class GeneratorUtil {
                                                                                                     char fileSeparator,
                                                                                                     Configuration.ConstrainingAttribute constrainingAttribute) {
 
-        String attributeType = constrainingAttribute.getConceptType();
+        String attributeType = constrainingAttribute.getAttribute();
         AttributeValueType attributeValueType = constrainingAttribute.getConceptValueType();
         String listSeparator = constrainingAttribute.getListSeparator();
         Configuration.PreprocessorConfig preprocessor = constrainingAttribute.getPreprocessorConfig();

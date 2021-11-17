@@ -16,8 +16,8 @@
 
 package generator;
 
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
 import config.Configuration;
-import config.TypeHandler;
 import io.FileLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import static util.GeneratorUtil.constrainThingWithHasAttributes;
+import static util.Util.playerType;
 
 public class RelationGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
@@ -83,54 +84,40 @@ public class RelationGenerator implements Generator {
             ArrayList<String> roleTypes = new ArrayList<>();
 
             int playerIdx = 0;
-            for (Configuration.Player player : relationConfiguration.getPlayers()) {
+            for (Configuration.Player player : relationConfiguration.getInsert().getPlayers()) {
                 String playerVar = "player-" + playerIdx;
-                TypeHandler playerTypeHandler = getPlayerType(player);
-                assert playerTypeHandler != null;
 
                 // ATTRIBUTE PLAYER
-                if (playerTypeHandler.equals(TypeHandler.ATTRIBUTE)) {
+                if (playerType(player).equals("attribute")) {
                     ThingVariable.Attribute playerMatchStatement = getAttributePlayerMatchStatement(row, player, playerVar);
                     if (playerMatchStatement != null) {
                         playerMatchStatements.add(playerMatchStatement);
                         playerVars.add(playerVar);
-                        roleTypes.add(player.getRoleType());
+                        roleTypes.add(player.getRole());
                         playerIdx += 1;
                     }
                 }
 
-                // ENTITY PLAYER BY ATTRIBUTE(s)
-                if (playerTypeHandler.equals(TypeHandler.ENTITY)) {
+                // ENTITY & RELATION PLAYER BY ATTRIBUTE(s)
+                if (playerType(player).equals("byAttribute")) {
                     ThingVariable.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
                     if (playerMatchStatement.toString().contains(", has")) {
                         playerMatchStatements.add(playerMatchStatement);
                         playerVars.add(playerVar);
-                        roleTypes.add(player.getRoleType());
+                        roleTypes.add(player.getRole());
                         playerIdx += 1;
                     }
                 }
 
-                // RELATION PLAYER BY ATTRIBUTE(s)
-                if (playerTypeHandler.equals(TypeHandler.RELATION)) {
-                    boolean isByAttribute = nestedRelationByAttribute(player);
-                    if (isByAttribute) {
-                        ThingVariable.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
-                        if (playerMatchStatement.toString().contains(", has")) {
-                            playerMatchStatements.add(playerMatchStatement);
-                            playerVars.add(playerVar);
-                            roleTypes.add(player.getRoleType());
-                            playerIdx += 1;
-                        }
-                    } else {
-                        ArrayList<ThingVariable<?>> playerMatchStatement = getRelationPlayerMatchStatementByPlayer(row, player, playerVar);
-                        if (playerMatchStatement != null) {
-                            playerMatchStatements.addAll(playerMatchStatement);
-                            playerVars.add(playerVar);
-                            roleTypes.add(player.getRoleType());
-                            playerIdx += 1;
-                        }
-                    }
+//                // Relation PLAYER BY PLAYERs
+                if (playerType(player).equals("byPlayer")) {
+                    ArrayList<ThingVariable<?>> playerMatchStatement = getRelationPlayerMatchStatement(row, player, playerVar);
+                    playerMatchStatements.addAll(playerMatchStatement);
+                    playerVars.add(playerVar);
+                    roleTypes.add(player.getRole());
+                    playerIdx += 1;
                 }
+
             }
 
             ThingVariable.Relation insertStatement = null;
@@ -142,9 +129,9 @@ public class RelationGenerator implements Generator {
                 }
             }
             if (insertStatement != null) {
-                insertStatement = insertStatement.isa(relationConfiguration.getConceptType());
-                if (relationConfiguration.getAttributes() != null) {
-                    constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, relationConfiguration.getAttributes());
+                insertStatement = insertStatement.isa(relationConfiguration.getInsert().getRelation());
+                if (relationConfiguration.getInsert().getOwnerships() != null) {
+                    constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, relationConfiguration.getInsert().getOwnerships());
                 }
 
                 return TypeQL.match(playerMatchStatements).insert(insertStatement);
@@ -156,134 +143,118 @@ public class RelationGenerator implements Generator {
         }
     }
 
-
-
-    private boolean nestedRelationByAttribute(Configuration.Player player) {
-        for (Configuration.ThingGetter thingGetter : player.getRoleGetter().getThingGetters()) {
-            if (thingGetter.getHandler() != TypeHandler.OWNERSHIP) return false;
-        }
-        return player.getRoleGetter().getOwnershipThingGetters().length > 0;
-    }
-
     private ThingVariable.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Player player, String playerVar) {
-        ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar)
-                .isa(player.getRoleGetter().getConceptType());
-        for (Configuration.ThingGetter ownershipThingGetter : player.getRoleGetter().getOwnershipThingGetters()) {
+        ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar).isa(player.getMatch().getType());
+        for (Configuration.ConstrainingAttribute consA : player.getMatch().getOwnerships()) {
             ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                    row, header, filePath, fileSeparator, ownershipThingGetter);
+                    row, header, filePath, fileSeparator, consA);
             for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getConceptType(), constraintValue));
+                playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(consA.getAttribute(), constraintValue));
             }
         }
         return playerMatchStatement;
     }
 
     private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
-        Configuration.RoleGetter attributeRoleGetter = player.getRoleGetter();
         ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                row, header, filePath, fileSeparator, attributeRoleGetter);
+                row, header, filePath, fileSeparator, player.getMatch().getAttribute());
         if (constraints.size() > 0) {
             return TypeQL.var(playerVar)
                     .constrain(constraints.get(0))
-                    .isa(attributeRoleGetter.getConceptType());
+                    .isa(player.getMatch().getType());
         } else {
             return null;
         }
     }
 
-    private ArrayList<ThingVariable<?>> getRelationPlayerMatchStatementByPlayer(String[] row, Configuration.Player player, String playerVar) {
+    private ArrayList<ThingVariable<?>> getRelationPlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
+        return recursiveAssemblyMatchStatement(row, player, playerVar);
+    }
 
-        // create a playerSubVar
-        ArrayList<ThingVariable.Thing> subPlayerMatchStatements = new ArrayList<>();
-        ArrayList<String> subPlayerVars = new ArrayList<>();
-        int subPlayerVarCounter = 0;
-        String subPlayerVar;
-        for (Configuration.ThingGetter thingGetter : player.getRoleGetter().getThingGetters()) {
-            subPlayerVar = playerVar + "-" + subPlayerVarCounter;
-            ThingVariable.Thing subPlayerMatchStatement = TypeQL.var(subPlayerVar)
-                    .isa(thingGetter.getConceptType());
-            for (Configuration.ThingGetter thingThingGetter : thingGetter.getThingGetters()) {
-                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                        row, header, filePath, fileSeparator, thingThingGetter);
-                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                    subPlayerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(thingThingGetter.getConceptType(), constraintValue));
+    private ArrayList<ThingVariable<?>> recursiveAssemblyMatchStatement(String[] row,
+                                                                        Configuration.Player player,
+                                                                        String playerVar) {
+        if (playerType(player).equals("attribute")) {
+            //terminating condition - attribute player:
+            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
+            ThingVariable<?> statement = getAttributePlayerMatchStatement(row, player, playerVar);
+            if (statement != null) {
+                statements.add(statement);
+            }
+            return statements;
+        } else if (playerType(player).equals("byAttribute")) {
+            //terminating condition - byAttribute player:
+            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
+            ThingVariable<?> statement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
+            if (statement != null && statement.toString().contains(", has")) {
+                statements.add(statement);
+            }
+            return statements;
+        } else if (playerType(player).equals("byPlayer")) {
+            // identify relation player "byPlayer"
+            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
+            //create the relation statement with the player vars that will be filled in recursion:
+            UnboundVariable ubv = TypeQL.var(playerVar);
+            ThingVariable.Relation relationMatch = null;
+            for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
+                Configuration.Player curPlayer = player.getMatch().getPlayers()[idx];
+                String curPlayerVar = playerVar + "-" + idx;
+                if (idx == 0) {
+                    relationMatch = ubv.rel(curPlayer.getRole(), curPlayerVar);
+                } else {
+                    relationMatch = relationMatch.rel(curPlayer.getRole(), curPlayerVar);
                 }
+                // this is where the recursion happens to fill the player var!
+                ArrayList<ThingVariable<?>> recursiveMatch = recursiveAssemblyMatchStatement(row, curPlayer, curPlayerVar);
+                // now add whatever the recursion brought back:
+                statements.addAll(recursiveMatch);
             }
-            if (subEntityValid(subPlayerMatchStatement, thingGetter)) {
-                subPlayerMatchStatements.add(subPlayerMatchStatement);
-                subPlayerVars.add(subPlayerVar);
-                subPlayerVarCounter++;
-            }
-        }
+            assert relationMatch != null;
+            relationMatch = relationMatch.isa(player.getMatch().getType());
+            statements.add(relationMatch);
 
-        ThingVariable.Relation relationMatchStatement = null;
-        for (int i = 0; i < subPlayerMatchStatements.size(); i++) {
-            if (relationMatchStatement == null) {
-                relationMatchStatement = TypeQL.var(playerVar).rel(player.getRoleGetter().getThingGetters()[i].getRoleType(), subPlayerVars.get(i));
-            } else {
-                relationMatchStatement = relationMatchStatement.rel(player.getRoleGetter().getThingGetters()[i].getRoleType(), subPlayerVars.get(i));
-            }
-        }
-        if (relationMatchStatement != null) {
-            relationMatchStatement = relationMatchStatement.isa(player.getRoleGetter().getConceptType());
-            ArrayList<ThingVariable<?>> playerMatchStatements = new ArrayList<>(subPlayerMatchStatements);
-            playerMatchStatements.add(relationMatchStatement);
-            if (playerMatchStatements.size() > 1) {
-                return playerMatchStatements;
-            } else {
-                return null;
-            }
+            return statements;
         } else {
             return null;
         }
     }
-
 
     public boolean relationInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
-        if (!insert.toString().contains("isa " + relationConfiguration.getConceptType())) return false;
+        if (!insert.toString().contains("isa " + relationConfiguration.getInsert().getRelation())) return false;
 
-        for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
-            if (player.getRoleGetter().getHandler() == TypeHandler.ATTRIBUTE) {
-                // the relation must be in the match statement
-                if (!insert.toString().contains("isa " + player.getRoleGetter().getConceptType())) return false;
-            } else if (player.getRoleGetter().getHandler() == TypeHandler.ENTITY) {
-                // the entity must be in the match statement
-                if (!insert.toString().contains("isa " + player.getRoleGetter().getConceptType())) return false;
-                // each identifying attribute of the entity must be in the match statement
-                Configuration.ThingGetter[] ownerships = player.getRoleGetter().getThingGetters();
-                for (Configuration.ThingGetter ownership : ownerships) {
-                    if (ownership != null) {
-                        String conceptType = ownership.getConceptType();
-                        if (!insert.toString().contains("has " + conceptType)) return false;
-                    }
+        int idx = 0;
+        for (Configuration.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
+            // if attribute player
+            // the attribute must be in the match statement
+            if (playerType(player).equals("attribute")) {
+                if (!validateAttributePlayer(player, insert)) {
+                    return false;
                 }
-            } else if (player.getRoleGetter().getHandler() == TypeHandler.RELATION) {
-                // the relation must be in the match statement
-                if (!insert.toString().contains("isa " + player.getRoleGetter().getConceptType())) return false;
-                // each identifying attribute of the relation must be in the match statement
-                Configuration.ThingGetter[] ownerships = player.getRoleGetter().getThingGetters();
-                for (Configuration.ThingGetter ownership : ownerships) {
-                    if (ownership != null && ownership.getHandler() == TypeHandler.OWNERSHIP) {
-                        String conceptType = ownership.getConceptType();
-                        if (!insert.toString().contains("has " + conceptType)) return false;
-                    }
+            } else if (playerType(player).equals("byAttribute")) {
+                if (!validateByAttributePlayer(player, insert)) {
+                    return false;
+                }
+            } else if (playerType(player).equals("byPlayer")) {
+                if (!recursiveValidationPlayers(player, insert, "player-" + idx)) {
+                    return false;
                 }
             }
+            idx++;
         }
 
         // all required attributes part of the insert statement
-        if (relationConfiguration.getRequireNonEmptyAttributes() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getRequireNonEmptyAttributes()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
+        if (relationConfiguration.getInsert().getRequiredOwnerships() != null) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
             }
         }
         // all roles that are required must be in the insert statement
-        for (Configuration.Player player : relationConfiguration.getRequiredNonEmptyPlayers()) {
-            if (!insert.toString().contains(player.getRoleType() + ":")) return false;
+        for (Configuration.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
+            if (!insert.toString().contains(player.getRole() + ":")) return false;
         }
         // must have number of requireNonNull players
-        int requiredPlayers = relationConfiguration.getRequiredNonEmptyPlayers().length;
+        int requiredPlayers = relationConfiguration.getInsert().getRequiredPlayers().length;
         for (int i = 0; i < requiredPlayers; i++) {
             if (!insert.toString().contains("player-" + i)) return false;
         }
@@ -291,24 +262,47 @@ public class RelationGenerator implements Generator {
         return true;
     }
 
-    public boolean subEntityValid(ThingVariable.Thing insert, Configuration.ThingGetter thingGetter) {
-        if (insert == null) return false;
-        if (!insert.toString().contains("isa " + thingGetter.getConceptType())) return false;
-        for (Configuration.ThingGetter thingThingGetter : thingGetter.getThingGetters()) {
-            if (!insert.toString().contains("has " + thingThingGetter.getConceptType())) return false;
+    private boolean validateAttributePlayer(Configuration.Player player, TypeQLInsert insert) {
+        return insert.toString().contains("isa " + player.getMatch().getType());
+    }
+
+    private boolean validateByAttributePlayer(Configuration.Player player, TypeQLInsert insert) {
+        if (!insert.toString().contains("isa " + player.getMatch().getType())) return false;
+        // each identifying attribute of the entity must be in the match statement
+        Configuration.ConstrainingAttribute[] ownerships = player.getMatch().getOwnerships();
+        for (Configuration.ConstrainingAttribute ownership : ownerships) {
+            if (ownership != null) {
+                if (!insert.toString().contains("has " + ownership.getAttribute())) return false;
+            }
         }
         return true;
     }
 
-    public char getFileSeparator() {
-        return this.fileSeparator;
+    private boolean recursiveValidationPlayers(Configuration.Player player, TypeQLInsert insert, String playerVar) {
+
+        if (playerType(player).equals("attribute")) {
+            //terminating condition - attribute player:
+            return validateAttributePlayer(player, insert);
+        } else if (playerType(player).equals("byAttribute")) {
+            //terminating condition - byAttribute player:
+            return validateByAttributePlayer(player, insert);
+        } else if (playerType(player).equals("byPlayer")) {
+            for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
+                // if player is a player in a relation
+                Configuration.Player curPlayer = player.getMatch().getPlayers()[idx];
+                String curPlayerVar = playerVar + "-" + idx;
+                if (!insert.toString().contains("isa " + curPlayer.getMatch().getType())) return false;
+                if (!insert.toString().contains(curPlayer.getRole() + ":")) return false;
+                if (!insert.toString().contains(curPlayerVar)) return false;
+                recursiveValidationPlayers(curPlayer, insert, curPlayerVar);
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    private TypeHandler getPlayerType(Configuration.Player player) {
-        Configuration.RoleGetter playerRoleGetter = player.getRoleGetter();
-        if (playerRoleGetter.getHandler() != TypeHandler.OWNERSHIP) {
-            return playerRoleGetter.getHandler();
-        }
-        return null;
+    public char getFileSeparator() {
+        return this.fileSeparator;
     }
 }

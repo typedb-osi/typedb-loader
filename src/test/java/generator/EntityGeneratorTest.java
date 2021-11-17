@@ -48,7 +48,7 @@ public class EntityGeneratorTest {
         ArrayList<String> entityKeys = new ArrayList<>(List.of("entity1", "entity2", "entity3"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String entityKey : entityKeys) {
-            for (int idx = 0; idx < dc.getEntities().get(entityKey).getAttributes().length; idx++) {
+            for (int idx = 0; idx < dc.getEntities().get(entityKey).getInsert().getOwnerships().length; idx++) {
                 setEntityHasAttributeConceptType(entityKey, idx, dc, session);
             }
         }
@@ -213,7 +213,7 @@ public class EntityGeneratorTest {
         assert dc != null;
         String entityKey = "person";
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
-        for (int idx = 0; idx < dc.getEntities().get(entityKey).getAttributes().length; idx++) {
+        for (int idx = 0; idx < dc.getEntities().get(entityKey).getInsert().getOwnerships().length; idx++) {
             setEntityHasAttributeConceptType(entityKey, idx, dc, session);
         }
         EntityGenerator gen = new EntityGenerator(dp,
@@ -228,186 +228,186 @@ public class EntityGeneratorTest {
         TypeQLInsert statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         String tmp = "insert $e isa person, has first-name \"Melli\", has last-name \"Winchcum\", has phone-number \"+7 171 898 0853\", has city \"London\", has age 55;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Celinda\", has last-name \"Bonick\", has phone-number \"+370 351 224 5176\", has city \"London\", has age 52;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Chryste\", has last-name \"Lilywhite\", has phone-number \"+81 308 988 7153\", has city \"London\", has age 66;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"D'arcy\", has last-name \"Byfford\", has phone-number \"+54 398 559 0423\", has city \"London\", has age 19, has nick-name \"D\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Xylina\", has last-name \"D'Alesco\", has phone-number \"+7 690 597 4443\", has city \"Cambridge\", has age 51;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Roldan\", has last-name \"Cometti\", has phone-number \"+263 498 495 0617\", has city \"Oxford\", has age 59, has nick-name \"Rolly\", has nick-name \"Rolli\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Cob\", has last-name \"Lafflin\", has phone-number \"+63 815 962 6097\", has city \"Cambridge\", has age 56;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Olag\", has last-name \"Heakey\", has phone-number \"+81 746 154 2598\", has city \"London\", has age 45;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Mandie\", has last-name \"Assender\", has phone-number \"+261 860 539 4754\", has city \"London\", has age 18;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Elenore\", has last-name \"Stokey\", has phone-number \"+62 107 530 7500\", has city \"Oxford\", has age 35;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+86 921 547 9004\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+48 894 777 5173\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+86 922 760 0418\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+33 614 339 0298\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+30 419 575 7546\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+7 414 625 3019\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+57 629 420 5680\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+351 515 605 7915\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+36 318 105 5629\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+63 808 497 1769\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+62 533 266 3426\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+351 272 414 6570\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+86 825 153 5518\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+86 202 257 8619\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+27 117 258 4149\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+48 697 447 6933\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+48 195 624 2025\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+1 254 875 4647\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+7 552 196 4096\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has phone-number \"+86 892 682 0628\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"John\", has last-name \"Smith\", has phone-number \"+62 999 888 7777\", has city \"London\", has age 43, has nick-name \"Jack\", has nick-name \"J\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has first-name \"Jane\", has last-name \"Smith\", has phone-number \"+62 999 888 7778\", has city \"London\", has age 43;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertTrue(gen.entityInsertStatementValid(statement));
+        Assert.assertTrue(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $null isa null, has null \"null\";";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertFalse(gen.entityInsertStatementValid(statement));
+        Assert.assertFalse(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has age 23;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertFalse(gen.entityInsertStatementValid(statement));
+        Assert.assertFalse(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person, has age 23;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertFalse(gen.entityInsertStatementValid(statement));
+        Assert.assertFalse(gen.valid(statement));
 
         statement = gen.generateThingInsertStatement(Util.parseCSV(iterator.next()));
         tmp = "insert $e isa person;";
         Assert.assertEquals(tmp, statement.toString());
-        Assert.assertFalse(gen.entityInsertStatementValid(statement));
+        Assert.assertFalse(gen.valid(statement));
 
     }
 
     private void setEntityHasAttributeConceptType(String entityKey, int attributeIndex, Configuration dc, TypeDBSession session) {
-        dc.getEntities().get(entityKey).getAttributes()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        dc.getEntities().get(entityKey).getInsert().getOwnerships()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
     }
 }

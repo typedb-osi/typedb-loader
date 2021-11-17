@@ -77,14 +77,14 @@ public class AttributeGenerator implements Generator {
     public List<TypeQLInsert> generateInsertStatements(String[] row) {
         if (row.length > 0) {
             ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                    row, header, filePath, fileSeparator, attributeConfiguration.getAttribute());
+                    row, header, filePath, fileSeparator, attributeConfiguration.getInsert());
 
             List<TypeQLInsert> insertStatements = new ArrayList<>();
             for (ThingConstraint.Value<?> constraint : constraints) {
                 insertStatements.add(TypeQL.insert(
                         TypeQL.var("a")
                                 .constrain(constraint)
-                                .isa(attributeConfiguration.getAttribute().getConceptType())
+                                .isa(attributeConfiguration.getInsert().getAttribute())
                 ));
             }
             return insertStatements;
@@ -95,7 +95,7 @@ public class AttributeGenerator implements Generator {
     }
 
     private boolean isValid(TypeQLInsert insert) {
-        return insert.toString().contains("isa " + attributeConfiguration.getAttribute().getConceptType());
+        return insert.toString().contains("isa " + attributeConfiguration.getInsert().getAttribute());
     }
 
     public char getFileSeparator() {

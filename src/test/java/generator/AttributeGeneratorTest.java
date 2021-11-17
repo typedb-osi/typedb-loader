@@ -51,7 +51,7 @@ public class AttributeGeneratorTest {
                 Objects.requireNonNullElseGet(dc.getAttributes().get(attributeKey).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
 
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
-        dc.getAttributes().get(attributeKey).getAttribute().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        dc.getAttributes().get(attributeKey).getInsert().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
         session.close();
         client.close();
 

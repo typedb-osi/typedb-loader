@@ -94,25 +94,25 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
             ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
-                    .isa(appendOrInsertConfiguration.getThingGetter().getConceptType());
-            for (Configuration.ThingGetter ownershipThingGetter : appendOrInsertConfiguration.getThingGetter().getThingGetters()) {
+                    .isa(appendOrInsertConfiguration.getMatch().getType());
+            for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, ownershipThingGetter);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                    entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getConceptType(), constraintValue));
+                    entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getAttribute(), constraintValue));
                 }
             }
 
             UnboundVariable insertUnboundVar = TypeQL.var("thing");
             ThingVariable.Thing insertStatement = null;
-            for (Configuration.ConstrainingAttribute attributeToAppend : appendOrInsertConfiguration.getAttributes()) {
+            for (Configuration.ConstrainingAttribute attributeToAppend : appendOrInsertConfiguration.getInsert().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
                     if (insertStatement == null) {
-                        insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getConceptType(), constraintValue));
+                        insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
                     } else {
-                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getConceptType(), constraintValue));
+                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
                     }
                 }
             }
@@ -129,17 +129,17 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public TypeQLInsert generateThingInsertStatement(String[] row) {
         if (row.length > 0) {
-            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getThingGetter().getConceptType());
+            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getMatch().getType());
 
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getThingGetter().getOwnershipThingGetters()) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, constrainingAttribute);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getConceptType(), constraintValue));
+                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getAttribute(), constraintValue));
                 }
             }
 
-            constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, appendOrInsertConfiguration.getAttributes());
+            constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, appendOrInsertConfiguration.getInsert().getOwnerships());
 
             return TypeQL.insert(insertStatement);
         } else {
@@ -149,13 +149,13 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public boolean appendAttributeInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
-        if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getThingGetter().getConceptType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getThingGetter().getOwnershipThingGetters()) {
-            if (!insert.toString().contains(", has " + ownershipThingGetter.getConceptType())) return false;
+        if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getMatch().getType())) return false;
+        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+            if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
         }
-        if (appendOrInsertConfiguration.getRequireNonEmptyAttributes() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getRequireNonEmptyAttributes()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
+        if (appendOrInsertConfiguration.getInsert().getRequiredOwnerships() != null) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
             }
         }
         return true;
@@ -163,15 +163,15 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public boolean thingInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
-        if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getThingGetter().getConceptType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getThingGetter().getOwnershipThingGetters()) {
-            if (ownershipThingGetter.getRequireNonEmpty() != null && ownershipThingGetter.getRequireNonEmpty()) {
-                if (!insert.toString().contains(", has " + ownershipThingGetter.getConceptType())) return false;
+        if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getMatch().getType())) return false;
+        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+            if (ownershipThingGetter.getRequired() != null && ownershipThingGetter.getRequired()) {
+                if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
             }
         }
-        if (appendOrInsertConfiguration.getRequireNonEmptyAttributes() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getRequireNonEmptyAttributes()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getConceptType())) return false;
+        if (appendOrInsertConfiguration.getInsert().getRequiredOwnerships() != null) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
             }
         }
         return true;
