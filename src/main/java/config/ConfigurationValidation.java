@@ -268,11 +268,9 @@ public class ConfigurationValidation {
                                            String breadcrumbs,
                                            String conceptType) {
         boolean valid = true;
-        TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.var("t").type(conceptType));
-        try {
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
             Util.trace(Integer.toString((int) txn.query().match(query).count()));
-            txn.close();
         } catch (TypeDBClientException typeDBClientException) {
             if (typeDBClientException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
                 validationReport.get("errors").add(breadcrumbs + ".conceptType: <" + conceptType + "> does not exist in schema");
@@ -458,14 +456,14 @@ public class ConfigurationValidation {
                              String breadcrumbs,
                              String relationConceptType,
                              String roleType) {
-        TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
-        TypeQLMatch query = TypeQL.match(TypeQL.type(relationConceptType).relates(TypeQL.var("r"))).get("r");
-        Stream<ConceptMap> answers = txn.query().match(query);
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
+            TypeQLMatch query = TypeQL.match(TypeQL.type(relationConceptType).relates(TypeQL.var("r"))).get("r");
+            Stream<ConceptMap> answers = txn.query().match(query);
 
-        if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
-            validationReport.get("errors").add(breadcrumbs + ".roleType: <" + roleType + "> is not a role for relation of type <" + relationConceptType + "> in schema");
+            if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
+                validationReport.get("errors").add(breadcrumbs + ".roleType: <" + roleType + "> is not a role for relation of type <" + relationConceptType + "> in schema");
+            }
         }
-        txn.close();
     }
 
 }
