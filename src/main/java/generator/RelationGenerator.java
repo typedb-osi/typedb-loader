@@ -288,7 +288,7 @@ public class RelationGenerator implements Generator {
             return validateByAttributePlayer(player, insert);
         } else if (playerType(player).equals("byPlayer")) {
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
-                // if player is a player in a relation
+                // if player is a relation with players - check validity of "shallow" relation player
                 Configuration.Player curPlayer = player.getMatch().getPlayers()[idx];
                 String curPlayerVar = playerVar + "-" + idx;
                 if (!insert.toString().contains("isa " + curPlayer.getMatch().getType())) return false;

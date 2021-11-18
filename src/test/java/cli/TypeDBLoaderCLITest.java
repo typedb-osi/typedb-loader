@@ -27,8 +27,7 @@ import util.TypeDBUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TypeDBLoaderCLITest {
 
@@ -52,8 +51,8 @@ public class TypeDBLoaderCLITest {
         assertEquals(options.dataConfigFilePath, config);
         assertEquals(options.databaseName, database);
         assertEquals(options.typedbURI, uri);
-        assertEquals(options.cleanMigration, true);
-        assertEquals(options.loadSchema, false);
+        assertTrue(options.cleanMigration);
+        assertFalse(options.loadSchema);
     }
 
     @Test
@@ -73,8 +72,8 @@ public class TypeDBLoaderCLITest {
         assertEquals(cleanLoadOptions.dataConfigFilePath, config);
         assertEquals(cleanLoadOptions.databaseName, db);
         assertEquals(cleanLoadOptions.typedbURI, uri);
-        assertEquals(cleanLoadOptions.cleanMigration, true);
-        assertEquals(cleanLoadOptions.loadSchema, false);
+        assertTrue(cleanLoadOptions.cleanMigration);
+        assertFalse(cleanLoadOptions.loadSchema);
 
         // run import once
         new TypeDBLoader(cleanLoadOptions).load();
@@ -91,8 +90,8 @@ public class TypeDBLoaderCLITest {
         assertEquals(continueLoadOptions.dataConfigFilePath, config);
         assertEquals(continueLoadOptions.databaseName, db);
         assertEquals(continueLoadOptions.typedbURI, uri);
-        assertEquals(continueLoadOptions.cleanMigration, false);
-        assertEquals(continueLoadOptions.loadSchema, false);
+        assertFalse(continueLoadOptions.cleanMigration);
+        assertFalse(continueLoadOptions.loadSchema);
 
         // load all data and schema again
         new TypeDBLoader(continueLoadOptions).load();
@@ -108,8 +107,8 @@ public class TypeDBLoaderCLITest {
         assertEquals(continueLoadSchemaOptions.dataConfigFilePath, config);
         assertEquals(continueLoadSchemaOptions.databaseName, db);
         assertEquals(continueLoadSchemaOptions.typedbURI, uri);
-        assertEquals(continueLoadSchemaOptions.cleanMigration, false);
-        assertEquals(continueLoadSchemaOptions.loadSchema, true);
+        assertFalse(continueLoadSchemaOptions.cleanMigration);
+        assertTrue(continueLoadSchemaOptions.loadSchema);
 
         // load all data and schema again
         new TypeDBLoader(continueLoadSchemaOptions).load();
