@@ -16,6 +16,7 @@
 
 package config;
 
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
 import type.AttributeValueType;
 import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
@@ -35,14 +36,16 @@ public class Configuration {
     Map<String, AppendAttribute> appendAttribute;
     Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
 
-    public static AttributeValueType getValueType(TypeDBTransaction txn, String conceptType) {
+    public static AttributeValueType getValueType(TypeDBSession session, String conceptType) {
         AttributeValueType valueType = null;
-        Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.var("t").type(conceptType)).get("t")).collect(Collectors.toSet());
-        assert answers.size() == 1;
-        for (ConceptMap answer : answers) {
-            valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
+            Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.var("t").type(conceptType)).get("t")).collect(Collectors.toSet());
+            assert answers.size() == 1;
+            for (ConceptMap answer : answers) {
+                valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());
+            }
+            return valueType;
         }
-        return valueType;
     }
 
     public GlobalConfig getGlobalConfig() {
@@ -255,8 +258,8 @@ public class Configuration {
             return conceptValueType;
         }
 
-        public void setConceptValueType(TypeDBTransaction txn) {
-            this.conceptValueType = getValueType(txn, attribute);
+        public void setConceptValueType(TypeDBSession session) {
+            this.conceptValueType = getValueType(session, attribute);
         }
 
         public String getColumn() {

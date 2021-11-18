@@ -367,11 +367,9 @@ public class ConfigurationValidation {
                                            String conceptType,
                                            String breadcrumbConceptType) {
         boolean exists = false;
-        TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.var("t").type(conceptType));
-        try {
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
             Util.trace(Integer.toString((int) txn.query().match(query).count()));
-            txn.close();
             exists = true;
         } catch (TypeDBClientException typeDBClientException) {
             if (typeDBClientException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
@@ -529,14 +527,13 @@ public class ConfigurationValidation {
                              String breadcrumbs,
                              String relationType,
                              String roleType) {
-        TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.type(relationType).relates(TypeQL.var("r"))).get("r");
-        Stream<ConceptMap> answers = txn.query().match(query);
-
-        if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
-            validationReport.get("errors").add(breadcrumbs + ".role: <" + roleType + "> is not a role for relation of type <" + relationType + "> in schema");
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
+            Stream<ConceptMap> answers = txn.query().match(query);
+            if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
+                validationReport.get("errors").add(breadcrumbs + ".role: <" + roleType + "> is not a role for relation of type <" + relationType + "> in schema");
+            }
         }
-        txn.close();
     }
 
     private void valRolePlayedByConcept(HashMap<String, ArrayList<String>> validationReport,
@@ -545,15 +542,13 @@ public class ConfigurationValidation {
                                         String relationType,
                                         String role,
                                         String conceptType) {
-
-        TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ);
         TypeQLMatch query = TypeQL.match(TypeQL.var("c").plays(relationType, role)).get("c");
-        Stream<ConceptMap> answers = txn.query().match(query);
-
-        if (answers.noneMatch(c -> c.get("c").asThingType().getLabel().name().equals(conceptType))) {
-            validationReport.get("errors").add(breadcrumbs + ".role: <" + role + "> is not player by <" + conceptType + "> in relation of type <" + relationType + "> in schema");
+        try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
+            Stream<ConceptMap> answers = txn.query().match(query);
+            if (answers.noneMatch(c -> c.get("c").asThingType().getLabel().name().equals(conceptType))) {
+                validationReport.get("errors").add(breadcrumbs + ".role: <" + role + "> is not player by <" + conceptType + "> in relation of type <" + relationType + "> in schema");
+            }
         }
-        txn.close();
     }
 
 }

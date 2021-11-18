@@ -17,6 +17,7 @@
 package generator;
 
 import config.Configuration;
+import util.QueryUtilTest;
 import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
@@ -53,7 +54,7 @@ public class RelationGeneratorTest {
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
-                Util.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
+                QueryUtilTest.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
             }
         }
         session.close();
@@ -276,7 +277,7 @@ public class RelationGeneratorTest {
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
-                Util.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
+                QueryUtilTest.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
                 if (dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers() != null) {
                     for (Configuration.Player player : dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers()) {
                         if (player.getMatch().getOwnerships() != null) {

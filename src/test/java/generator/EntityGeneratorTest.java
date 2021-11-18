@@ -21,7 +21,6 @@ import util.TypeDBUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.connection.TypeDBClient;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -408,6 +407,6 @@ public class EntityGeneratorTest {
     }
 
     private void setEntityHasAttributeConceptType(String entityKey, int attributeIndex, Configuration dc, TypeDBSession session) {
-        dc.getEntities().get(entityKey).getInsert().getOwnerships()[attributeIndex].setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+        dc.getEntities().get(entityKey).getInsert().getOwnerships()[attributeIndex].setConceptValueType(session);
     }
 }

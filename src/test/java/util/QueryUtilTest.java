@@ -16,6 +16,9 @@
 
 package util;
 
+import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import config.Configuration;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,6 +34,26 @@ public class QueryUtilTest {
             return date.atTime(time);
         } else {
             return date.atStartOfDay();
+        }
+    }
+    public static void setPlayerAttributeTypes(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
+        if (relation.getInsert().getPlayers()[playerIndex].getMatch() != null) {
+            Configuration.RoleGetter currentPlayerMatch = relation.getInsert().getPlayers()[playerIndex].getMatch();
+            if (currentPlayerMatch != null) {
+                // if attribute player
+                if (currentPlayerMatch.getAttribute() != null) {
+                    System.out.println("attribute player, index " + playerIndex + " " + relation.getInsert().getRelation());
+                    currentPlayerMatch.getAttribute().setAttribute(currentPlayerMatch.getType());
+                    currentPlayerMatch.getAttribute().setConceptValueType(session);
+                }
+                // if byAttribute player
+                else if (currentPlayerMatch.getOwnerships() != null) {
+                    System.out.println("byAttribute player, index " + playerIndex + " " + relation.getInsert().getRelation());
+                    for (Configuration.ConstrainingAttribute ownership : currentPlayerMatch.getOwnerships()) {
+                        ownership.setConceptValueType(session);
+                    }
+                }
+            }
         }
     }
 }

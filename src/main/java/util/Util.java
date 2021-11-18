@@ -20,7 +20,6 @@ import config.Configuration;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.vaticle.typedb.client.api.connection.TypeDBSession;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -95,7 +94,7 @@ public class Util {
         }
     }
 
-    public static String[] parseBySeparator(String line, char separator) throws IOException {
+    public static String[] parseBySeparator(String line, char separator) throws IllegalArgumentException {
         if (separator == ',') {
             return parseCSV(line);
         } else if (separator == '\t') {
@@ -204,7 +203,7 @@ public class Util {
 
     public static void setConstrainingAttributeConceptType(Configuration.ConstrainingAttribute[] attributes, TypeDBSession session) {
         for (Configuration.ConstrainingAttribute attribute : attributes) {
-            attribute.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
+            attribute.setConceptValueType(session);
         }
     }
 
@@ -218,46 +217,6 @@ public class Util {
         } else {
             return "";
         }
-    }
-
-    public static void setPlayerAttributeTypes(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
-        if (relation.getInsert().getPlayers()[playerIndex].getMatch() != null) {
-            Configuration.RoleGetter currentPlayerMatch = relation.getInsert().getPlayers()[playerIndex].getMatch();
-            if (currentPlayerMatch != null) {
-                // if attribute player
-                if (currentPlayerMatch.getAttribute() != null) {
-                    System.out.println("attribute player, index " + playerIndex + " " + relation.getInsert().getRelation());
-                    currentPlayerMatch.getAttribute().setAttribute(currentPlayerMatch.getType());
-                    currentPlayerMatch.getAttribute().setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-                }
-                // if byAttribute player
-                else if (currentPlayerMatch.getOwnerships() != null) {
-                    System.out.println("byAttribute player, index " + playerIndex + " " + relation.getInsert().getRelation());
-                    for (Configuration.ConstrainingAttribute ownership : currentPlayerMatch.getOwnerships()) {
-                        ownership.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-                    }
-                }
-
-                // if byPlayer player
-                // TODO: must also be recursive...
-//            Configuration.ThingGetter[] thingGetters = relation.getPlayers()[playerIndex].getMatch().getOwnerships();
-//            if (thingGetters != null) {
-//                for (Configuration.ThingGetter thingGetter : thingGetters) {
-//                    if (thingGetter != null) {
-//                        Configuration.ThingGetter[] thingThingGetters = thingGetter.getOwnerships();
-//                        if (thingThingGetters != null) {
-//                            for (Configuration.ThingGetter thingThingGetter : thingThingGetters) {
-//                                if (thingThingGetter.getHandler() == TypeHandler.OWNERSHIP) {
-//                                    thingThingGetter.setConceptValueType(session.transaction(TypeDBTransaction.Type.READ));
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-            }
-        }
-
     }
 
     public static Integer getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
