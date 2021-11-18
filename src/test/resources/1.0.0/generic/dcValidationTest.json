@@ -1,83 +1,91 @@
 {
-  "defaultConfig": {
+  "globalConfig": {
     "separator": ',',
     "rowsPerCommit": 200,
     "parallelisation": 64,
-    "schemaPath": "src/test/resources/1.0.0/synthetic/schema.gql"
+    "schema": "src/test/resources/1.0.0/generic/schema.gql"
   },
   "attributes": {
     "names": {
-      "dataPaths": [
-        "src/test/resources/1.0.0/synthetic/names.csv"
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv"
       ],
-      "attribute": {
-        "column": "doesnotexist",
-        "conceptType": "name"
-      },
+      "insert": {
+        "attribute": "name",
+        "column": "doesnotexist"
+      }
     },
     "no-file": {
-      "dataPaths": [
-        "src/test/resources/1.0.0/synthetic/nam.csv",
-        "src/test/resources/1.0.0/synthetic/na.csv"
+      "data": [
+        "src/test/resources/1.0.0/generic/nam.csv",
+        "src/test/resources/1.0.0/generic/na.csv"
       ],
-      "column": "values",
-      "conceptType": "doesnotexist"
+      "insert": {
+        "column": "values",
+        "attribute": "doesnotexist"
+      }
     },
     "empty-file": {
-      "dataPaths": [
-        "src/test/resources/1.0.0/synthetic/empty.csv",
-        "src/test/resources/1.0.0/synthetic/nam.csv"
+      "data": [
+        "src/test/resources/1.0.0/generic/empty.csv",
+        "src/test/resources/1.0.0/generic/nam.csv"
       ],
-      "column": "values",
-      "conceptType": "doesnotexist"
+      "insert": {
+        "column": "values",
+        "attribute": "doesnotexist"
+      }
     }
   },
   "entities": {
     "missing-attributes": {
-      "dataPaths": [
-        "src/test/resources/1.0.0/synthetic/names.csv"
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv"
       ],
       "column": "name",
       "conceptType": "person"
     },
     "person": {
-      "dataPaths": [
-        "src/test/resources/1.0.0/synthetic/names.csv",
-        "src/test/resources/1.0.0/synthetic/empty.csv",
-        "src/test/resources/1.0.0/synthetic/notfound.csv",
-        "src/test/resources/1.0.0/synthetic/notfound-other.csv"
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv",
+        "src/test/resources/1.0.0/generic/empty.csv",
+        "src/test/resources/1.0.0/generic/notfound.csv",
+        "src/test/resources/1.0.0/generic/notfound-other.csv"
       ],
-      "conceptType": "doesnotexist",
-      "separator": ",",
-      "attributes": [
-        {
-          "conceptType": "name",
-          "column": "name",
-          "requireNonEmpty": false
-        },
-        {
-          "conceptType": "doesnotexist",
-          "column": "name",
-          "requireNonEmpty": false
-        },
-        {
-          "conceptType": "name",
-          "column": "doesnotexist",
-          "requireNonEmpty": false
-        },
-        {
-          "conceptType": "name",
-          "column": "name"
-        },
-        {
-          "column": "name",
-          "requireNonEmpty": false
-        },
-        {
-          "conceptType": "name",
-          "requireNonEmpty": false
-        }
-      ]
+      "config": {
+        "separator": ","
+      },
+      "insert": {
+        "entity": "doesnotexist",
+        "ownerships": [
+          {
+            "attribute": "name",
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "doesnotexist",
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "column": "doesnotexist",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "column": "name"
+          },
+          {
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "required": false
+          }
+        ]
+      }
     }
   }
 }

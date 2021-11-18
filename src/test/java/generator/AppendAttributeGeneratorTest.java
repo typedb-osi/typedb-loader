@@ -42,7 +42,7 @@ public class AppendAttributeGeneratorTest {
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
-        Configuration dc = Util.initializeDataConfig(dcp);
+        Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> appendKeys = new ArrayList<>(List.of("append-twitter", "append-fakebook", "append-call-rating"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);

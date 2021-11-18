@@ -278,14 +278,14 @@ public class ConfigurationValidation {
     }
 
     public void validateSchemaPresent(HashMap<String, ArrayList<String>> validationReport) {
-        String schemaPath = configuration.getGlobalConfig().getSchemaPath();
-        if (schemaPath == null) {
-            validationReport.get("errors").add("defaultConfig.schemaPath: missing required field");
+        String schema = configuration.getGlobalConfig().getSchema();
+        if (schema == null) {
+            validationReport.get("errors").add("defaultConfig.schema: missing required field");
         } else {
             try {
-                Util.newBufferedReader(schemaPath);
+                Util.newBufferedReader(schema);
             } catch (FileNotFoundException fileNotFoundException) {
-                validationReport.get("errors").add("defaultConfig.schemaPath - schema file not found under: <" + schemaPath + ">");
+                validationReport.get("errors").add("defaultConfig.schema - schema file not found under: <" + schema + ">");
             }
         }
     }
@@ -317,7 +317,7 @@ public class ConfigurationValidation {
                 } catch (IOException fileNotFoundException) {
                     validationReport.get("errors").add(breadcrumbs + ".data: <" + filepath + ">: file not found");
                     valid = false;
-                } catch (IllegalArgumentException ioException) {
+                } catch (NullPointerException nullPointerException) {
                     validationReport.get("errors").add(breadcrumbs + ".data: <" + filepath + ">: file is empty");
                     valid = false;
                 }

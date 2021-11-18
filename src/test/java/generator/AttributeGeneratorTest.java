@@ -43,7 +43,7 @@ public class AttributeGeneratorTest {
 
         String dp = new File("src/test/resources/1.0.0/phoneCalls/is-in-use.csv").getAbsolutePath();
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
-        Configuration dc = Util.initializeDataConfig(dcp);
+        Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         String attributeKey = "is-in-use";
         AttributeGenerator gen = new AttributeGenerator(dp,

@@ -57,7 +57,7 @@ public class Util {
         return file.getAbsolutePath();
     }
 
-    public static Configuration initializeDataConfig(String dcPath) {
+    public static Configuration initializeConfig(String dcPath) {
         try {
             BufferedReader bufferedReader = newBufferedReader(dcPath);
             Type DataConfigType = new TypeToken<Configuration>() {

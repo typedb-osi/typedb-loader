@@ -169,7 +169,7 @@ public class Configuration {
         Character separator;
         Integer rowsPerCommit;
         Integer parallelisation;
-        String schemaPath;
+        String schema;
         ArrayList<String> orderedBeforeGenerators;
         ArrayList<String> orderedAfterGenerators;
         ArrayList<String> ignoreGenerators;
@@ -187,8 +187,8 @@ public class Configuration {
             else return parallelisation;
         }
 
-        public String getSchemaPath() {
-            return schemaPath;
+        public String getSchema() {
+            return schema;
         }
 
         public ArrayList<String> getOrderedAfterGenerators() {

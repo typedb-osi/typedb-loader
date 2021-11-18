@@ -37,7 +37,7 @@ public class TypeDBLoader {
 
     public TypeDBLoader(LoadOptions options) {
         this.options = options;
-        this.dc = Util.initializeDataConfig(options.dataConfigFilePath);
+        this.dc = Util.initializeConfig(options.dataConfigFilePath);
     }
 
     public void load() {
@@ -53,10 +53,10 @@ public class TypeDBLoader {
 
         if (validationReport.get("errors").size() == 0) {
             if (options.cleanMigration) {
-                TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, options.databaseName, dc.getGlobalConfig().getSchemaPath());
+                TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, options.databaseName, dc.getGlobalConfig().getSchema());
                 Util.info("cleaned database and migrated schema...");
             } else if (options.loadSchema) {
-                TypeDBUtil.loadAndDefineSchema(schemaClient, options.databaseName, dc.getGlobalConfig().getSchemaPath());
+                TypeDBUtil.loadAndDefineSchema(schemaClient, options.databaseName, dc.getGlobalConfig().getSchema());
                 Util.info("loaded schema...");
             }
         }

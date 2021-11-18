@@ -1,8 +1,8 @@
 {
-  "defaultConfig": {
+  "globalConfig": {
     "separator": ',',
     "rowsPerCommit": 200,
-    "schemaPath": "src/test/resources/1.0.0/phoneCalls/schema-updated.gql"
+    "schema": "src/test/resources/1.0.0/phoneCalls/schema-updated.gql"
   },
   relations: {
 

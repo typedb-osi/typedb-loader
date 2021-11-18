@@ -26,7 +26,7 @@ public class ConfigurationTest {
 
     @Test
     public void dcPhoneCallsTest() {
-        Configuration dc = Util.initializeDataConfig(new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath());
         //general
         Assert.assertNotNull(dc);
 

@@ -3,7 +3,7 @@
     "separator": ',',
     "rowsPerCommit": 100,
     "parallelisation": 4,
-    "schemaPath": "src/test/resources/1.0.0/generic/schema.gql"
+    "schema": "src/test/resources/1.0.0/generic/schema.gql"
   },
   "entities": {
     "entity1": {

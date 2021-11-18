@@ -43,7 +43,7 @@ public class RelationGeneratorTest {
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
-        Configuration dc = Util.initializeDataConfig(dcp);
+        Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
@@ -266,7 +266,7 @@ public class RelationGeneratorTest {
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
-        Configuration dc = Util.initializeDataConfig(dcp);
+        Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel", "communication-channel-pm"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);

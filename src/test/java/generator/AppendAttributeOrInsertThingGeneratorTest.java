@@ -43,7 +43,7 @@ public class AppendAttributeOrInsertThingGeneratorTest {
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
-        Configuration dc = Util.initializeDataConfig(dcp);
+        Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> appendOrInsertKeys = new ArrayList<>(List.of("append-or-insert-person"));
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
