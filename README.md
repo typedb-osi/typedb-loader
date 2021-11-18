@@ -1,20 +1,20 @@
 
 
-![grami_icon](https://github.com/bayer-science-for-a-better-life/grami/blob/master/grami_banner.png?raw=true)
+![TypeDBLoader_icon](https://github.com/bayer-science-for-a-better-life/grami/blob/master/typedbloader.png?raw=true)
 ---
 ---
 ### 
-![GraMi Test](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Test/badge.svg?branch=master)
-![GraMi Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Build/badge.svg)
+![TypeDB Loader Test](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Test/badge.svg?branch=master)
+![TypeDB Loader Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Build/badge.svg)
 ###
 
 ---
 
-If your [Grakn.ai](https://github.com/graknlabs/grakn) project
+If your [TypeDB](https://github.com/vaticle/typedb) project
  - has a lot of data
  - and you want/need to focus on schema design, inference, and querying
 
-Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. GraMi streams data from files and migrates them into grakn **at scale**!
+Use TypeDB Loader to take care of your data migration for you. TypeDB Loader streams data from files and migrates them into TypeDB **at scale**!
  
 ## Features:
  - Data Input:
@@ -22,124 +22,122 @@ Use GraMi (**Gra**kn**Mi**grator) to take care of your data migration for you. G
     - supports any tabular data file with your separator of choice (i.e.: csv, tsv, whatever-sv...)
     - supports gzipped files
     - ignores unnecessary columns
- - [Attribute](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes), [Entity](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities), [Relation](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations), [Nested Relations](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations), [Attribute-Player Relations](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations) Migration:
-    - migrate required/optional attributes of any grakn type (string, boolean, long, double, datetime)
-    - migrate required/optional role players (entity & relations)
-    - migrate list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by Grakn)
-    - migrate list-like player columns as n players
-    - **migrate entity if not present - if present, either do not write or append attributes**
+ - [Attribute](), [Entity](), [Relation]() Loading:
+    - load required/optional attributes of any TypeDB type (string, boolean, long, double, datetime)
+    - load required/optional role players (attribute / entity / relation)
+    - load list-like attribute columns as n attributes (recommended procedure until attribute lists are fully supported by TypeDB)
+    - load list-like player columns as n players for a relation
+    - load entity if not present - if present, either do not write or append attributes
+ - [Appending Attributes]() to existing things
+ - [Append-Attribute-If-Present-Else-Insert]() for entities
+ - [Schema Updating]() for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
  - Data Validation:
     - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
+ - Configuration Validation:
+    - write your configuration with confidence: warnings will display useful information for fine tuning, errors will let you know what you forgot. All BEFORE the database is touched.
  - Performance:
-    - parallelized asynchronous writes to Grakn to make the most of your hardware configuration
- - Stop/Restart:
+    - parallelized asynchronous writes to TypeDB to make the most of your hardware configuration, optimized with engineers @vaticle
+ - Stop/Restart (in re-implementation, currently NOT available):
     - tracking of your migration status to stop/restart, or restart after failure
- - [Schema Updating](https://github.com/bayer-science-for-a-better-life/grami/wiki/Schema-Updating) for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
- - [Appending Attributes](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-Attributes) to existing things
- - [Append-If-Present-Else-Insert](https://github.com/bayer-science-for-a-better-life/grami/wiki/Append-If-Present-Else-Insert)
- - [Basic Column Preprocessing using RegEx's](https://github.com/bayer-science-for-a-better-life/grami/wiki/Preprocessing)
 
-After creating your processor configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/processorConfig.json)) and data configuration ([example](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/dataConfig.json)), you can use GraMi
- - as an [executable CLI](https://github.com/bayer-science-for-a-better-life/grami/wiki/Grami-as-Executable-CLI) - no coding - configuration required 
- - in [your own Java project](https://github.com/bayer-science-for-a-better-life/grami/wiki/GraMi-as-Dependency) - easy API - configuration required
- 
-Please note that the recommended way of developing your schema is still to use your favorite code editor/IDE in combination with the grakn console.
+ - [Basic Column Preprocessing using RegEx's]()
+
+Create a Loading Configuration ([example]()) and use TypeDB Loader
+ - as an [executable CLI]() - no coding 
+ - in [your own Java project]() - easy API
 
 ## How it works:
 
-To illustrate how to use GraMi, we will use a slightly extended version of the "phone-calls" example [dataset](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls) and [schema](https://github.com/bayer-science-for-a-better-life/grami/tree/master/src/test/resources/phone-calls/schema.gql) from the grakn developer documentation:
+To illustrate how to use TypeDB Loader, we will use a slightly extended version of the "phone-calls" example [dataset]() and [schema]() from the TypeDB developer documentation:
 
-### Processor Configuration
+### Configuration
 
-The processor configuration file describes how you want data to be migrated given the constraints of your schema. There are different processor types. 
+The configuration file tells TypeDB Loader what things you want to insert for each of your data files and how to do it. 
 
-Depending on what you would like to migrate, see here:
+Here are some example:
 
- - [Attribute Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes#processor-config)
- - [Entity Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities#processor-config)
- - [Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#processor-config)
- - [Nested Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#processor-config)
- - [Attribute-Player Relation Processor Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations#processor-config)
+ - [Attribute Data Config Example]()
+ - [Entity Data Config Example]()
+ - [Relation Data Config Example]()
+ - [Nested Relation - Match by Attribute(s) - Data Config Example]()
+ - [Nested Relation - Match by Player(s) - Data Config Example]()
+ - [Attribute-Player Relation - Data Config Example]()
+ - [Custom Migration Order of Data Config Entries]()
 
-### Data Configuration
-
-The data configuration file maps each data file and its columns to your processor configurations and specifies whether a column contains single/a list of values. In addition, you can specify the size of processing batches and the number of threads (the number of cores on your machine) to be used for the migration to fine-tune the performance (where a greater number of threads up to 8 is always better while batchsize depends on the complexity of your concept (# of attributes per entity record and/or # of players per relation record)). 
-
-A good point to start the performance optimization is to set the number of threads equal to the number of cores on your machine and the batchsize to 500 * threads (i.e.: 4 threads => batchsize = 2000).
-
-See Example here:
-
- - [Attribute Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attributes#data-config)
- - [Entity Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Entities#data-config)
- - [Relation Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Relations#data-config)
- - [Nested Relation - Match by Attribute(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---attribute-matching)
- - [Nested Relation - Match by Player(s) - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Nested-Relations#data-config---player-matching)
- - [Attribute-Player Relation - Data Config Example](https://github.com/bayer-science-for-a-better-life/grami/wiki/Migrating-Attribute-Player-Relations#data-config)
- - [Custom Migration Order of Data Config Entries](https://github.com/bayer-science-for-a-better-life/grami/wiki/Custom-Migration-Order)
+For detailed documentation, please refer to the [WIKI]().
 
 ### Migrate Data
 
-Once your configuration files are complete, you can use GraMi in one of two ways:
+Once your configuration files are complete, you can use TypeDB Loader in one of two ways:
 
- 1. As an executable command line interface - no coding required
+ 1. As an executable command line interface - no coding required:
 
 ```Shell
-./bin/grami migrate \
--dc /path/to/dataConfig.json \
--pc /path/to/processorConfig.json \
--ms /path/to/migrationStatus.json \
--s /path/to/schema.gql \
--db yourFavoriteDatabase
+./bin/typedbloader load \
+                -tdb localhost:1729, \
+                -c /path/to/your/config.json \
+                -db databaseName \
+                -cm
 ```
 
-[See details here](https://github.com/bayer-science-for-a-better-life/grami/wiki/Grami-as-Executable-CLI)
+[See details here]()
 
- 2. As a dependency in your own Java code
+ 2. As a dependency in your own Java code:
 
 ```Java
-public class Migration {
+public class LoadingData {
 
-    private static final String schema = "/path/to/your/schema.gql";
-    private static final String processorConfig = "/path/to/your/processorConfig.json";
-    private static final String dataConfig = "/path/to/your/dataConfig.json";
-    private static final String migrationStatus = "/path/to/your/migrationStatus.json";
+   public void loadData() {
+      String uri = "localhost:1729";
+      String config = "path/to/your/config.json";
+      String database = "databaseName";
+      
+      String[] args = {
+              "load",
+              "-tdb", uri,
+              "-c", config,
+              "-db", database,              
+              "-cm"
+      };
 
-    private static final String graknURI = "127.0.0.1:1729";               // defines which grakn server to migrate into
-    private static final String databaseName = "yourFavoriteDatabase";      // defines which keyspace to migrate into
-
-    private static final MigrationConfig loaderLoadConfig = new MigrationConfig(graknURI, databaseName, schema, dataConfig, processorConfig);
-
-    public static void main(String[] args) throws IOException {
-        GraknMigrator mig = new GraknMigrator(loaderLoadConfig, migrationStatus, true);
-        mig.migrate();
-    }
+      LoadOptions options = LoadOptions.parse(args);
+      TypeDBLoader loader = new TypeDBLoader(options);
+      loader.load();
+   }
 }
 ```
 
-[See details here](https://github.com/bayer-science-for-a-better-life/grami/wiki/GraMi-as-Dependency)
+[See details here]()
 
 
 ## Step-by-Step Tutorial
 
-A complete tutorial for grakn version >= 2.0 is in work and will be published asap.
+A complete tutorial for TypeDB version >= 2.5.0 is in work and will be published asap.
 
-A complete tutorial for grakn version >= 1.8.2, but < 2.0 can be found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
+A complete tutorial for TypeDB version >= 2.5.0 is in work and will soon be [on Medium]()
 
-There is this [example repository](https://github.com/bayer-science-for-a-better-life/grami-example).
+A complete tutorial for TypeDB (Grakn) version < 2.0 can be found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
+
+There is an [example repository](https://github.com/bayer-science-for-a-better-life/grami-example) for your convenience.
 
 ## Compatibility
 
-GraMi version == 0.1.1 is tested for:
-- [grakn-core](https://github.com/graknlabs/grakn) == 2.0.1
+TypeDB Loader version == 1.0.0 is tested for:
+- [grakn-core](https://github.com/vaticle/typedb) == 2.5.0
+
+GraMi (former name) version == 0.1.1 is tested for:
+- [grakn-core](https://github.com/vaticle/typedb) == 2.0.1
+
+Find the Readme for GraMi for grakn == 2.0.x [here](https://github.com/bayer-science-for-a-better-life/grami/blob/XXXXX/README.md)
 
 GraMi version < 0.1.0 is tested for: 
- - [grakn-core](https://github.com/graknlabs/grakn) >= 1.8.2
+ - [grakn-core](https://github.com/vaticle/typedb) >= 1.8.2
 
 Find the Readme for GraMi for grakn < 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
 
 ## Contributions
 
-GraknMigrator was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/graknlabs/people)
+TypeDB Loader was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/vaticle/people). Special thanks to @flying_silverfin.
 
 ## Licensing
 
@@ -147,4 +145,4 @@ This repository includes software developed at [Bayer AG](https://www.bayer.com/
  
 ## Credits
 
-Icon in banner by [Smashicons](https://www.flaticon.com/de/autoren/smashicons) from [Flaticon](https://www.flaticon.com/)
+Icon in banner by [Freepik](https://www.freepik.com") from [Flaticon](https://www.flaticon.com/)
