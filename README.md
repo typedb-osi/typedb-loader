@@ -30,7 +30,6 @@ Use TypeDB Loader to take care of your data migration for you. TypeDB Loader str
     - load entity if not present - if present, either do not write or append attributes
  - [Appending Attributes]() to existing things
  - [Append-Attribute-If-Present-Else-Insert]() for entities
- - [Schema Updating]() for non-breaking changes (i.e. add to your schema or modify concepts that do not yet contain any data)
  - Data Validation:
     - validate input data rows and log issues for easy diagnosis input data-related issues (i.e. missing attributes/players, invalid characters...)
  - Configuration Validation:

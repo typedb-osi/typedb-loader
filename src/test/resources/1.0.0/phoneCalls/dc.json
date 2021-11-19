@@ -340,8 +340,7 @@
               "ownerships": [
                 {
                   "attribute": "phone-number",
-                  "column": "caller_id",
-                  "required": true
+                  "column": "caller_id"
                 }
               ]
             }
@@ -354,8 +353,7 @@
               "ownerships": [
                 {
                   "attribute": "phone-number",
-                  "column": "callee_id",
-                  "required": true
+                  "column": "callee_id"
                 }
               ]
             }
@@ -392,8 +390,7 @@
             "match": {
               "type": "is-in-use",
               "attribute": {
-                "column": "in_use",
-                "required": true
+                "column": "in_use"
               }
             }
           },
@@ -403,8 +400,7 @@
             "match": {
               "type": "phone-number",
               "attribute" : {
-                "column": "pn",
-                "required": true
+                "column": "pn"
               }
             }
           }
@@ -557,8 +553,7 @@
         "ownerships": [
           {
             "attribute": "phone-number",
-            "column": "phone_number",
-            "required": true
+            "column": "phone_number"
           }
         ]
       },
@@ -590,8 +585,7 @@
         "ownerships": [
           {
             "attribute": "phone-number",
-            "column": "phone_number",
-            "required": true
+            "column": "phone_number"
           }
         ]
       },

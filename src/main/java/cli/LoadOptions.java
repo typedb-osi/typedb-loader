@@ -18,7 +18,7 @@ package cli;
 
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "load", description = "run a migration", mixinStandardHelpOptions = true)
+@CommandLine.Command(name = "load", description = "load data and/or schema", mixinStandardHelpOptions = true)
 public class LoadOptions {
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
