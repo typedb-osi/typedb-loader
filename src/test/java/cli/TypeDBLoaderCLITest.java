@@ -24,9 +24,6 @@ import loader.TypeDBLoader;
 import org.junit.Test;
 import util.TypeDBUtil;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import static org.junit.Assert.*;
 
 public class TypeDBLoaderCLITest {

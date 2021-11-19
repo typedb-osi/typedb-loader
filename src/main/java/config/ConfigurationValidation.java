@@ -100,7 +100,8 @@ public class ConfigurationValidation {
                                 breadcrumbs,
                                 configuration,
                                 attribute.getValue(),
-                                session);
+                                session,
+                                false);
                     }
                 }
             }
@@ -202,7 +203,8 @@ public class ConfigurationValidation {
                                     configuration,
                                     appendAttribute.getValue(),
                                     appendAttribute.getValue().getMatch().getOwnerships(),
-                                    session);
+                                    session,
+                                    false);
                             if (appendAttribute.getValue().getInsert() == null) {
                                 validationReport.get("errors").add(breadcrumbs + ".insert: insert block is missing.");
                             } else {
@@ -211,7 +213,8 @@ public class ConfigurationValidation {
                                         configuration,
                                         appendAttribute.getValue(),
                                         appendAttribute.getValue().getMatch().getOwnerships(),
-                                        session);
+                                        session,
+                                        true);
                             }
                         }
                     }
@@ -242,7 +245,8 @@ public class ConfigurationValidation {
                                     configuration,
                                     appendOrInsertAttribute.getValue(),
                                     appendOrInsertAttribute.getValue().getMatch().getOwnerships(),
-                                    session);
+                                    session,
+                                    false);
                             if (appendOrInsertAttribute.getValue().getInsert() == null) {
                                 validationReport.get("errors").add(breadcrumbs + ".insert: insert block is missing.");
                             } else {
@@ -251,7 +255,8 @@ public class ConfigurationValidation {
                                         configuration,
                                         appendOrInsertAttribute.getValue(),
                                         appendOrInsertAttribute.getValue().getMatch().getOwnerships(),
-                                        session);
+                                        session,
+                                        true);
                             }
                         }
                     }
@@ -330,12 +335,13 @@ public class ConfigurationValidation {
                                       String breadcrumbs,
                                       Configuration configuration,
                                       Configuration.Attribute generator,
-                                      TypeDBSession session) {
+                                      TypeDBSession session,
+                                      boolean isInsert) {
         breadcrumbs = breadcrumbs + ".insert";
         if (generator.getInsert() == null) {
             validationReport.get("error").add(breadcrumbs + ": missing required insert object.");
         } else {
-            valConstrainingAttribute(validationReport, breadcrumbs, configuration, generator, generator.getInsert(), session);
+            valConstrainingAttribute(validationReport, breadcrumbs, configuration, generator, generator.getInsert(), session, isInsert);
         }
 
     }
@@ -345,7 +351,8 @@ public class ConfigurationValidation {
                                          Configuration configuration,
                                          Configuration.Generator generator,
                                          Configuration.ConstrainingAttribute attribute,
-                                         TypeDBSession session) {
+                                         TypeDBSession session,
+                                         boolean isInsert) {
         if (attribute.getAttribute() == null) {
             validationReport.get("error").add(breadcrumbs + ".attribute: missing required field");
         } else {
@@ -356,8 +363,10 @@ public class ConfigurationValidation {
         } else {
             valColumnInHeader(validationReport, breadcrumbs, configuration, generator, attribute.getColumn());
         }
-        if (attribute.getRequired() == null) {
-            validationReport.get("warnings").add(breadcrumbs + ".required: field not set - defaults to false");
+        if (isInsert) {
+            if (attribute.getRequired() == null) {
+                validationReport.get("warnings").add(breadcrumbs + ".required: field not set - defaults to false");
+            }
         }
     }
 
@@ -407,7 +416,7 @@ public class ConfigurationValidation {
         if (constrainingAttributes == null) {
             validationReport.get("errors").add(breadcrumbs + ".ownerships: missing required ownerships list");
         } else {
-            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session);
+            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session, true);
         }
     }
 
@@ -416,12 +425,12 @@ public class ConfigurationValidation {
                                Configuration configuration,
                                Configuration.Generator generator,
                                Configuration.ConstrainingAttribute[] constrainingAttributes,
-                               TypeDBSession session
-    ) {
+                               TypeDBSession session,
+                               boolean isInsert) {
         int entryIdx = 0;
         for (Configuration.ConstrainingAttribute attribute : constrainingAttributes) {
             String aBreadcrumbs = breadcrumbs + ".ownerships.[" + entryIdx + "]";
-            valConstrainingAttribute(validationReport, aBreadcrumbs, configuration, generator, attribute, session);
+            valConstrainingAttribute(validationReport, aBreadcrumbs, configuration, generator, attribute, session, isInsert);
             entryIdx += 1;
         }
     }
@@ -433,7 +442,7 @@ public class ConfigurationValidation {
                                           Configuration.ConstrainingAttribute[] constrainingAttributes,
                                           TypeDBSession session) {
         if (constrainingAttributes != null) {
-            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session);
+            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session, true);
         }
     }
 
@@ -472,11 +481,6 @@ public class ConfigurationValidation {
         } else {
             valRoleType(validationReport, session, breadcrumbs, relation, player.getRole());
             valRolePlayedByConcept(validationReport, session, breadcrumbs, relation, player.getRole(), player.getMatch().getType());
-        }
-
-        // required player?
-        if (player.getRequired() == null) {
-            validationReport.get("warnings").add(breadcrumbs + ".required: field not set - defaults to false");
         }
 
         //validate type exists
