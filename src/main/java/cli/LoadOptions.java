@@ -42,8 +42,21 @@ public class LoadOptions {
         CommandLine commandLine = new CommandLine(new TypeDBLoaderCLI())
                 .addSubcommand("load", new LoadOptions());
         CommandLine.ParseResult arguments = commandLine.parseArgs(args);
-        assert arguments.subcommands().size() == 1;
-        return arguments.subcommand().asCommandLineList().get(0).getCommand();
+
+        if (arguments.isUsageHelpRequested()) {
+            commandLine.usage(commandLine.getOut());
+            System.exit(0);
+        } else if (arguments.isVersionHelpRequested()) {
+            commandLine.printVersionHelp(commandLine.getOut());
+            System.exit(0);
+        } else if (!arguments.hasSubcommand()) {
+            commandLine.getErr().println("Missing subcommand");
+            commandLine.usage(commandLine.getOut());
+            System.exit(0);
+        } else {
+            return arguments.subcommand().asCommandLineList().get(0).getCommand();
+        }
+        throw new RuntimeException("Illegal state");
     }
 
     public void print() {
@@ -53,6 +66,6 @@ public class LoadOptions {
         spec.commandLine().getOut().println("\tdatabase name: " + databaseName);
         spec.commandLine().getOut().println("\tTypeDB server: " + typedbURI);
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
-        spec.commandLine().getOut().println("\tdo not load schema?: " + loadSchema);
+        spec.commandLine().getOut().println("\treload schema (if not doing clean migration): " + loadSchema);
     }
 }

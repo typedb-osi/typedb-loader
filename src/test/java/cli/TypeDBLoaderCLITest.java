@@ -29,6 +29,14 @@ import static org.junit.Assert.*;
 public class TypeDBLoaderCLITest {
 
     @Test
+    public void versionTest() {
+        String[] args = {
+                "-V"
+        };
+        LoadOptions options = LoadOptions.parse(args);
+    }
+
+    @Test
     public void migrateTest() {
         String config = "src/test/resources/1.0.0/phoneCalls/dc.json";
         String database = "typedb_loader_cli_test";
