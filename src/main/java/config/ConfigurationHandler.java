@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package config;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+public enum ConfigurationHandler {
+    ATTRIBUTES,
+    ENTITIES,
+    RELATIONS,
+    APPEND_ATTRIBUTE,
+    APPEND_ATTRIBUTE_OR_INSERT_THING;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase();
     }
-
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
-    }
-
 }

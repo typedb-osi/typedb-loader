@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package io;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+import org.junit.Test;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
-    }
+public class ErrorLoggerTest {
 
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
+    @Test
+    public void errorFileLogger() {
+        FileLogger logger = FileLogger.getLogger();
+        logger.logMalformed("entities.tsv", "shucks! There was a malformed row error");
+        logger.logUnavailable("entities.tsv", "shucks! There was a connection error");
+        logger.logInvalid("entities.tsv", "shucks! There was a invalid row error");
     }
 
 }

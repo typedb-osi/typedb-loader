@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package status;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+import org.junit.Test;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
+import java.io.IOException;
+
+public class MigrationStatusTest {
+
+    String graknURI = "localhost:1729";
+
+    @Test
+    public void migrationStatusTest() throws IOException {
+        //TODO
     }
-
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
-    }
-
 }
+

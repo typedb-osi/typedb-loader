@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package generator;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
-    }
-
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
-    }
-
+public interface Generator {
+    void write(TypeDBTransaction tx, String[] row);
+    char getFileSeparator();
 }

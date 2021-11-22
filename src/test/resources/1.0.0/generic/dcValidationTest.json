@@ -1,0 +1,91 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 200,
+    "parallelisation": 64,
+    "schema": "src/test/resources/1.0.0/generic/schema.gql"
+  },
+  "attributes": {
+    "names": {
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv"
+      ],
+      "insert": {
+        "attribute": "name",
+        "column": "doesnotexist"
+      }
+    },
+    "no-file": {
+      "data": [
+        "src/test/resources/1.0.0/generic/nam.csv",
+        "src/test/resources/1.0.0/generic/na.csv"
+      ],
+      "insert": {
+        "column": "values",
+        "attribute": "doesnotexist"
+      }
+    },
+    "empty-file": {
+      "data": [
+        "src/test/resources/1.0.0/generic/empty.csv",
+        "src/test/resources/1.0.0/generic/nam.csv"
+      ],
+      "insert": {
+        "column": "values",
+        "attribute": "doesnotexist"
+      }
+    }
+  },
+  "entities": {
+    "missing-attributes": {
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv"
+      ],
+      "column": "name",
+      "conceptType": "person"
+    },
+    "person": {
+      "data": [
+        "src/test/resources/1.0.0/generic/names.csv",
+        "src/test/resources/1.0.0/generic/empty.csv",
+        "src/test/resources/1.0.0/generic/notfound.csv",
+        "src/test/resources/1.0.0/generic/notfound-other.csv"
+      ],
+      "config": {
+        "separator": ","
+      },
+      "insert": {
+        "entity": "doesnotexist",
+        "ownerships": [
+          {
+            "attribute": "name",
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "doesnotexist",
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "column": "doesnotexist",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "column": "name"
+          },
+          {
+            "column": "name",
+            "required": false
+          },
+          {
+            "attribute": "name",
+            "required": false
+          }
+        ]
+      }
+    }
+  }
+}

@@ -149,3 +149,15 @@ gradle-app.setting
 
 grami-data-warn.log
 grami-log.log
+
+*.log
+
+.idea/aws.xml
+.idea/deployment.xml
+.idea/libraries-with-intellij-classes.xml
+.idea/sshConfigs.xml
+.idea/vcs.xml
+.idea/webServers.xml
+
+src/test/resources/_*
+src/test/java/_*

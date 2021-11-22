@@ -1,0 +1,166 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 100,
+    "parallelisation": 4,
+    "schema": "src/test/resources/1.0.0/generic/schema.gql"
+  },
+  "entities": {
+    "entity1": {
+      "data": [
+        "src/test/resources/1.0.0/generic/entity1.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "insert": {
+        "entity": "entity1",
+        "ownerships": [
+          {
+            "attribute": "entity1-id",
+            "column": "entity1-id",
+            "required": false
+          },
+          {
+            "attribute": "entity1-name",
+            "column": "entity1-name",
+            "required": false,
+            "listSeparator": "###"
+          },
+          {
+            "attribute": "entity1-exp",
+            "column": "entity1-exp",
+            "required": true,
+            "listSeparator": "###"
+          }
+        ]
+      }
+    },
+    "entity2": {
+      "data": [
+        "src/test/resources/1.0.0/generic/entity2.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "insert": {
+        "entity": "entity2",
+        "ownerships": [
+          {
+            "attribute": "entity2-id",
+            "column": "entity2-id",
+            "required": false
+          },
+          {
+            "attribute": "entity2-bool",
+            "column": "entity2-bool",
+            "required": false
+          },
+          {
+            "attribute": "entity2-double",
+            "column": "entity2-double",
+            "required": true,
+            "listSeparator": "###"
+          }
+        ]
+      }
+    },
+    "entity3": {
+      "data": [
+        "src/test/resources/1.0.0/generic/entity3.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "insert": {
+        "entity": "entity3",
+        "ownerships": [
+          {
+            "attribute": "entity3-id",
+            "column": "entity3-id",
+            "required": false
+          },
+          {
+            "attribute": "entity3-int",
+            "column": "entity3-int",
+            "required": false,
+            "listSeparator": "###"
+          }
+        ]
+      }
+    }
+  },
+  "relations": {
+    "rel1": {
+      "data": [
+        "src/test/resources/1.0.0/generic/rel1.tsv"
+      ],
+      "config": {
+        "rowsPerCommit": 50,
+        "separator": "\t"
+      },
+      "insert": {
+        "relation": "rel1",
+        "players": [
+          {
+            "role": "player-one",
+            "required": true,
+            "match": {
+              "type": "entity1",
+              "ownerships": [
+                {
+                  "attribute": "entity1-id",
+                  "column": "entity1-id",
+                  "listSeparator": "###"
+                }
+              ]
+            }
+          },
+          {
+            "role": "player-two",
+            "required": true,
+            "match": {
+              "type": "entity2",
+              "ownerships": [
+                {
+                  "attribute": "entity2-id",
+                  "column": "entity2-id"
+                }
+              ]
+            }
+          },
+          {
+            "role": "player-optional",
+            "required": false,
+            "match": {
+              "type": "entity3",
+              "ownerships": [
+                {
+                  "attribute": "entity3-id",
+                  "column": "entity3-id"
+                }
+              ]
+            }
+          }
+        ],
+        "ownerships": [
+          {
+            "attribute": "relAt-1",
+            "column": "relAt-1",
+            "required": true,
+            "listSeparator": "###"
+          },
+          {
+            "attribute": "relAt-2",
+            "column": "relAt-2",
+            "required": false,
+            "listSeparator": "###"
+          }
+        ]
+      }
+      }
+  }
+}

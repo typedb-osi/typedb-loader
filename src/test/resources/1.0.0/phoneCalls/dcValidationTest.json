@@ -1,0 +1,10 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 200,
+    "schema": "src/test/resources/1.0.0/phoneCalls/schema-updated.gql"
+  },
+  relations: {
+
+  }
+}

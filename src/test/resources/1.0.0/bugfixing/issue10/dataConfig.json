@@ -1,0 +1,68 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 50,
+    "parallelisation": 4,
+    "schema": "src/test/resources/1.0.0/bugfixing.issue10/schema.gql"
+  },
+  "entities": {
+    "text": {
+      "data": ["src/test/resources/bugfixing/issue10/text.csv"],
+      "insert": {
+        "entity": "text",
+        "ownerships": [
+          {
+            "attribute": "uid-name",
+            "column": "uid"
+          }
+        ],
+      }
+    },
+    "label": {
+      "data": ["src/test/resources/bugfixing/issue10/label.csv"],
+      "insert": {
+        "entity": "label",
+        "ownerships": [
+          {
+            "attribute": "name",
+            "column": "name"
+          }
+        ],
+      },
+    }
+  },
+  "relations": {
+    "tag": {
+      "data": ["src/test/resources/bugfixing/issue10/tag.csv"],
+      "insert": {
+        "relation": "tag",
+        "players": [
+          {
+            "role": "tagger",
+            "match": {
+              "type": "label",
+              "ownerships": [
+                {
+                  "attribute": "name",
+                  "column": "label_name"
+                }
+              ]
+            }
+          },
+          {
+            "role": "tagged",
+            "match": {
+              "type": "text",
+              "ownerships": [
+                {
+                  "attribute": "uid",
+                  "column": "text_id"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -5,17 +5,19 @@ plugins {
 }
 
 group 'com.github.bayer-science-for-a-better-life'
-version '0.1.1'
+version '1.0.0-alpha'
 
 repositories {
     mavenCentral()
     maven {
-        url "https://repo.grakn.ai/repository/maven/"
+        url "https://repo.vaticle.com/repository/maven/"
     }
 }
 
 dependencies {
-    compile group: 'io.grakn.client', name: 'grakn-client', version: '2.0.0'
+    compile group: 'com.vaticle.typedb', name: 'typedb-client', version: '2.5.0'
+    compile group: 'com.vaticle.typedb', name: 'typedb-protocol', version: '2.5.0'
+    compile group: 'com.vaticle.typeql', name: 'typeql-grammar', version: '2.4.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'com.google.code.gson:gson:2.8.6'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -23,21 +25,23 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
     annotationProcessor 'info.picocli:picocli-codegen:4.5.1'
     compile 'info.picocli:picocli:4.5.1'
+    compile 'org.apache.commons:commons-csv:1.8'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
 }
 
-mainClassName = 'cli.GramiCLI'
+mainClassName = 'cli.TypeDBLoaderCLI'
 
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId = 'grami'
+            artifactId = 'typedbloader'
             from components.java
         }
     }
     repositories {
         maven {
             name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/bayer-science-for-a-better-life/grami"
+            url = "https://maven.pkg.github.com/bayer-science-for-a-better-life/typedbloader"
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

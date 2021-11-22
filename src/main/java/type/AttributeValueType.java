@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package type;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+public enum AttributeValueType {
+    STRING,
+    LONG,
+    DOUBLE,
+    BOOLEAN,
+    DATETIME,
+    INVALID;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
-    }
-
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
-    }
-
+//    @Override
+//    public String toString() {
+//        return super.toString().toLowerCase();
+//    }
 }

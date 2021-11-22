@@ -1,0 +1,7 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 200,
+    "parallelisation": 64
+  }
+}

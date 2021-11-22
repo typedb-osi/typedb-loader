@@ -1,185 +1,130 @@
+/*
+ * Copyright (C) 2021 Bayer AG
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package generator;
 
-import configuration.DataConfigEntry;
-import configuration.ProcessorConfigEntry;
-import graql.lang.Graql;
-import graql.lang.pattern.Pattern;
-import graql.lang.pattern.variable.ThingVariable;
-import graql.lang.pattern.variable.ThingVariable.Thing;
-import graql.lang.pattern.variable.UnboundVariable;
+import config.Configuration;
+import io.FileLogger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import util.GeneratorUtil;
+import util.Util;
+import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.common.exception.TypeDBClientException;
+import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import org.apache.commons.io.FilenameUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import static generator.GeneratorUtil.addAttribute;
-import static generator.GeneratorUtil.malformedRow;
+public class AppendAttributeGenerator implements Generator {
+    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
+    private final String filePath;
+    private final String[] header;
+    private final Configuration.AppendAttribute appendConfiguration;
+    private final char fileSeparator;
 
-public class AppendAttributeGenerator extends InsertGenerator {
-
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.grami");
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.grami.data");
-    private final DataConfigEntry dce;
-    private final ProcessorConfigEntry pce;
-
-    public AppendAttributeGenerator(DataConfigEntry dataConfigEntry,
-                                    ProcessorConfigEntry processorConfigEntry) {
-        super();
-        this.dce = dataConfigEntry;
-        this.pce = processorConfigEntry;
-        appLogger.debug("Creating AppendAttribute for processor " + processorConfigEntry.getProcessor() + " of type " + processorConfigEntry.getProcessorType());
+    public AppendAttributeGenerator(String filePath, Configuration.AppendAttribute appendConfiguration, char fileSeparator) throws IOException {
+        this.filePath = filePath;
+        this.header = Util.getFileHeader(filePath, fileSeparator);
+        this.appendConfiguration = appendConfiguration;
+        this.fileSeparator = fileSeparator;
     }
 
-    public HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> graknAppendAttributeInsert(ArrayList<String> rows,
-                                                                                              String header, int rowCounter) throws Exception {
-        HashMap<String, ArrayList<ArrayList<ThingVariable<?>>>> matchInsertPatterns = new HashMap<>();
+    public void write(TypeDBTransaction tx,
+                      String[] row) {
+        String fileName = FilenameUtils.getName(filePath);
+        String fileNoExtension = FilenameUtils.removeExtension(fileName);
+        String originalRow = String.join(Character.toString(fileSeparator), row);
 
-        ArrayList<ArrayList<ThingVariable<?>>> matchPatterns = new ArrayList<>();
-        ArrayList<ArrayList<ThingVariable<?>>> insertPatterns = new ArrayList<>();
+        if (row.length > header.length) {
+            FileLogger.getLogger().logMalformed(fileName, originalRow);
+            dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
+        }
 
-        int insertCounter = 0;
-        int batchCounter = 1;
-        for (String row : rows) {
+        TypeQLInsert statement = generateMatchInsertStatement(row);
 
-            ArrayList<ArrayList<ThingVariable<?>>> tmp = graknAppendAttributeQueryFromRow(row, header, insertCounter, rowCounter + batchCounter);
-            if (tmp != null) {
-                if (tmp.get(0) != null && tmp.get(1) != null) {
-                    matchPatterns.add(tmp.get(0));
-                    insertPatterns.add(tmp.get(1));
-                    insertCounter++;
+        if (appendAttributeInsertStatementValid(statement)) {
+            try {
+                tx.query().insert(statement);
+            } catch (TypeDBClientException typeDBClientException) {
+                FileLogger.getLogger().logUnavailable(fileName, originalRow);
+                dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
+            }
+        } else {
+            FileLogger.getLogger().logInvalid(fileName, originalRow);
+            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + statement.toString().replace("\n", " ") + ">");
+        }
+    }
+
+    public TypeQLInsert generateMatchInsertStatement(String[] row) {
+        if (row.length > 0) {
+            ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
+                    .isa(appendConfiguration.getMatch().getType());
+            for (Configuration.ConstrainingAttribute consAtt : appendConfiguration.getMatch().getOwnerships()) {
+                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                        row, header, filePath, fileSeparator, consAtt);
+                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                    entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(consAtt.getAttribute(), constraintValue));
                 }
             }
-            batchCounter = batchCounter + 1;
-        }
-        matchInsertPatterns.put("match", matchPatterns);
-        matchInsertPatterns.put("insert", insertPatterns);
-        return matchInsertPatterns;
-    }
 
-    public ArrayList<ArrayList<ThingVariable<?>>> graknAppendAttributeQueryFromRow(String row,
-                                                                                   String header,
-                                                                                   int insertCounter,
-                                                                                   int rowCounter) throws Exception {
-        String fileSeparator = dce.getSeparator();
-        String[] rowTokens = row.split(fileSeparator);
-        String[] columnNames = header.split(fileSeparator);
-        appLogger.debug("processing tokenized row: " + Arrays.toString(rowTokens));
-        malformedRow(row, rowTokens, columnNames.length);
-
-        if (!validateDataConfigEntry()) {
-            throw new IllegalArgumentException("data config entry for " + dce.getDataPath() + " is incomplete - it needs at least one attribute used for matching (\"match\": true) and at least one attribute to be appended (\"match\": false or not set at all");
-        }
-
-        ArrayList<ThingVariable<?>> matchPatterns = new ArrayList<>();
-        ArrayList<ThingVariable<?>> insertPatterns = new ArrayList<>();
-
-        // get all attributes that are isMatch() --> construct match clause
-        Thing appendAttributeMatchPattern = addEntityToMatchPattern(insertCounter);
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForMatchAttribute : dce.getAttributes()) {
-            if (generatorMappingForMatchAttribute.isMatch()) {
-                appendAttributeMatchPattern = addAttribute(rowTokens, appendAttributeMatchPattern, columnNames, rowCounter, generatorMappingForMatchAttribute, pce, generatorMappingForMatchAttribute.getPreprocessor());
+            UnboundVariable insertUnboundVar = TypeQL.var("thing");
+            ThingVariable.Thing insertStatement = null;
+            for (Configuration.ConstrainingAttribute attributeToAppend : appendConfiguration.getInsert().getOwnerships()) {
+                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                        row, header, filePath, fileSeparator, attributeToAppend);
+                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                    if (insertStatement == null) {
+                        insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
+                    } else {
+                        insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
+                    }
+                }
             }
-        }
-        matchPatterns.add(appendAttributeMatchPattern);
 
-        // get all attributes that are !isMatch() --> construct insert clause
-        UnboundVariable thingVar = addEntityToInsertPattern(insertCounter);
-        Thing appendAttributeInsertPattern = null;
-        for (DataConfigEntry.DataConfigGeneratorMapping generatorMappingForAppendAttribute : dce.getAttributes()) {
-            if (!generatorMappingForAppendAttribute.isMatch()) {
-                appendAttributeInsertPattern = addAttribute(rowTokens, thingVar, rowCounter, columnNames, generatorMappingForAppendAttribute, pce, generatorMappingForAppendAttribute.getPreprocessor());
+            if (insertStatement != null) {
+                return TypeQL.match(entityMatchStatement).insert(insertStatement);
+            } else {
+                return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
             }
-        }
-        if (appendAttributeInsertPattern != null) {
-            insertPatterns.add(appendAttributeInsertPattern);
-        }
-
-        ArrayList<ArrayList<ThingVariable<?>>> assembledPatterns = new ArrayList<>();
-        assembledPatterns.add(matchPatterns);
-        assembledPatterns.add(insertPatterns);
-
-
-        if (isValid(assembledPatterns)) {
-            appLogger.debug("valid query: <" + assembleQuery(assembledPatterns) + ">");
-            return assembledPatterns;
         } else {
-            dataLogger.warn("in datapath <" + dce.getDataPath() + ">: skipped row " + rowCounter + " b/c does not contain at least one match attribute and one insert attribute. Faulty tokenized row: " + Arrays.toString(rowTokens));
-            return null;
+            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
         }
     }
 
-    private boolean validateDataConfigEntry() {
-        boolean containsMatchAttribute = false;
-        boolean containsAppendAttribute = false;
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getAttributes()) {
-            if (attributeMapping.isMatch()) {
-                containsMatchAttribute = true;
-            }
-            if (!attributeMapping.isMatch()) {
-                containsAppendAttribute = true;
-            }
+    public boolean appendAttributeInsertStatementValid(TypeQLInsert insert) {
+        if (insert == null) return false;
+        if (!insert.toString().contains("isa " + appendConfiguration.getMatch().getType())) return false;
+        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendConfiguration.getMatch().getOwnerships()) {
+            if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
         }
-        return containsMatchAttribute && containsAppendAttribute;
-    }
-
-    private Thing addEntityToMatchPattern(int insertCounter) {
-        if (pce.getSchemaType() != null) {
-//            return Graql.var("e-" + insertCounter).isa(pce.getSchemaType());
-            return Graql.var("e").isa(pce.getSchemaType());
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
-        }
-    }
-
-    private UnboundVariable addEntityToInsertPattern(int insertCounter) {
-        if (pce.getSchemaType() != null) {
-//            return Graql.var("e-" + insertCounter);
-            return Graql.var("e");
-        } else {
-            throw new IllegalArgumentException("Required field <schemaType> not set in processor " + pce.getProcessor());
-        }
-    }
-
-    private String assembleQuery(ArrayList<ArrayList<ThingVariable<?>>> queries) {
-        StringBuilder ret = new StringBuilder();
-        for (ThingVariable st : queries.get(0)) {
-            ret.append(st.toString());
-        }
-        ret.append(queries.get(1).get(0).toString());
-        return ret.toString();
-    }
-
-    private boolean isValid(ArrayList<ArrayList<ThingVariable<?>>> si) {
-        ArrayList<ThingVariable<?>> matchPatterns = si.get(0);
-        ArrayList<ThingVariable<?>> insertPatterns = si.get(1);
-
-        if (insertPatterns.size() < 1) {
-            return false;
-        }
-
-        StringBuilder matchPattern = new StringBuilder();
-        for (Pattern st : matchPatterns) {
-            matchPattern.append(st.toString());
-        }
-        String insertPattern = insertPatterns.get(0).toString();
-
-        // missing match attribute
-        for (DataConfigEntry.DataConfigGeneratorMapping attributeMapping : dce.getMatchAttributes()) {
-            String generatorKey = attributeMapping.getGenerator();
-            ProcessorConfigEntry.ConceptGenerator generatorEntry = pce.getAttributeGenerator(generatorKey);
-            if (!matchPattern.toString().contains("has " + generatorEntry.getAttributeType())) {
-                return false;
-            }
-        }
-        // missing required insert attribute
-        for (Map.Entry<String, ProcessorConfigEntry.ConceptGenerator> generatorEntry : pce.getRequiredAttributes().entrySet()) {
-            if (!insertPattern.contains("has " + generatorEntry.getValue().getAttributeType())) {
-                return false;
+        if (appendConfiguration.getInsert().getRequiredOwnerships() != null) {
+            for (Configuration.ConstrainingAttribute constrainingAttribute : appendConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
             }
         }
         return true;
+    }
+
+    public char getFileSeparator() {
+        return this.fileSeparator;
     }
 }

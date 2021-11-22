@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package preprocessor;
+package cli;
 
-public class RegexPreprocessor {
-    String match;
-    String replace;
+import loader.TypeDBLoader;
+import picocli.CommandLine;
 
-    public RegexPreprocessor(String match, String replace) {
-        this.match = match;
-        this.replace = replace;
-    }
+@CommandLine.Command(description = "Welcome to the CLI of TypeDB Loader - your TypeDB data loading tool", name = "typedbloader", version = "1.0.0-alpha", mixinStandardHelpOptions = true)
+public class TypeDBLoaderCLI {
 
-    public String applyProcessor(String value) {
-        return value.replaceAll(match, replace);
+    public static void main(String[] args) {
+        LoadOptions options = LoadOptions.parse(args);
+        options.print();
+        TypeDBLoader loader = new TypeDBLoader(options);
+        loader.load();
     }
 
 }

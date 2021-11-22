@@ -1,0 +1,683 @@
+{
+  "globalConfig": {
+    "separator": ',',
+    "rowsPerCommit": 50,
+    "parallelisation": 4,
+    "schema": "src/test/resources/1.0.0/phoneCalls/schema.gql",
+    "orderedBeforeGenerators": [
+      "person-1"
+    ],
+    "orderedAfterGenerators": [
+      "person-2",
+      "person-3"
+    ],
+    "ignoreGenerators": [
+      "person-ignored"
+    ]
+  },
+  "attributes": {
+    "is-in-use": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "attribute": "is-in-use",
+        "column": "values"
+      }
+    }
+  },
+  "entities": {
+    "person": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person.csv",
+        "src/test/resources/1.0.0/phoneCalls/person_nextfile.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "person",
+        "ownerships": [
+          {
+            "attribute": "first-name",
+            "column": "first_name",
+            "required": false
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name",
+            "required": false
+          },
+          {
+            "attribute": "phone-number",
+            "column": "phone_number",
+            "required": true
+          },
+          {
+            "attribute": "city",
+            "column": "city",
+            "required": false
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": false
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name",
+            "listSeparator": ";",
+            "required": false
+          }
+        ]
+      }
+    },
+    "company": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/company.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "company",
+        "ownerships": [
+          {
+            "attribute": "name",
+            "column": "name",
+            "required": true
+          }
+        ]
+      }
+    },
+    "person-1": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person1.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "person",
+        "ownerships": [
+          {
+            "attribute": "first-name",
+            "column": "first_name",
+            "required": false
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name",
+            "required": false
+          },
+          {
+            "attribute": "phone-number",
+            "column": "phone_number",
+            "required": true
+          },
+          {
+            "attribute": "city",
+            "column": "city",
+            "required": false
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": false
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name",
+            "listSeparator": ";",
+            "required": false
+          }
+        ]
+      }
+    },
+    "person-2": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person2.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "person",
+        "ownerships":[
+          {
+            "attribute": "first-name",
+            "column": "first_name",
+            "required": false
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name",
+            "required": false
+          },
+          {
+            "attribute": "phone-number",
+            "column": "phone_number",
+            "required": true
+          },
+          {
+            "attribute": "city",
+            "column": "city",
+            "required": false
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": false
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name",
+            "listSeparator": ";",
+            "required": false
+          }
+        ]
+      }
+    },
+    "person-3": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "person",
+        "ownerships":[
+          {
+            "attribute": "first-name",
+            "column": "first_name",
+            "required": false
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name",
+            "required": false
+          },
+          {
+            "attribute": "phone-number",
+            "column": "phone_number",
+            "required": true
+          },
+          {
+            "attribute": "city",
+            "column": "city",
+            "required": false
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": false
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name",
+            "listSeparator": ";",
+            "required": false
+          }
+        ]
+      }
+    },
+    "person-ignored": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "entity": "person",
+        "ownerships":[
+          {
+            "attribute": "first-name",
+            "column": "first_name",
+            "required": false
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name",
+            "required": false
+          },
+          {
+            "attribute": "phone-number",
+            "column": "phone_number",
+            "required": true
+          },
+          {
+            "attribute": "city",
+            "column": "city",
+            "required": false
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": false
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name",
+            "listSeparator": ";",
+            "required": false
+          }
+        ]
+      }
+    }
+  },
+  "relations": {
+    "contract": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/contract.csv.gz"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "relation": "contract",
+        "players": [
+          {
+            "role": "provider",
+            "required": true,
+            "match": {
+              "type": "company",
+              "ownerships": [
+                {
+                  "attribute": "name",
+                  "column": "company_name",
+                  "required": true
+                }
+              ]
+            }
+          },
+          {
+            "role": "customer",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "person_id",
+                  "listSeparator": "###",
+                  "required": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "call": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/call.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "relation": "call",
+        "players": [
+          {
+            "role": "caller",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "caller_id"
+                }
+              ]
+            }
+          },
+          {
+            "role": "callee",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "callee_id"
+                }
+              ]
+            }
+          }
+        ],
+        "ownerships": [
+          {
+            "attribute": "started-at",
+            "column": "started_at",
+            "required": true
+          },
+          {
+            "attribute": "duration",
+            "column": "duration",
+            "required": true
+          }
+        ]
+      }
+    },
+    "in-use": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/in-use.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "relation": "in-use",
+        "players": [
+          {
+            "role": "status",
+            "required": true,
+            "match": {
+              "type": "is-in-use",
+              "attribute": {
+                "column": "in_use"
+              }
+            }
+          },
+          {
+            "role": "account",
+            "required": true,
+            "match": {
+              "type": "phone-number",
+              "attribute" : {
+                "column": "pn"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "communication-channel": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "relation": "communication-channel",
+        "players": [
+          {
+            "role": "peer",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "peer_1",
+                  "required": true
+                }
+              ]
+            }
+          },
+          {
+            "role": "peer",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "peer_2"
+                }
+              ]
+            }
+          },
+          {
+            "role": "past-call",
+            "required": true,
+            "match": {
+              "type": "call",
+              "ownerships": [
+                {
+                  "attribute": "started-at",
+                  "column": "call_started_at",
+                  "listSeparator": "###",
+                  "required": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "communication-channel-pm": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "insert": {
+        "relation": "communication-channel",
+        "players": [
+          {
+            "role": "peer",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "peer_1"
+                }
+              ]
+            }
+          },
+          {
+            "role": "peer",
+            "required": true,
+            "match": {
+              "type": "person",
+              "ownerships": [
+                {
+                  "attribute": "phone-number",
+                  "column": "peer_2"
+                }
+              ]
+            }
+          },
+          {
+            "role": "past-call",
+            "required": true,
+            "match": {
+              "type": "call",
+              "players": [
+                {
+                  "role": "caller",
+                  "required": true,
+                  "match": {
+                    "type": "person",
+                    "ownerships": [
+                      {
+                        "attribute": "phone-number",
+                        "column": "peer_1"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "role": "callee",
+                  "required": true,
+                  "match": {
+                    "type": "person",
+                    "ownerships": [
+                      {
+                        "attribute": "phone-number",
+                        "column": "peer_2"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "appendAttribute": {
+    "append-twitter": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "match": {
+        "type": "person",
+        "ownerships": [
+          {
+            "attribute": "phone-number",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "insert": {
+        "ownerships": [
+          {
+            "attribute": "twitter-username",
+            "column": "twitter",
+            "listSeparator": "###",
+            "required": true
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name"
+          }
+        ]
+      }
+    },
+    "append-fakebook": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "match": {
+        "type": "person",
+        "ownerships": [
+          {
+            "attribute": "phone-number",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "insert": {
+        "ownerships": [
+          {
+            "attribute": "fakebook-link",
+            "column": "fb",
+            "required": true,
+            "preprocessorConfig": {
+              "type": "regex",
+              "parameters": {
+                "regexMatch": "^.*(fakebook\\.com.*)/$",
+                "regexReplace": "$1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "append-call-rating": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/append-call-rating.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "match": {
+        "type": "call",
+        "ownerships": [
+          {
+            "attribute": "started-at",
+            "column": "started_at",
+            "required": true
+          }
+        ]
+      },
+      "insert": {
+        "ownerships": [
+          {
+            "attribute": "call-rating",
+            "column": "call_rating",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "appendAttributeOrInsertThing": {
+    "append-or-insert-person": {
+      "data": [
+        "src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv"
+      ],
+      "config": {
+        "separator": ",",
+        "rowsPerCommit": 50
+      },
+      "match": {
+        "type": "person",
+        "ownerships": [
+          {
+            "attribute": "phone-number",
+            "column": "phone_number"
+          }
+        ]
+      },
+      "insert": {
+        "ownerships": [
+          {
+            "attribute": "first-name",
+            "column": "first_name"
+          },
+          {
+            "attribute": "last-name",
+            "column": "last_name"
+          },
+          {
+            "attribute": "city",
+            "column": "city"
+          },
+          {
+            "attribute": "age",
+            "column": "age",
+            "required": true
+          },
+          {
+            "attribute": "nick-name",
+            "column": "nick_name"
+          }
+        ]
+      }
+    }
+  }
+}
