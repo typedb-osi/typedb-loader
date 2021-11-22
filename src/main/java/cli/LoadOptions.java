@@ -43,11 +43,15 @@ public class LoadOptions {
                 .addSubcommand("load", new LoadOptions());
         CommandLine.ParseResult arguments = commandLine.parseArgs(args);
 
+
         if (arguments.isUsageHelpRequested()) {
             commandLine.usage(commandLine.getOut());
             System.exit(0);
         } else if (arguments.isVersionHelpRequested()) {
             commandLine.printVersionHelp(commandLine.getOut());
+            System.exit(0);
+        } else if (arguments.subcommand().isUsageHelpRequested()) {
+            commandLine.getSubcommands().get("load").usage(commandLine.getOut());
             System.exit(0);
         } else if (!arguments.hasSubcommand()) {
             commandLine.getErr().println("Missing subcommand");
