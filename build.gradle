@@ -9,9 +9,6 @@ version '1.0.0-alpha'
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://repo.vaticle.com/repository/maven/"
-    }
 }
 
 dependencies {
