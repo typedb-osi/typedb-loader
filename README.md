@@ -136,7 +136,7 @@ Find the Readme for GraMi for grakn < 2.0 [here](https://github.com/bayer-scienc
 
 ## Contributions
 
-TypeDB Loader was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/vaticle/people). Special thanks to @flyingsilverfin.
+TypeDB Loader was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with the support of the engineers @[Grakn Labs](https://github.com/orgs/vaticle/people).
 
 ## Licensing
 
