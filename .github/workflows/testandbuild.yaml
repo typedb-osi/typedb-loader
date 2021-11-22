@@ -17,7 +17,7 @@ jobs:
         with:
           java-version: '11'
       - name: Test with Gradle
-        run: ./gradlew test --tests generator.* --tests config.* --tests io.* --tests preprocessor.*
+        run: ./gradlew test --tests config.ConfigurationTest --tests io.* --tests preprocessor.*
       - name: Build libs and distributions with Gradle
         run: ./gradlew build -x test
       - name: Upload libs
