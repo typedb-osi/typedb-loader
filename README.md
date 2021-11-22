@@ -4,8 +4,8 @@
 ---
 ---
 ### 
-![TypeDB Loader Test](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Test/badge.svg?branch=master)
-![TypeDB Loader Build](https://github.com/bayer-science-for-a-better-life/grami/workflows/GraMi%20Build/badge.svg)
+[![TypeDB Loader Test](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml)
+[![TypeDB Loader Build](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml)
 ###
 
 ---
