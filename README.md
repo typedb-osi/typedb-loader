@@ -55,15 +55,15 @@ The configuration file tells TypeDB Loader what things you want to insert for ea
 
 Here are some example:
 
- - [Attribute Data Config Example]()
- - [Entity Data Config Example]()
- - [Relation Data Config Example]()
- - [Nested Relation - Match by Attribute(s) - Data Config Example]()
- - [Nested Relation - Match by Player(s) - Data Config Example]()
- - [Attribute-Player Relation - Data Config Example]()
- - [Custom Migration Order of Data Config Entries]()
+ - [Attribute Examples]()
+ - [Entity Examples]()
+ - [Relation Examples]()
+ - [Nested Relation - Match by Attribute(s) Example]()
+ - [Nested Relation - Match by Player(s) Example]()
+ - [Attribute-Player Relation Example]()
+ - [Custom Migration Order Example]()
 
-For detailed documentation, please refer to the [WIKI]().
+For detailed documentation, please refer to the [WIKI](https://github.com/bayer-science-for-a-better-life/grami/wiki).
 
 ### Migrate Data
 
