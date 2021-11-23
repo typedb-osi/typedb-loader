@@ -40,7 +40,7 @@ public class TypeDBLoaderTest {
 
     @Test
     public void loadSyntheticTest() {
-        String dcPath = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
+        String dcPath = new File("src/test/resources/generic/config.json").getAbsolutePath();
         String databaseName = "generic-test";
         String[] args = {
                 "load",
@@ -55,7 +55,7 @@ public class TypeDBLoaderTest {
 
     @Test
     public void loadPhoneCallsTest() {
-        String dcPath = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dcPath = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         String databaseName = "phone-calls-test";
 
         String[] args = {

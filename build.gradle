@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.github.bayer-science-for-a-better-life'
+group 'com.vaticle.typedb-osi'
 version '1.0.0-alpha'
 
 repositories {
@@ -34,14 +34,14 @@ mainClassName = 'cli.TypeDBLoaderCLI'
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId = 'grami'
+            artifactId = 'typedb-loader'
             from components.java
         }
     }
     repositories {
         maven {
             name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/bayer-science-for-a-better-life/grami"
+            url = "https://maven.pkg.github.com/typedb-osi/typedb-loader"
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

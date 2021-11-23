@@ -3,6 +3,6 @@
     "separator": ',',
     "rowsPerCommit": 200,
     "parallelisation": 64,
-    "schema": "src/test/resources/1.0.0/synthetic/schema-not-found.gql"
+    "schema": "src/test/resources/synthetic/schema-not-found.gql"
   }
 }

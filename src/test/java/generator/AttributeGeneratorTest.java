@@ -36,12 +36,12 @@ public class AttributeGeneratorTest {
     @Test
     public void generateInsertStatementsTest() throws IOException {
         String dbName = "attribute-generator-test";
-        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/is-in-use.csv").getAbsolutePath();
-        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/is-in-use.csv").getAbsolutePath();
+        String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         String attributeKey = "is-in-use";

@@ -34,11 +34,11 @@ public class ConfigurationValidationTest {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
     private static final String graknURI = "localhost:1729";
-    private static final String databaseName = "1.0.0-config-validation-test";
+    private static final String databaseName = "config-validation-test";
 
     @Test
     public void validateNoSchemaDataConfig() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/generic/dcNoSchema.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/configNoSchema.json").getAbsolutePath());
         assert dc != null;
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
@@ -60,7 +60,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateSchemaFileNotFoundDataConfig() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/generic/dcSchemaNotFound.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/configSchemaNotFound.json").getAbsolutePath());
         assert dc != null;
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
@@ -76,14 +76,14 @@ public class ConfigurationValidationTest {
         validationReport.get("errors").forEach(appLogger::error);
 
         Assert.assertTrue(validationReport.get("errors").stream().anyMatch(message -> message.equals(
-                "defaultConfig.schema - schema file not found under: <src/test/resources/1.0.0/synthetic/schema-not-found.gql>"
+                "defaultConfig.schema - schema file not found under: <src/test/resources/synthetic/schema-not-found.gql>"
         )));
     }
 
 
     @Test
     public void validateErrorDataConfig() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/generic/dcValidationTest.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
@@ -115,7 +115,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateErrorDataConfigPhoneCalls() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/phoneCalls/dcValidationTest.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
@@ -145,7 +145,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validateDataConfig() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/config.json").getAbsolutePath());
         assert dc != null;
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
 
@@ -176,7 +176,7 @@ public class ConfigurationValidationTest {
 
     @Test
     public void validatePhoneCallsDataConfig() {
-        Configuration dc = Util.initializeConfig(new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath());
+        Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/config.json").getAbsolutePath());
         assert dc != null;
 
         TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
