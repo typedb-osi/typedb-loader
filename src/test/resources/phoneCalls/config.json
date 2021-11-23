@@ -3,7 +3,7 @@
     "separator": ',',
     "rowsPerCommit": 50,
     "parallelisation": 4,
-    "schema": "src/test/resources/1.0.0/phoneCalls/schema.gql",
+    "schema": "src/test/resources/phoneCalls/schema.gql",
     "orderedBeforeGenerators": [
       "person-1"
     ],
@@ -18,7 +18,7 @@
   "attributes": {
     "is-in-use": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/is-in-use.csv"
+        "src/test/resources/phoneCalls/is-in-use.csv"
       ],
       "config": {
         "separator": ",",
@@ -33,8 +33,8 @@
   "entities": {
     "person": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person.csv",
-        "src/test/resources/1.0.0/phoneCalls/person_nextfile.csv"
+        "src/test/resources/phoneCalls/person.csv",
+        "src/test/resources/phoneCalls/person_nextfile.csv"
       ],
       "config": {
         "separator": ",",
@@ -79,7 +79,7 @@
     },
     "company": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/company.csv"
+        "src/test/resources/phoneCalls/company.csv"
       ],
       "config": {
         "separator": ",",
@@ -98,7 +98,7 @@
     },
     "person-1": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person1.csv"
+        "src/test/resources/phoneCalls/person1.csv"
       ],
       "config": {
         "separator": ",",
@@ -143,7 +143,7 @@
     },
     "person-2": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person2.csv"
+        "src/test/resources/phoneCalls/person2.csv"
       ],
       "config": {
         "separator": ",",
@@ -188,7 +188,7 @@
     },
     "person-3": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+        "src/test/resources/phoneCalls/person3.csv"
       ],
       "config": {
         "separator": ",",
@@ -233,7 +233,7 @@
     },
     "person-ignored": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person3.csv"
+        "src/test/resources/phoneCalls/person3.csv"
       ],
       "config": {
         "separator": ",",
@@ -280,7 +280,7 @@
   "relations": {
     "contract": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/contract.csv.gz"
+        "src/test/resources/phoneCalls/contract.csv.gz"
       ],
       "config": {
         "separator": ",",
@@ -323,7 +323,7 @@
     },
     "call": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/call.csv"
+        "src/test/resources/phoneCalls/call.csv"
       ],
       "config": {
         "separator": ",",
@@ -375,7 +375,7 @@
     },
     "in-use": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/in-use.csv"
+        "src/test/resources/phoneCalls/in-use.csv"
       ],
       "config": {
         "separator": ",",
@@ -409,7 +409,7 @@
     },
     "communication-channel": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/communication-channel.csv"
+        "src/test/resources/phoneCalls/communication-channel.csv"
       ],
       "config": {
         "separator": ",",
@@ -465,7 +465,7 @@
     },
     "communication-channel-pm": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv"
+        "src/test/resources/phoneCalls/communication-channel-pm.csv"
       ],
       "config": {
         "separator": ",",
@@ -542,7 +542,7 @@
   "appendAttribute": {
     "append-twitter": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv"
+        "src/test/resources/phoneCalls/append-twitter-nickname.csv"
       ],
       "config": {
         "separator": ",",
@@ -574,7 +574,7 @@
     },
     "append-fakebook": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv"
+        "src/test/resources/phoneCalls/append-fb-preprocessed.csv"
       ],
       "config": {
         "separator": ",",
@@ -608,7 +608,7 @@
     },
     "append-call-rating": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/append-call-rating.csv"
+        "src/test/resources/phoneCalls/append-call-rating.csv"
       ],
       "config": {
         "separator": ",",
@@ -638,7 +638,7 @@
   "appendAttributeOrInsertThing": {
     "append-or-insert-person": {
       "data": [
-        "src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv"
+        "src/test/resources/phoneCalls/person-append-or-insert.csv"
       ],
       "config": {
         "separator": ",",

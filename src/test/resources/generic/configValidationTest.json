@@ -3,12 +3,12 @@
     "separator": ',',
     "rowsPerCommit": 200,
     "parallelisation": 64,
-    "schema": "src/test/resources/1.0.0/generic/schema.gql"
+    "schema": "src/test/resources/generic/schema.gql"
   },
   "attributes": {
     "names": {
       "data": [
-        "src/test/resources/1.0.0/generic/names.csv"
+        "src/test/resources/generic/names.csv"
       ],
       "insert": {
         "attribute": "name",
@@ -17,8 +17,8 @@
     },
     "no-file": {
       "data": [
-        "src/test/resources/1.0.0/generic/nam.csv",
-        "src/test/resources/1.0.0/generic/na.csv"
+        "src/test/resources/generic/nam.csv",
+        "src/test/resources/generic/na.csv"
       ],
       "insert": {
         "column": "values",
@@ -27,8 +27,8 @@
     },
     "empty-file": {
       "data": [
-        "src/test/resources/1.0.0/generic/empty.csv",
-        "src/test/resources/1.0.0/generic/nam.csv"
+        "src/test/resources/generic/empty.csv",
+        "src/test/resources/generic/nam.csv"
       ],
       "insert": {
         "column": "values",
@@ -39,17 +39,17 @@
   "entities": {
     "missing-attributes": {
       "data": [
-        "src/test/resources/1.0.0/generic/names.csv"
+        "src/test/resources/generic/names.csv"
       ],
       "column": "name",
       "conceptType": "person"
     },
     "person": {
       "data": [
-        "src/test/resources/1.0.0/generic/names.csv",
-        "src/test/resources/1.0.0/generic/empty.csv",
-        "src/test/resources/1.0.0/generic/notfound.csv",
-        "src/test/resources/1.0.0/generic/notfound-other.csv"
+        "src/test/resources/generic/names.csv",
+        "src/test/resources/generic/empty.csv",
+        "src/test/resources/generic/notfound.csv",
+        "src/test/resources/generic/notfound-other.csv"
       ],
       "config": {
         "separator": ","

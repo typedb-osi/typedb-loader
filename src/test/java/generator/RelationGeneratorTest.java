@@ -39,11 +39,11 @@ public class RelationGeneratorTest {
     public void genericRelationTest() throws IOException {
 
         String dbName = "relation-generator-test";
-        String sp = new File("src/test/resources/1.0.0/generic/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/generic/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dcp = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
+        String dcp = new File("src/test/resources/generic/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
@@ -60,7 +60,7 @@ public class RelationGeneratorTest {
         session.close();
         client.close();
 
-        String dp = new File("src/test/resources/1.0.0/generic/rel1.tsv").getAbsolutePath();
+        String dp = new File("src/test/resources/generic/rel1.tsv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -262,11 +262,11 @@ public class RelationGeneratorTest {
     @Test
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "relation-generator-test";
-        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel", "communication-channel-pm"));
@@ -298,7 +298,7 @@ public class RelationGeneratorTest {
     }
 
     private void testContracts(Configuration dc, ArrayList<String> relationKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/contract.csv.gz").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/contract.csv.gz").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -355,7 +355,7 @@ public class RelationGeneratorTest {
 
     private void testCalls(Configuration dc, ArrayList<String> relationKeys) throws IOException {
 
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/call.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/call.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(1)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(1)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -428,7 +428,7 @@ public class RelationGeneratorTest {
     }
 
     private void testInUse(Configuration dc, ArrayList<String> relationKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/in-use.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/in-use.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(2)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(2)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -465,7 +465,7 @@ public class RelationGeneratorTest {
     }
 
     private void testCommunicationChannel(Configuration dc, ArrayList<String> relationKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/communication-channel.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/communication-channel.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(3)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(3)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -562,7 +562,7 @@ public class RelationGeneratorTest {
     }
 
     private void testCommunicationChannelPM(Configuration dc, ArrayList<String> relationKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/communication-channel-pm.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/communication-channel-pm.csv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
                 dc.getRelations().get(relationKeys.get(4)),
                 Objects.requireNonNullElseGet(dc.getRelations().get(relationKeys.get(4)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));

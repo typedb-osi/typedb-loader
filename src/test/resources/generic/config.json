@@ -3,12 +3,12 @@
     "separator": ',',
     "rowsPerCommit": 100,
     "parallelisation": 4,
-    "schema": "src/test/resources/1.0.0/generic/schema.gql"
+    "schema": "src/test/resources/generic/schema.gql"
   },
   "entities": {
     "entity1": {
       "data": [
-        "src/test/resources/1.0.0/generic/entity1.tsv"
+        "src/test/resources/generic/entity1.tsv"
       ],
       "config": {
         "rowsPerCommit": 50,
@@ -39,7 +39,7 @@
     },
     "entity2": {
       "data": [
-        "src/test/resources/1.0.0/generic/entity2.tsv"
+        "src/test/resources/generic/entity2.tsv"
       ],
       "config": {
         "rowsPerCommit": 50,
@@ -69,7 +69,7 @@
     },
     "entity3": {
       "data": [
-        "src/test/resources/1.0.0/generic/entity3.tsv"
+        "src/test/resources/generic/entity3.tsv"
       ],
       "config": {
         "rowsPerCommit": 50,
@@ -96,7 +96,7 @@
   "relations": {
     "rel1": {
       "data": [
-        "src/test/resources/1.0.0/generic/rel1.tsv"
+        "src/test/resources/generic/rel1.tsv"
       ],
       "config": {
         "rowsPerCommit": 50,

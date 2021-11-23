@@ -30,7 +30,7 @@ public class TypeDBLoaderCLITest {
 
     @Test
     public void migrateTest() {
-        String config = "src/test/resources/1.0.0/phoneCalls/dc.json";
+        String config = "src/test/resources/phoneCalls/config.json";
         String database = "typedb_loader_cli_test";
         String uri = "127.0.0.1:1729";
         String[] args = {
@@ -54,7 +54,7 @@ public class TypeDBLoaderCLITest {
 
     @Test
     public void migrateTestContinue() {
-        String config = "src/test/resources/1.0.0/phoneCalls/dc.json";
+        String config = "src/test/resources/phoneCalls/config.json";
         String db = "typedb_loader_cli_test";
         String uri = "127.0.0.1:1729";
         String[] cleanLoadArgs = {

@@ -37,11 +37,11 @@ public class AppendAttributeGeneratorTest {
     @Test
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "append-attribute-generator-test";
-        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> appendKeys = new ArrayList<>(List.of("append-twitter", "append-fakebook", "append-call-rating"));
@@ -65,7 +65,7 @@ public class AppendAttributeGeneratorTest {
     }
 
     private void testTwitter(Configuration dc, ArrayList<String> appendKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/append-twitter-nickname.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/append-twitter-nickname.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -132,7 +132,7 @@ public class AppendAttributeGeneratorTest {
     }
 
     private void testFakebook(Configuration dc, ArrayList<String> appendKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/append-fb-preprocessed.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/append-fb-preprocessed.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(1)),
                 Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(1)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -166,7 +166,7 @@ public class AppendAttributeGeneratorTest {
     }
 
     private void testCallAppend(Configuration dc, ArrayList<String> appendKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/append-call-rating.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/append-call-rating.csv").getAbsolutePath();
         AppendAttributeGenerator gen = new AppendAttributeGenerator(dp,
                 dc.getAppendAttribute().get(appendKeys.get(2)),
                 Objects.requireNonNullElseGet(dc.getAppendAttribute().get(appendKeys.get(2)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));

@@ -37,11 +37,11 @@ public class EntityGeneratorTest {
     @Test
     public void genericEntityTest() throws IOException {
         String dbName = "entity-generator-test";
-        String sp = new File("src/test/resources/1.0.0/generic/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/generic/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dcp = new File("src/test/resources/1.0.0/generic/dc.json").getAbsolutePath();
+        String dcp = new File("src/test/resources/generic/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> entityKeys = new ArrayList<>(List.of("entity1", "entity2", "entity3"));
@@ -54,7 +54,7 @@ public class EntityGeneratorTest {
         session.close();
         client.close();
 
-        String dp = new File("src/test/resources/1.0.0/generic/entity1.tsv").getAbsolutePath();
+        String dp = new File("src/test/resources/generic/entity1.tsv").getAbsolutePath();
         EntityGenerator gen = new EntityGenerator(dp,
                 dc.getEntities().get(entityKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
@@ -121,7 +121,7 @@ public class EntityGeneratorTest {
         Assert.assertEquals(tmp, gen.generateThingInsertStatement(Util.parseTSV(iterator.next())).toString());
 
 
-        dp = new File("src/test/resources/1.0.0/generic/entity2.tsv").getAbsolutePath();
+        dp = new File("src/test/resources/generic/entity2.tsv").getAbsolutePath();
         gen = new EntityGenerator(dp, dc.getEntities().get(entityKeys.get(1)),
                 Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(1)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
@@ -160,7 +160,7 @@ public class EntityGeneratorTest {
         Assert.assertEquals(tmp, gen.generateThingInsertStatement(Util.parseTSV(iterator.next())).toString());
 
 
-        dp = new File("src/test/resources/1.0.0/generic/entity3.tsv").getAbsolutePath();
+        dp = new File("src/test/resources/generic/entity3.tsv").getAbsolutePath();
         gen = new EntityGenerator(dp, dc.getEntities().get(entityKeys.get(2)),
                 Objects.requireNonNullElseGet(dc.getEntities().get(entityKeys.get(2)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
         iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
@@ -202,12 +202,12 @@ public class EntityGeneratorTest {
     @Test
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "entity-generator-test";
-        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/person.csv").getAbsolutePath();
-        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/person.csv").getAbsolutePath();
+        String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         String entityKey = "person";

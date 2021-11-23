@@ -38,11 +38,11 @@ public class AppendAttributeOrInsertThingGeneratorTest {
     @Test
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "append-or-insert-generator-test";
-        String sp = new File("src/test/resources/1.0.0/phoneCalls/schema.gql").getAbsolutePath();
+        String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
         TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
-        String dcp = new File("src/test/resources/1.0.0/phoneCalls/dc.json").getAbsolutePath();
+        String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> appendOrInsertKeys = new ArrayList<>(List.of("append-or-insert-person"));
@@ -62,7 +62,7 @@ public class AppendAttributeOrInsertThingGeneratorTest {
     }
 
     private void testPerson(Configuration dc, ArrayList<String> appendKeys) throws IOException {
-        String dp = new File("src/test/resources/1.0.0/phoneCalls/person-append-or-insert.csv").getAbsolutePath();
+        String dp = new File("src/test/resources/phoneCalls/person-append-or-insert.csv").getAbsolutePath();
         AppendAttributeOrInsertThingGenerator gen = new AppendAttributeOrInsertThingGenerator(dp,
                 dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)),
                 Objects.requireNonNullElseGet(dc.getAppendAttributeOrInsertThing().get(appendKeys.get(0)).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
