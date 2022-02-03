@@ -16,7 +16,7 @@
 
 package util;
 
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import config.Configuration;
 
 import java.time.LocalDate;

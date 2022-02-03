@@ -16,7 +16,7 @@
 
 package generator;
 
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 
 public interface Generator {
     void write(TypeDBTransaction tx, String[] row);

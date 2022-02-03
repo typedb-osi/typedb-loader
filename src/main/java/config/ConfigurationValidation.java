@@ -17,12 +17,12 @@
 package config;
 
 import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import util.Util;
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

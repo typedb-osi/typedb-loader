@@ -16,9 +16,9 @@
 
 package config;
 
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import type.AttributeValueType;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typeql.lang.TypeQL;
 

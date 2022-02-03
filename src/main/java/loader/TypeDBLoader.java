@@ -18,8 +18,8 @@ package loader;
 
 import cli.LoadOptions;
 import com.vaticle.typedb.client.TypeDB;
-import com.vaticle.typedb.client.api.connection.TypeDBClient;
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBClient;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
 import config.Configuration;
 import config.ConfigurationValidation;
@@ -87,7 +87,7 @@ public class TypeDBLoader {
                 asyncLoaderWorker = new AsyncLoaderWorker(dc, options.databaseName);
                 asyncLoaderWorker.run(client);
             } finally {
-                if (asyncLoaderWorker != null) asyncLoaderWorker.executor.shutdown();
+                if (asyncLoaderWorker != null) asyncLoaderWorker.close();
             }
         } catch (Throwable e) {
             Util.error(e.getMessage(), e);

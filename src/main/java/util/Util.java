@@ -19,7 +19,7 @@ package util;
 import config.Configuration;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;

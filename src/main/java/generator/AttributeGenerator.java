@@ -22,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
@@ -47,8 +47,7 @@ public class AttributeGenerator implements Generator {
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx,
-                      String[] row) {
+    public void write(TypeDBTransaction tx, String[] row) {
 
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
