@@ -44,7 +44,7 @@ public class AsyncLoaderWorker {
 
     private static final DecimalFormat countFormat = new DecimalFormat("#,###");
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
-    final ExecutorService executor;
+    private final ExecutorService executor;
     private final int threads;
     private final String databaseName;
     private final AtomicBoolean hasError;
