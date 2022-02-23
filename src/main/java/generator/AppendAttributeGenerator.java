@@ -38,10 +38,10 @@ public class AppendAttributeGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.AppendAttribute appendConfiguration;
+    private final Configuration.Generator.AppendAttribute appendConfiguration;
     private final char fileSeparator;
 
-    public AppendAttributeGenerator(String filePath, Configuration.AppendAttribute appendConfiguration, char fileSeparator) throws IOException {
+    public AppendAttributeGenerator(String filePath, Configuration.Generator.AppendAttribute appendConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.appendConfiguration = appendConfiguration;
@@ -78,7 +78,7 @@ public class AppendAttributeGenerator implements Generator {
         if (row.length > 0) {
             ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
                     .isa(appendConfiguration.getMatch().getType());
-            for (Configuration.ConstrainingAttribute consAtt : appendConfiguration.getMatch().getOwnerships()) {
+            for (Configuration.Definition.Attribute consAtt : appendConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, consAtt);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
@@ -88,7 +88,7 @@ public class AppendAttributeGenerator implements Generator {
 
             UnboundVariable insertUnboundVar = TypeQL.var("thing");
             ThingVariable.Thing insertStatement = null;
-            for (Configuration.ConstrainingAttribute attributeToAppend : appendConfiguration.getInsert().getOwnerships()) {
+            for (Configuration.Definition.Attribute attributeToAppend : appendConfiguration.getInsert().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
@@ -113,12 +113,12 @@ public class AppendAttributeGenerator implements Generator {
     public boolean appendAttributeInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + appendConfiguration.getMatch().getType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendConfiguration.getMatch().getOwnerships()) {
+        for (Configuration.Definition.Attribute ownershipThingGetter : appendConfiguration.getMatch().getOwnerships()) {
             if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
         }
         if (appendConfiguration.getInsert().getRequiredOwnerships() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendConfiguration.getInsert().getRequiredOwnerships()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
+            for (Configuration.Definition.Attribute attribute : appendConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + attribute.getAttribute())) return false;
             }
         }
         return true;

@@ -41,10 +41,10 @@ public class RelationGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.Relation relationConfiguration;
+    private final Configuration.Generator.Relation relationConfiguration;
     private final char fileSeparator;
 
-    public RelationGenerator(String filePath, Configuration.Relation relationConfiguration, char fileSeparator) throws IOException {
+    public RelationGenerator(String filePath, Configuration.Generator.Relation relationConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.relationConfiguration = relationConfiguration;
@@ -84,7 +84,7 @@ public class RelationGenerator implements Generator {
             ArrayList<String> roleTypes = new ArrayList<>();
 
             int playerIdx = 0;
-            for (Configuration.Player player : relationConfiguration.getInsert().getPlayers()) {
+            for (Configuration.Definition.Player player : relationConfiguration.getInsert().getPlayers()) {
                 String playerVar = "player-" + playerIdx;
 
                 // ATTRIBUTE PLAYER
@@ -143,9 +143,9 @@ public class RelationGenerator implements Generator {
         }
     }
 
-    private ThingVariable.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Player player, String playerVar) {
+    private ThingVariable.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Definition.Player player, String playerVar) {
         ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar).isa(player.getMatch().getType());
-        for (Configuration.ConstrainingAttribute consA : player.getMatch().getOwnerships()) {
+        for (Configuration.Definition.Attribute consA : player.getMatch().getOwnerships()) {
             ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, consA);
             for (ThingConstraint.Value<?> constraintValue : constraintValues) {
@@ -155,7 +155,7 @@ public class RelationGenerator implements Generator {
         return playerMatchStatement;
     }
 
-    private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
+    private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
         ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                 row, header, filePath, fileSeparator, player.getMatch().getAttribute());
         if (constraints.size() > 0) {
@@ -167,12 +167,12 @@ public class RelationGenerator implements Generator {
         }
     }
 
-    private ArrayList<ThingVariable<?>> getRelationPlayerMatchStatement(String[] row, Configuration.Player player, String playerVar) {
+    private ArrayList<ThingVariable<?>> getRelationPlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
         return recursiveAssemblyMatchStatement(row, player, playerVar);
     }
 
     private ArrayList<ThingVariable<?>> recursiveAssemblyMatchStatement(String[] row,
-                                                                        Configuration.Player player,
+                                                                        Configuration.Definition.Player player,
                                                                         String playerVar) {
         if (playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
@@ -197,7 +197,7 @@ public class RelationGenerator implements Generator {
             UnboundVariable ubv = TypeQL.var(playerVar);
             ThingVariable.Relation relationMatch = null;
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
-                Configuration.Player curPlayer = player.getMatch().getPlayers()[idx];
+                Configuration.Definition.Player curPlayer = player.getMatch().getPlayers()[idx];
                 String curPlayerVar = playerVar + "-" + idx;
                 if (idx == 0) {
                     relationMatch = ubv.rel(curPlayer.getRole(), curPlayerVar);
@@ -224,7 +224,7 @@ public class RelationGenerator implements Generator {
         if (!insert.toString().contains("isa " + relationConfiguration.getInsert().getRelation())) return false;
 
         int idx = 0;
-        for (Configuration.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
+        for (Configuration.Definition.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
             // if attribute player
             // the attribute must be in the match statement
             if (playerType(player).equals("attribute")) {
@@ -245,12 +245,12 @@ public class RelationGenerator implements Generator {
 
         // all required attributes part of the insert statement
         if (relationConfiguration.getInsert().getRequiredOwnerships() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : relationConfiguration.getInsert().getRequiredOwnerships()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
+            for (Configuration.Definition.Attribute attribute : relationConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + attribute.getAttribute())) return false;
             }
         }
         // all roles that are required must be in the insert statement
-        for (Configuration.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
+        for (Configuration.Definition.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
             if (!insert.toString().contains(player.getRole() + ":")) return false;
         }
         // must have number of requireNonNull players
@@ -262,15 +262,15 @@ public class RelationGenerator implements Generator {
         return true;
     }
 
-    private boolean validateAttributePlayer(Configuration.Player player, TypeQLInsert insert) {
+    private boolean validateAttributePlayer(Configuration.Definition.Player player, TypeQLInsert insert) {
         return insert.toString().contains("isa " + player.getMatch().getType());
     }
 
-    private boolean validateByAttributePlayer(Configuration.Player player, TypeQLInsert insert) {
+    private boolean validateByAttributePlayer(Configuration.Definition.Player player, TypeQLInsert insert) {
         if (!insert.toString().contains("isa " + player.getMatch().getType())) return false;
         // each identifying attribute of the entity must be in the match statement
-        Configuration.ConstrainingAttribute[] ownerships = player.getMatch().getOwnerships();
-        for (Configuration.ConstrainingAttribute ownership : ownerships) {
+        Configuration.Definition.Attribute[] ownerships = player.getMatch().getOwnerships();
+        for (Configuration.Definition.Attribute ownership : ownerships) {
             if (ownership != null) {
                 if (!insert.toString().contains("has " + ownership.getAttribute())) return false;
             }
@@ -278,7 +278,7 @@ public class RelationGenerator implements Generator {
         return true;
     }
 
-    private boolean recursiveValidationPlayers(Configuration.Player player, TypeQLInsert insert, String playerVar) {
+    private boolean recursiveValidationPlayers(Configuration.Definition.Player player, TypeQLInsert insert, String playerVar) {
 
         if (playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
@@ -289,7 +289,7 @@ public class RelationGenerator implements Generator {
         } else if (playerType(player).equals("byPlayer")) {
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
                 // if player is a relation with players - check validity of "shallow" relation player
-                Configuration.Player curPlayer = player.getMatch().getPlayers()[idx];
+                Configuration.Definition.Player curPlayer = player.getMatch().getPlayers()[idx];
                 String curPlayerVar = playerVar + "-" + idx;
                 if (!insert.toString().contains("isa " + curPlayer.getMatch().getType())) return false;
                 if (!insert.toString().contains(curPlayer.getRole() + ":")) return false;

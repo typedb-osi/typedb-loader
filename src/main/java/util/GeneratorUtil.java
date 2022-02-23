@@ -53,12 +53,12 @@ public class GeneratorUtil {
                                                        String filePath,
                                                        char fileSeparator,
                                                        ThingVariable<?> insertStatement,
-                                                       Configuration.ConstrainingAttribute[] attributes) {
-        for (Configuration.ConstrainingAttribute constrainingAttribute : attributes) {
+                                                       Configuration.Definition.Attribute[] attributes) {
+        for (Configuration.Definition.Attribute attribute : attributes) {
             ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                    row, header, filePath, fileSeparator, constrainingAttribute);
+                    row, header, filePath, fileSeparator, attribute);
             for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getAttribute(), constraintValue));
+                insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attribute.getAttribute(), constraintValue));
             }
         }
     }
@@ -83,15 +83,15 @@ public class GeneratorUtil {
                                                                                                     String[] header,
                                                                                                     String filepath,
                                                                                                     char fileSeparator,
-                                                                                                    Configuration.ConstrainingAttribute constrainingAttribute) {
+                                                                                                    Configuration.Definition.Attribute attribute) {
 
-        String attributeType = constrainingAttribute.getAttribute();
-        AttributeValueType attributeValueType = constrainingAttribute.getConceptValueType();
-        String listSeparator = constrainingAttribute.getListSeparator();
-        Configuration.PreprocessorConfig preprocessor = constrainingAttribute.getPreprocessorConfig();
+        String attributeType = attribute.getAttribute();
+        AttributeValueType attributeValueType = attribute.getConceptValueType();
+        String listSeparator = attribute.getListSeparator();
+        Configuration.PreprocessorConfig preprocessor = attribute.getPreprocessorConfig();
         String token;
 
-        int colIdx = GeneratorUtil.getColumnIndexByName(header, constrainingAttribute.getColumn());
+        int colIdx = GeneratorUtil.getColumnIndexByName(header, attribute.getColumn());
         if (colIdx < row.length) {
             token = row[colIdx];
         } else {

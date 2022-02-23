@@ -99,7 +99,7 @@ public class AsyncLoaderWorker {
             // Load attributes
             Util.info("loading attributes");
             if (dc.getAttributes() != null) {
-                for (Map.Entry<String, Configuration.Attribute> attribute : dc.getAttributes().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.Attribute> attribute : dc.getAttributes().entrySet()) {
                     if (!separateGenerators.contains(attribute.getKey())) {
                         loadAttribute(session, attribute.getKey(), attribute.getValue());
                         if (status == Status.ERROR) return;
@@ -110,7 +110,7 @@ public class AsyncLoaderWorker {
             // Load entities
             Util.info("loading entities");
             if (dc.getEntities() != null) {
-                for (Map.Entry<String, Configuration.Entity> entity : dc.getEntities().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.EntityInsert> entity : dc.getEntities().entrySet()) {
                     if (!separateGenerators.contains(entity.getKey())) {
                         loadEntity(session, entity.getKey(), entity.getValue());
                         if (status == Status.ERROR) return;
@@ -121,7 +121,7 @@ public class AsyncLoaderWorker {
             //Load relations
             Util.info("loading relations");
             if (dc.getRelations() != null) {
-                for (Map.Entry<String, Configuration.Relation> relation : dc.getRelations().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.Relation> relation : dc.getRelations().entrySet()) {
                     if (!separateGenerators.contains(relation.getKey())) {
                         loadRelation(session, relation.getKey(), relation.getValue());
                         if (status == Status.ERROR) return;
@@ -132,7 +132,7 @@ public class AsyncLoaderWorker {
             //Load appendAttributes
             Util.info("loading appendAttributes");
             if (dc.getAppendAttribute() != null) {
-                for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.AppendAttribute> appendAttribute : dc.getAppendAttribute().entrySet()) {
                     if (!separateGenerators.contains(appendAttribute.getKey())) {
                         loadAppendAttribute(session, appendAttribute.getKey(), appendAttribute.getValue());
                         if (status == Status.ERROR) return;
@@ -143,7 +143,7 @@ public class AsyncLoaderWorker {
             //Load appendAttributesOrInsertThing
             Util.info("loading appendAttributesOrInsertThing");
             if (dc.getAppendAttributeOrInsertThing() != null) {
-                for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendAttributeOrInsertThing : dc.getAppendAttributeOrInsertThing().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.AppendAttributeOrInsertThing> appendAttributeOrInsertThing : dc.getAppendAttributeOrInsertThing().entrySet()) {
                     if (!separateGenerators.contains(appendAttributeOrInsertThing.getKey())) {
                         loadAppendOrInsert(session, appendAttributeOrInsertThing.getKey(), appendAttributeOrInsertThing.getValue());
                         if (status == Status.ERROR) return;
@@ -176,7 +176,7 @@ public class AsyncLoaderWorker {
         executor.shutdown();
     }
 
-    private void loadAttribute(TypeDBSession session, String generatorKey, Configuration.Attribute attributeGenerator)
+    private void loadAttribute(TypeDBSession session, String generatorKey, Configuration.Generator.Attribute attributeGenerator)
             throws IOException, InterruptedException {
         initializeAttributeConceptValueType(session, attributeGenerator.getInsert());
         for (String filePath : attributeGenerator.getData()) {
@@ -186,7 +186,7 @@ public class AsyncLoaderWorker {
         }
     }
 
-    private void loadEntity(TypeDBSession session, String generatorKey, Configuration.Entity entityGenerator)
+    private void loadEntity(TypeDBSession session, String generatorKey, Configuration.Generator.EntityInsert entityGenerator)
             throws IOException, InterruptedException {
         Util.setConstrainingAttributeConceptType(entityGenerator.getInsert().getOwnerships(), session);
         for (String filePath : entityGenerator.getData()) {
@@ -196,7 +196,7 @@ public class AsyncLoaderWorker {
         }
     }
 
-    private void loadRelation(TypeDBSession session, String generatorKey, Configuration.Relation relation)
+    private void loadRelation(TypeDBSession session, String generatorKey, Configuration.Generator.Relation relation)
             throws IOException, InterruptedException {
         initializeRelationAttributeConceptValueTypes(session, relation);
         for (String filePath : relation.getData()) {
@@ -206,7 +206,7 @@ public class AsyncLoaderWorker {
         }
     }
 
-    private void loadAppendAttribute(TypeDBSession session, String generatorKey, Configuration.AppendAttribute appendAttribute)
+    private void loadAppendAttribute(TypeDBSession session, String generatorKey, Configuration.Generator.AppendAttribute appendAttribute)
             throws IOException, InterruptedException {
         initializeAppendAttributeConceptValueTypes(session, appendAttribute);
         for (String filePath : appendAttribute.getData()) {
@@ -217,7 +217,7 @@ public class AsyncLoaderWorker {
     }
 
     private void loadAppendOrInsert(TypeDBSession session, String generatorKey,
-                                      Configuration.AppendAttributeOrInsertThing appendAttributeOrInsertThing)
+                                      Configuration.Generator.AppendAttributeOrInsertThing appendAttributeOrInsertThing)
             throws IOException, InterruptedException {
         initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing);
         for (String filePath : appendAttributeOrInsertThing.getData()) {
@@ -231,64 +231,64 @@ public class AsyncLoaderWorker {
                                     Configuration.Generator generatorConfig) throws IOException, InterruptedException {
         switch (generatorType) {
             case "attributes":
-                loadAttribute(session, generatorKey, (Configuration.Attribute) generatorConfig);
+                loadAttribute(session, generatorKey, (Configuration.Generator.Attribute) generatorConfig);
                 break;
             case "entities":
-                 loadEntity(session, generatorKey, (Configuration.Entity) generatorConfig);
+                 loadEntity(session, generatorKey, (Configuration.Generator.EntityInsert) generatorConfig);
                  break;
             case "relations":
-                 loadRelation(session, generatorKey, (Configuration.Relation) generatorConfig);
+                 loadRelation(session, generatorKey, (Configuration.Generator.Relation) generatorConfig);
                  break;
             case "appendAttribute":
-                 loadAppendAttribute(session, generatorKey, (Configuration.AppendAttribute) generatorConfig);
+                 loadAppendAttribute(session, generatorKey, (Configuration.Generator.AppendAttribute) generatorConfig);
                  break;
             case "appendAttributeOrInsertThing":
-                 loadAppendOrInsert(session, generatorKey, (Configuration.AppendAttributeOrInsertThing) generatorConfig);
+                 loadAppendOrInsert(session, generatorKey, (Configuration.Generator.AppendAttributeOrInsertThing) generatorConfig);
                  break;
             default:
                 throw new RuntimeException("Unrecognised generator type: " + generatorType);
         }
     }
 
-    private void initializeAppendAttributeConceptValueTypes(TypeDBSession session, Configuration.AppendAttribute appendAttribute) {
-        Configuration.ConstrainingAttribute[] hasAttributes = appendAttribute.getInsert().getOwnerships();
+    private void initializeAppendAttributeConceptValueTypes(TypeDBSession session, Configuration.Generator.AppendAttribute appendAttribute) {
+        Configuration.Definition.Attribute[] hasAttributes = appendAttribute.getInsert().getOwnerships();
         if (hasAttributes != null) {
             Util.setConstrainingAttributeConceptType(hasAttributes, session);
         }
 
-        Configuration.ConstrainingAttribute[] matchAttributes = appendAttribute.getMatch().getOwnerships();
+        Configuration.Definition.Attribute[] matchAttributes = appendAttribute.getMatch().getOwnerships();
         if (matchAttributes != null) {
             Util.setConstrainingAttributeConceptType(matchAttributes, session);
         }
     }
 
-    private void initializeAttributeConceptValueType(TypeDBSession session, Configuration.ConstrainingAttribute attribute) {
-        Configuration.ConstrainingAttribute[] attributes = new Configuration.ConstrainingAttribute[1];
+    private void initializeAttributeConceptValueType(TypeDBSession session, Configuration.Definition.Attribute attribute) {
+        Configuration.Definition.Attribute[] attributes = new Configuration.Definition.Attribute[1];
         attributes[0] = attribute;
         Util.setConstrainingAttributeConceptType(attributes, session);
     }
 
-    private void initializeRelationAttributeConceptValueTypes(TypeDBSession session, Configuration.Relation relation) {
-        Configuration.ConstrainingAttribute[] hasAttributes = relation.getInsert().getOwnerships();
+    private void initializeRelationAttributeConceptValueTypes(TypeDBSession session, Configuration.Generator.Relation relation) {
+        Configuration.Definition.Attribute[] hasAttributes = relation.getInsert().getOwnerships();
         if (hasAttributes != null) {
             Util.setConstrainingAttributeConceptType(hasAttributes, session);
         }
-        for (Configuration.Player player : relation.getInsert().getPlayers()) {
+        for (Configuration.Definition.Player player : relation.getInsert().getPlayers()) {
             recursiveSetPlayerAttributeConceptValueTypes(session, player);
         }
     }
 
-    private void recursiveSetPlayerAttributeConceptValueTypes(TypeDBSession session, Configuration.Player player) {
+    private void recursiveSetPlayerAttributeConceptValueTypes(TypeDBSession session, Configuration.Definition.Player player) {
         if (playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
-            Configuration.ConstrainingAttribute currentAttribute = player.getMatch().getAttribute();
+            Configuration.Definition.Attribute currentAttribute = player.getMatch().getAttribute();
             currentAttribute.setAttribute(player.getMatch().getType());
             initializeAttributeConceptValueType(session, currentAttribute);
         } else if (playerType(player).equals("byAttribute")) {
             //terminating condition - byAttribute player:
             Util.setConstrainingAttributeConceptType(player.getMatch().getOwnerships(), session);
         } else if (playerType(player).equals("byPlayer")) {
-            for (Configuration.Player curPlayer : player.getMatch().getPlayers()) {
+            for (Configuration.Definition.Player curPlayer : player.getMatch().getPlayers()) {
                 recursiveSetPlayerAttributeConceptValueTypes(session, curPlayer);
             }
         }

@@ -50,7 +50,7 @@ public class RelationGeneratorTest {
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
-                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
+                Configuration.Definition.Attribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
@@ -273,13 +273,13 @@ public class RelationGeneratorTest {
         TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
-                Configuration.ConstrainingAttribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
+                Configuration.Definition.Attribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
                 Util.setConstrainingAttributeConceptType(hasAttributes, session);
             }
             for (int idx = 0; idx < dc.getRelations().get(relationKey).getInsert().getPlayers().length; idx++) {
                 QueryUtilTest.setPlayerAttributeTypes(dc.getRelations().get(relationKey), idx, session);
                 if (dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers() != null) {
-                    for (Configuration.Player player : dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers()) {
+                    for (Configuration.Definition.Player player : dc.getRelations().get(relationKey).getInsert().getPlayers()[idx].getMatch().getPlayers()) {
                         if (player.getMatch().getOwnerships() != null) {
                             Util.setConstrainingAttributeConceptType(player.getMatch().getOwnerships(), session);
                         }

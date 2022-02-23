@@ -17,10 +17,10 @@
 package config;
 
 import com.vaticle.typedb.client.api.TypeDBSession;
-import type.AttributeValueType;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typeql.lang.TypeQL;
+import type.AttributeValueType;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
 public class Configuration {
 
     GlobalConfig globalConfig;
-    Map<String, Attribute> attributes;
-    Map<String, Entity> entities;
-    Map<String, Relation> relations;
-    Map<String, AppendAttribute> appendAttribute;
-    Map<String, AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
+    Map<String, Generator.Attribute> attributes;
+    Map<String, Generator.EntityInsert> entities;
+    Map<String, Generator.Relation> relations;
+    Map<String, Generator.AppendAttribute> appendAttribute;
+    Map<String, Generator.AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
 
     public static AttributeValueType getValueType(TypeDBSession session, String conceptType) {
         AttributeValueType valueType = null;
@@ -52,118 +52,77 @@ public class Configuration {
         return globalConfig;
     }
 
-    public Map<String, Attribute> getAttributes() {
+    public Map<String, Generator.Attribute> getAttributes() {
         return attributes;
     }
 
-    public Map<String, Entity> getEntities() {
+    public Map<String, Generator.EntityInsert> getEntities() {
         return entities;
     }
 
-    public Map<String, Relation> getRelations() {
+    public Map<String, Generator.Relation> getRelations() {
         return relations;
     }
 
-    public Map<String, AppendAttribute> getAppendAttribute() {
+    public Map<String, Generator.AppendAttribute> getAppendAttribute() {
         return appendAttribute;
     }
 
-    public Map<String, AppendAttributeOrInsertThing> getAppendAttributeOrInsertThing() {
+    public Map<String, Generator.AppendAttributeOrInsertThing> getAppendAttributeOrInsertThing() {
         return appendAttributeOrInsertThing;
     }
 
     public Generator getGeneratorByKey(String key) {
-        Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
-        if (attributeGenerators != null) {
-            for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return generator.getValue();
-                }
-            }
+        Map<String, Generator.Attribute> attributeGenerators = getAttributes();
+        if (attributeGenerators != null && attributeGenerators.containsKey(key)) {
+            return attributeGenerators.get(key);
         }
-        Map<String, Configuration.Entity> entityGenerators = getEntities();
-        if (entityGenerators != null) {
-            for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return generator.getValue();
-                }
-            }
+        Map<String, Generator.EntityInsert> entityGenerators = getEntities();
+        if (entityGenerators != null && entityGenerators.containsKey(key)) {
+            return entityGenerators.get(key);
         }
-        Map<String, Configuration.Relation> relationGenerators = getRelations();
-        if (relationGenerators != null) {
-            for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return generator.getValue();
-                }
-            }
+        Map<String, Generator.Relation> relationGenerators = getRelations();
+        if (relationGenerators != null && relationGenerators.containsKey(key)) {
+            return relationGenerators.get(key);
         }
-        Map<String, Configuration.AppendAttribute> aaGenerators = getAppendAttribute();
-        if (aaGenerators != null) {
-            for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return generator.getValue();
-                }
-            }
+        Map<String, Generator.AppendAttribute> aaGenerators = getAppendAttribute();
+        if (aaGenerators != null && aaGenerators.containsKey(key)) {
+            return aaGenerators.get(key);
         }
-        Map<String, Configuration.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
-        if (aiGenerators != null) {
-            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return generator.getValue();
-                }
-            }
+        Map<String, Generator.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
+        if (aiGenerators != null && aiGenerators.containsKey(key)) {
+            return aiGenerators.get(key);
         }
         return null;
     }
 
     public String getGeneratorTypeByKey(String key) {
-        Map<String, Configuration.Attribute> attributeGenerators = getAttributes();
-        if (attributeGenerators != null) {
-            for (Map.Entry<String, Configuration.Attribute> generator : getAttributes().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return "attributes";
-                }
-            }
+        Map<String, Generator.Attribute> attributeGenerators = getAttributes();
+        if (attributeGenerators != null && attributeGenerators.containsKey(key)) {
+            return "attributes";
         }
 
-        Map<String, Configuration.Entity> entityGenerators = getEntities();
-        if (entityGenerators != null) {
-            for (Map.Entry<String, Configuration.Entity> generator : getEntities().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return "entities";
-                }
-            }
+        Map<String, Generator.EntityInsert> entityGenerators = getEntities();
+        if (entityGenerators != null && entityGenerators.containsKey(key)) {
+            return "entities";
         }
 
-        Map<String, Configuration.Relation> relationGenerators = getRelations();
-        if (relationGenerators != null) {
-            for (Map.Entry<String, Configuration.Relation> generator : getRelations().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return "relations";
-                }
-            }
+        Map<String, Generator.Relation> relationGenerators = getRelations();
+        if (relationGenerators != null && relationGenerators.containsKey(key)) {
+            return "relations";
         }
 
-        Map<String, Configuration.AppendAttribute> aaGenerators = getAppendAttribute();
-        if (aaGenerators != null) {
-            for (Map.Entry<String, Configuration.AppendAttribute> generator : getAppendAttribute().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return "appendAttribute";
-                }
-            }
+        Map<String, Generator.AppendAttribute> aaGenerators = getAppendAttribute();
+        if (aaGenerators != null && aaGenerators.containsKey(key)) {
+            return "appendAttribute";
         }
 
-        Map<String, Configuration.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
-        if (aiGenerators != null) {
-            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> generator : getAppendAttributeOrInsertThing().entrySet()) {
-                if (generator.getKey().equals(key)) {
-                    return "appendAttributeOrInsertThing";
-                }
-            }
+        Map<String, Generator.AppendAttributeOrInsertThing> aiGenerators = getAppendAttributeOrInsertThing();
+        if (aiGenerators != null && aiGenerators.containsKey(key)) {
+            return "appendAttributeOrInsertThing";
         }
         return null;
     }
-
 
     public static class GlobalConfig {
 
@@ -207,7 +166,7 @@ public class Configuration {
         }
     }
 
-    public class Generator {
+    public static abstract class Generator {
         String[] data;
         GeneratorConfig config;
 
@@ -218,72 +177,166 @@ public class Configuration {
         public GeneratorConfig getConfig() {
             return config;
         }
+
+        public static class GeneratorConfig {
+            Character separator;
+            Integer rowsPerCommit;
+
+            public Character getSeparator() {
+                return separator;
+            }
+
+            public Integer getRowsPerCommit() {
+                return rowsPerCommit;
+            }
+        }
+
+        public static class Attribute extends Generator {
+            Definition.Attribute insert;
+
+            public Definition.Attribute getInsert() {
+                return insert;
+            }
+        }
+
+        public static class EntityInsert extends Generator {
+            Insert insert;
+
+            public Insert getInsert() {
+                return insert;
+            }
+
+            public static class Insert {
+                String entity;
+                Definition.Attribute[] ownerships;
+
+                public String getEntity() {
+                    return entity;
+                }
+
+                public Definition.Attribute[] getOwnerships() {
+                    return ownerships;
+                }
+
+                public Definition.Attribute[] getRequiredOwnerships() {
+                    ArrayList<Definition.Attribute> tmp = new ArrayList<>();
+                    for (Definition.Attribute attribute : getOwnerships()) {
+                        if (attribute.getRequired() != null && attribute.getRequired()) {
+                            tmp.add(attribute);
+                        }
+                    }
+                    Definition.Attribute[] requireNoneEmptyAttributes = new Definition.Attribute[tmp.size()];
+                    return tmp.toArray(requireNoneEmptyAttributes);
+                }
+            }
+        }
+
+        public static class Relation extends Generator {
+            Insert insert;
+
+            public Insert getInsert() {
+                return insert;
+            }
+
+            public static class Insert {
+                String relation;
+                Definition.Attribute[] ownerships;
+                Definition.Player[] players;
+
+                public String getRelation() {
+                    return relation;
+                }
+
+                public Definition.Attribute[] getOwnerships() {
+                    return ownerships;
+                }
+
+                public Definition.Attribute[] getRequiredOwnerships() {
+                    ArrayList<Definition.Attribute> tmp = new ArrayList<>();
+                    if (ownerships != null) {
+                        for (Definition.Attribute attribute : ownerships) {
+                            if (attribute.getRequired() != null && attribute.getRequired()) {
+                                tmp.add(attribute);
+                            }
+                        }
+                        Definition.Attribute[] requireNoneEmptyAttributes = new Definition.Attribute[tmp.size()];
+                        return tmp.toArray(requireNoneEmptyAttributes);
+                    } else {
+                        return new Definition.Attribute[0];
+                    }
+                }
+
+                public Definition.Player[] getPlayers() {
+                    return players;
+                }
+
+                public Definition.Player[] getRequiredPlayers() {
+                    ArrayList<Definition.Player> tmp = new ArrayList<>();
+                    for (Definition.Player player : getPlayers()) {
+                        if (player.getRequired() != null) {
+                            if (player.getRequired()) {
+                                tmp.add(player);
+                            }
+                        }
+                    }
+                    Definition.Player[] requireNoneEmptyAttributes = new Definition.Player[tmp.size()];
+                    return tmp.toArray(requireNoneEmptyAttributes);
+                }
+            }
+
+        }
+
+        public static class AppendAttribute extends Generator {
+            Match match;
+            Insert insert;
+
+            public Match getMatch() {
+                return match;
+            }
+
+            public Insert getInsert() {
+                return insert;
+            }
+
+            public static class Match {
+                String type;
+                Definition.Attribute[] ownerships;
+
+                public String getType() {
+                    return type;
+                }
+
+                public Definition.Attribute[] getOwnerships() {
+                    return ownerships;
+                }
+            }
+
+            public static class Insert {
+                Definition.Attribute[] ownerships;
+
+                public Definition.Attribute[] getOwnerships() {
+                    return ownerships;
+                }
+
+                public Definition.Attribute[] getRequiredOwnerships() {
+                    ArrayList<Definition.Attribute> tmp = new ArrayList<>();
+                    for (Definition.Attribute attribute : getOwnerships()) {
+                        if (attribute.getRequired() != null && attribute.getRequired()) {
+                            tmp.add(attribute);
+                        }
+                    }
+                    Definition.Attribute[] requireNoneEmptyAttributes = new Definition.Attribute[tmp.size()];
+                    return tmp.toArray(requireNoneEmptyAttributes);
+                }
+            }
+        }
+
+        public static class AppendAttributeOrInsertThing extends AppendAttribute {
+        }
+
     }
 
-    public class GeneratorConfig {
-        Character separator;
-        Integer rowsPerCommit;
-
-        public Character getSeparator() {
-            return separator;
-        }
-
-        public Integer getRowsPerCommit() {
-            return rowsPerCommit;
-        }
-    }
-
-
-    public class Attribute extends Generator {
-        ConstrainingAttribute insert;
-
-        public ConstrainingAttribute getInsert() {
-            return insert;
-        }
-    }
-
-    public class ConstrainingAttribute {
-        String attribute;
-        AttributeValueType conceptValueType;
-        String column;
-        Boolean required;
-        String listSeparator;
-        PreprocessorConfig preprocessorConfig;
-
-        public String getAttribute() {
-            return attribute;
-        }
-
-        public AttributeValueType getConceptValueType() {
-            return conceptValueType;
-        }
-
-        public void setConceptValueType(TypeDBSession session) {
-            this.conceptValueType = getValueType(session, attribute);
-        }
-
-        public String getColumn() {
-            return column;
-        }
-
-        public Boolean getRequired() {
-            return required;
-        }
-
-        public String getListSeparator() {
-            return listSeparator;
-        }
-
-        public PreprocessorConfig getPreprocessorConfig() {
-            return preprocessorConfig;
-        }
-
-        public void setAttribute(String attribute) {
-            this.attribute = attribute;
-        }
-    }
-
-    public class PreprocessorConfig {
+    public static class PreprocessorConfig {
         String type;
         PreprocessorParameters parameters;
 
@@ -295,7 +348,7 @@ public class Configuration {
             return parameters;
         }
 
-        public class PreprocessorParameters {
+        public static class PreprocessorParameters {
             String regexMatch;
             String regexReplace;
 
@@ -309,189 +362,101 @@ public class Configuration {
         }
     }
 
-    public class Entity extends Generator {
-        EntityInsert insert;
+    public static class Definition {
 
-        public EntityInsert getInsert() {
-            return insert;
-        }
-    }
+        public static class Attribute {
+            String attribute;
+            AttributeValueType conceptValueType;
+            String column;
+            Boolean required;
+            String listSeparator;
+            PreprocessorConfig preprocessorConfig;
 
-    public class EntityInsert {
-        String entity;
-        ConstrainingAttribute[] ownerships;
-
-        public String getEntity() {
-            return entity;
-        }
-
-        public ConstrainingAttribute[] getOwnerships() {
-            return ownerships;
-        }
-
-        public ConstrainingAttribute[] getRequiredOwnerships() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
-                if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
-                    tmp.add(constrainingAttribute);
-                }
+            public String getAttribute() {
+                return attribute;
             }
-            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
+
+            public AttributeValueType getConceptValueType() {
+                return conceptValueType;
+            }
+
+            public void setConceptValueType(TypeDBSession session) {
+                this.conceptValueType = getValueType(session, attribute);
+            }
+
+            public String getColumn() {
+                return column;
+            }
+
+            public Boolean getRequired() {
+                return required;
+            }
+
+            public String getListSeparator() {
+                return listSeparator;
+            }
+
+            public PreprocessorConfig getPreprocessorConfig() {
+                return preprocessorConfig;
+            }
+
+            public void setAttribute(String attribute) {
+                this.attribute = attribute;
+            }
         }
-    }
 
-    public class Relation extends Generator {
-        RelationInsert insert;
+        public static class Player {
+            String role;
+            Boolean required;
+            Thing match;
 
-        public RelationInsert getInsert() {
-            return insert;
-        }
-    }
+            public String getRole() {
+                return role;
+            }
 
-    public class RelationInsert {
-        String relation;
-        ConstrainingAttribute[] ownerships;
-        Player[] players;
+            public Boolean getRequired() {
+                return required;
+            }
 
-        public String getRelation() {
-            return relation;
-        }
-
-        public ConstrainingAttribute[] getOwnerships() {
-            return ownerships;
+            public Definition.Thing getMatch() {
+                return match;
+            }
         }
 
-        public ConstrainingAttribute[] getRequiredOwnerships() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            if (getOwnerships() != null) {
-                for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
-                    if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
-                        tmp.add(constrainingAttribute);
+        public static class Thing {
+            String type;
+            Attribute attribute;
+            Attribute[] ownerships;
+            Player[] players;
+
+            public String getType() {
+                return type;
+            }
+
+            public Attribute[] getOwnerships() {
+                return ownerships;
+            }
+
+            public Player[] getPlayers() {
+                return players;
+            }
+
+            public Attribute getAttribute() {
+                return attribute;
+            }
+
+            public Player[] getRequiredPlayers() {
+                ArrayList<Player> tmp = new ArrayList<>();
+                for (Player player : getPlayers()) {
+                    if (player.getRequired() != null) {
+                        if (player.getRequired()) {
+                            tmp.add(player);
+                        }
                     }
                 }
-                ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-                return tmp.toArray(requireNoneEmptyAttributes);
-            } else {
-                return new ConstrainingAttribute[0];
+                Player[] requiredPlayers = new Player[tmp.size()];
+                return tmp.toArray(requiredPlayers);
             }
         }
-
-        public Player[] getPlayers() {
-            return players;
-        }
-
-        public Player[] getRequiredPlayers() {
-            ArrayList<Player> tmp = new ArrayList<>();
-            for (Player player : getPlayers()) {
-                if (player.getRequired() != null) {
-                    if (player.getRequired()) {
-                        tmp.add(player);
-                    }
-                }
-            }
-            Player[] requireNoneEmptyAttributes = new Player[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
-        }
     }
-
-    public class Player {
-        String role;
-        Boolean required;
-        RoleGetter match;
-
-        public String getRole() {
-            return role;
-        }
-
-        public Boolean getRequired() {
-            return required;
-        }
-
-        public RoleGetter getMatch() {
-            return match;
-        }
-    }
-
-    public class RoleGetter {
-        String type;
-        ConstrainingAttribute attribute;
-        ConstrainingAttribute[] ownerships;
-        Player[] players;
-
-        public String getType() {
-            return type;
-        }
-
-        public ConstrainingAttribute[] getOwnerships() {
-            return ownerships;
-        }
-
-        public Player[] getPlayers() {
-            return players;
-        }
-
-        public ConstrainingAttribute getAttribute() { return attribute; }
-
-        public Player[] getRequiredPlayers() {
-            ArrayList<Player> tmp = new ArrayList<>();
-            for (Player player : getPlayers()) {
-                if (player.getRequired() != null) {
-                    if (player.getRequired()) {
-                        tmp.add(player);
-                    }
-                }
-            }
-            Player[] requiredPlayers = new Player[tmp.size()];
-            return tmp.toArray(requiredPlayers);
-        }
-    }
-
-    public class AppendAttribute extends Generator {
-        AppendAttributeMatch match;
-        AppendAttributeInsert insert;
-
-        public AppendAttributeMatch getMatch() {
-            return match;
-        }
-
-        public AppendAttributeInsert getInsert() {
-            return insert;
-        }
-    }
-
-    public class AppendAttributeMatch {
-        String type;
-        ConstrainingAttribute[] ownerships;
-
-        public String getType() {
-            return type;
-        }
-
-        public ConstrainingAttribute[] getOwnerships() {
-            return ownerships;
-        }
-    }
-
-    public class AppendAttributeInsert {
-        ConstrainingAttribute[] ownerships;
-
-        public ConstrainingAttribute[] getOwnerships() {
-            return ownerships;
-        }
-
-        public ConstrainingAttribute[] getRequiredOwnerships() {
-            ArrayList<ConstrainingAttribute> tmp = new ArrayList<>();
-            for (ConstrainingAttribute constrainingAttribute : getOwnerships()) {
-                if (constrainingAttribute.getRequired() != null && constrainingAttribute.getRequired()) {
-                    tmp.add(constrainingAttribute);
-                }
-            }
-            ConstrainingAttribute[] requireNoneEmptyAttributes = new ConstrainingAttribute[tmp.size()];
-            return tmp.toArray(requireNoneEmptyAttributes);
-        }
-    }
-
-    public class AppendAttributeOrInsertThing extends AppendAttribute { }
-
 }
