@@ -31,7 +31,7 @@ public class Configuration {
 
     GlobalConfig globalConfig;
     Map<String, Generator.Attribute> attributes;
-    Map<String, Generator.EntityInsert> entities;
+    Map<String, Generator.Entity> entities;
     Map<String, Generator.Relation> relations;
     Map<String, Generator.AppendAttribute> appendAttribute;
     Map<String, Generator.AppendAttributeOrInsertThing> appendAttributeOrInsertThing;
@@ -56,7 +56,7 @@ public class Configuration {
         return attributes;
     }
 
-    public Map<String, Generator.EntityInsert> getEntities() {
+    public Map<String, Generator.Entity> getEntities() {
         return entities;
     }
 
@@ -77,7 +77,7 @@ public class Configuration {
         if (attributeGenerators != null && attributeGenerators.containsKey(key)) {
             return attributeGenerators.get(key);
         }
-        Map<String, Generator.EntityInsert> entityGenerators = getEntities();
+        Map<String, Generator.Entity> entityGenerators = getEntities();
         if (entityGenerators != null && entityGenerators.containsKey(key)) {
             return entityGenerators.get(key);
         }
@@ -102,7 +102,7 @@ public class Configuration {
             return "attributes";
         }
 
-        Map<String, Generator.EntityInsert> entityGenerators = getEntities();
+        Map<String, Generator.Entity> entityGenerators = getEntities();
         if (entityGenerators != null && entityGenerators.containsKey(key)) {
             return "entities";
         }
@@ -199,7 +199,7 @@ public class Configuration {
             }
         }
 
-        public static class EntityInsert extends Generator {
+        public static class Entity extends Generator {
             Insert insert;
 
             public Insert getInsert() {

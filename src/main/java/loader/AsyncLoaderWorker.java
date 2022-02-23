@@ -110,7 +110,7 @@ public class AsyncLoaderWorker {
             // Load entities
             Util.info("loading entities");
             if (dc.getEntities() != null) {
-                for (Map.Entry<String, Configuration.Generator.EntityInsert> entity : dc.getEntities().entrySet()) {
+                for (Map.Entry<String, Configuration.Generator.Entity> entity : dc.getEntities().entrySet()) {
                     if (!separateGenerators.contains(entity.getKey())) {
                         loadEntity(session, entity.getKey(), entity.getValue());
                         if (status == Status.ERROR) return;
@@ -186,7 +186,7 @@ public class AsyncLoaderWorker {
         }
     }
 
-    private void loadEntity(TypeDBSession session, String generatorKey, Configuration.Generator.EntityInsert entityGenerator)
+    private void loadEntity(TypeDBSession session, String generatorKey, Configuration.Generator.Entity entityGenerator)
             throws IOException, InterruptedException {
         Util.setConstrainingAttributeConceptType(entityGenerator.getInsert().getOwnerships(), session);
         for (String filePath : entityGenerator.getData()) {
@@ -234,7 +234,7 @@ public class AsyncLoaderWorker {
                 loadAttribute(session, generatorKey, (Configuration.Generator.Attribute) generatorConfig);
                 break;
             case "entities":
-                 loadEntity(session, generatorKey, (Configuration.Generator.EntityInsert) generatorConfig);
+                 loadEntity(session, generatorKey, (Configuration.Generator.Entity) generatorConfig);
                  break;
             case "relations":
                  loadRelation(session, generatorKey, (Configuration.Generator.Relation) generatorConfig);

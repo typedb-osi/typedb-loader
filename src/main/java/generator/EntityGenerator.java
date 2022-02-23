@@ -37,10 +37,10 @@ public class EntityGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.Generator.EntityInsert entityConfiguration;
+    private final Configuration.Generator.Entity entityConfiguration;
     private final char fileSeparator;
 
-    public EntityGenerator(String filePath, Configuration.Generator.EntityInsert entityConfiguration, char fileSeparator) throws IOException {
+    public EntityGenerator(String filePath, Configuration.Generator.Entity entityConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.entityConfiguration = entityConfiguration;

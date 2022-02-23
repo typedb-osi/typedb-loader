@@ -109,7 +109,7 @@ public class ConfigurationValidation {
 
         // validate entities:
         if (configuration.getEntities() != null) {
-            for (Map.Entry<String, Configuration.Generator.EntityInsert> entity : configuration.getEntities().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.Entity> entity : configuration.getEntities().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entity.getKey();
                 // CONFIG
