@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download latest library artifacts
-       uses: dawidd6/action-download-artifact@v2
-       with:
-         workflow: build_and_test.yaml
-         branch: master
-         name: typedb-loader-latest-libs
-         path: lib
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build_and_test.yaml
+          branch: master
+          name: typedb-loader-latest-libs
+          path: lib
 
       - name: Download latest binary artifacts
         uses: dawidd6/action-download-artifact@v2
