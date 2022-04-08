@@ -20,13 +20,3 @@ jobs:
         run: ./gradlew build -x test
       - name: Test with Gradle
         run: ./gradlew test --tests config.ConfigurationTest --tests io.* --tests preprocessor.*
-      - name: Upload libs
-        uses: actions/upload-artifact@v2
-        with:
-          name: typedb-loader-latest-libs
-          path: build/libs
-      - name: Upload distributions
-        uses: actions/upload-artifact@v2
-        with:
-          name: typedb-loader-latest-binaries
-          path: build/distributions
