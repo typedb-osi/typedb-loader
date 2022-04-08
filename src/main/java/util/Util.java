@@ -28,11 +28,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
 import static io.FileToInputStream.getInputStream;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Util {
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
@@ -71,7 +74,7 @@ public class Util {
     public static String loadSchemaFromFile(String schemaPath) {
         String schema = "";
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(schemaPath)));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(schemaPath), UTF_8));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             while (line != null) {
@@ -88,7 +91,7 @@ public class Util {
     public static BufferedReader newBufferedReader(String filePath) throws FileNotFoundException {
         InputStream is = getInputStream(filePath);
         if (is != null) {
-            return new BufferedReader(new InputStreamReader(is));
+            return new BufferedReader(new InputStreamReader(is, UTF_8));
         } else {
             throw new FileNotFoundException();
         }
