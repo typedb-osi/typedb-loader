@@ -33,7 +33,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build/distributions/typedb-loader-${{ github.ref_name }}.zip
-          asset_name: typedb-loader-${{ github.ref_namef }}.zip
+          asset_name: typedb-loader-${{ github.ref_name }}.zip
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
