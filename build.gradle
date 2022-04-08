@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.vaticle.typedb-osi'
-version '1.0.0-alpha'
+version '1.1.0'
 
 repositories {
     mavenCentral()
@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    compile group: 'com.vaticle.typedb', name: 'typedb-client', version: '2.6.1'
-    compile group: 'com.vaticle.typeql', name: 'typeql-grammar', version: '2.4.0'
+    compile group: 'com.vaticle.typedb', name: 'typedb-client', version: '2.8.0'
+    compile group: 'com.vaticle.typeql', name: 'typeql-grammar', version: '2.8.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'com.google.code.gson:gson:2.8.6'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
