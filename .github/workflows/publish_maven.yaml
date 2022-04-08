@@ -1,4 +1,4 @@
-name: TypeDB Loader Release
+name: Maven release
 on:
   release:
     types: [published]

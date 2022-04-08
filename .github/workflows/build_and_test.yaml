@@ -1,4 +1,4 @@
-name: TypeDB Loader Test
+name: Build and test
 
 on:
   push:
