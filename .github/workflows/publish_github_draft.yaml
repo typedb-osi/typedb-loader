@@ -9,14 +9,6 @@ jobs:
   create-draft:
     runs-on: ubuntu-latest
     steps:
-      - name: Download latest library artifacts
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow: build_and_test.yaml
-          branch: master
-          name: typedb-loader-latest-libs
-          path: lib
-
       - name: Download latest binary artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -36,18 +28,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload libraries
+      - name: Upload binary zip
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: lib/*
+          asset_path: bin/typedb-loader-${{ github.ref }}.zip
+          asset_name: typedb-loader-${{ github.ref }}.zip
+          asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload binaries
+      - name: Upload binary tar
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/*
+          asset_path: bin/typedb-loader-${{ github.ref }}.tar.gz
+          asset_name: typedb-loader-${{ github.ref }}.tar.gz
+          asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
