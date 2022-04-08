@@ -16,17 +16,17 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-      - name: Test with Gradle
-        run: ./gradlew test --tests config.ConfigurationTest --tests io.* --tests preprocessor.*
       - name: Build libs and distributions with Gradle
         run: ./gradlew build -x test
+      - name: Test with Gradle
+        run: ./gradlew test --tests config.ConfigurationTest --tests io.* --tests preprocessor.*
       - name: Upload libs
         uses: actions/upload-artifact@v2
         with:
-          name: typedbloader-latest
+          name: typedb-loader-latest-libs
           path: build/libs
       - name: Upload distributions
         uses: actions/upload-artifact@v2
         with:
-          name: typedbloader-cli-latest
+          name: typedb-loader-latest-binaries
           path: build/distributions

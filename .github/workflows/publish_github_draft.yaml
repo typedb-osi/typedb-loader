@@ -1,0 +1,53 @@
+name: Create a github draft release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  create-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download latest library artifacts
+       uses: dawidd6/action-download-artifact@v2
+       with:
+         workflow: build_and_test.yaml
+         branch: master
+         name: typedb-loader-latest-libs
+         path: lib
+
+      - name: Download latest binary artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build_and_test.yaml
+          branch: master
+          name: typedb-loader-latest-binaries
+          path: bin
+
+      - name: Create release notes draft
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          release_name: TypeDB Loader ${{ github.ref }}
+          draft: true
+          prerelease: false
+          tag_name: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload libraries
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: lib/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload binaries
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: bin/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
