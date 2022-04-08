@@ -42,8 +42,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/distributions/typedb-loader-${{ github.ref_name }}.tar.gz
-          asset_name: typedb-loader-${{ github.ref_name }}.tar.gz
+          asset_path: build/distributions/typedb-loader-${{ github.ref_name }}.tar
+          asset_name: typedb-loader-${{ github.ref_name }}.tar
           asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
