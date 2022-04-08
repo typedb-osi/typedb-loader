@@ -1,4 +1,4 @@
-name: TypeDB Loader Build
+name: TypeDB Loader Release
 on:
   release:
     types: [published]
@@ -13,4 +13,4 @@ jobs:
       - name: Publish package
         run: gradle publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GRAMI_CICD_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
