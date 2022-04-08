@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
@@ -42,10 +42,10 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.AppendAttributeOrInsertThing appendOrInsertConfiguration;
+    private final Configuration.Generator.AppendAttributeOrInsertThing appendOrInsertConfiguration;
     private final char fileSeparator;
 
-    public AppendAttributeOrInsertThingGenerator(String filePath, Configuration.AppendAttributeOrInsertThing appendOrInsertConfiguration, char fileSeparator) throws IOException {
+    public AppendAttributeOrInsertThingGenerator(String filePath, Configuration.Generator.AppendAttributeOrInsertThing appendOrInsertConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.appendOrInsertConfiguration = appendOrInsertConfiguration;
@@ -95,7 +95,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
         if (row.length > 0) {
             ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
                     .isa(appendOrInsertConfiguration.getMatch().getType());
-            for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+            for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, ownershipThingGetter);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
@@ -105,7 +105,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
             UnboundVariable insertUnboundVar = TypeQL.var("thing");
             ThingVariable.Thing insertStatement = null;
-            for (Configuration.ConstrainingAttribute attributeToAppend : appendOrInsertConfiguration.getInsert().getOwnerships()) {
+            for (Configuration.Definition.Attribute attributeToAppend : appendOrInsertConfiguration.getInsert().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
@@ -131,11 +131,11 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
         if (row.length > 0) {
             ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getMatch().getType());
 
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+            for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
-                        row, header, filePath, fileSeparator, constrainingAttribute);
+                        row, header, filePath, fileSeparator, attribute);
                 for (ThingConstraint.Value<?> constraintValue : constraintValues) {
-                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(constrainingAttribute.getAttribute(), constraintValue));
+                    insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attribute.getAttribute(), constraintValue));
                 }
             }
 
@@ -150,12 +150,12 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
     public boolean appendAttributeInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getMatch().getType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+        for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
             if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
         }
         if (appendOrInsertConfiguration.getInsert().getRequiredOwnerships() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
+            for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + attribute.getAttribute())) return false;
             }
         }
         return true;
@@ -164,14 +164,14 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
     public boolean thingInsertStatementValid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getMatch().getType())) return false;
-        for (Configuration.ConstrainingAttribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
+        for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
             if (ownershipThingGetter.getRequired() != null && ownershipThingGetter.getRequired()) {
                 if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
             }
         }
         if (appendOrInsertConfiguration.getInsert().getRequiredOwnerships() != null) {
-            for (Configuration.ConstrainingAttribute constrainingAttribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
-                if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
+            for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {
+                if (!insert.toString().contains("has " + attribute.getAttribute())) return false;
             }
         }
         return true;

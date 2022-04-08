@@ -51,7 +51,7 @@ public class ConfigurationTest {
         Assert.assertEquals(',', config.getEntities().get(entity).getConfig().getSeparator().charValue());
         Assert.assertEquals("person", config.getEntities().get(entity).getInsert().getEntity());
         Assert.assertEquals(50, config.getEntities().get(entity).getConfig().getRowsPerCommit().intValue());
-        Configuration.ConstrainingAttribute[] attributes = config.getEntities().get(entity).getInsert().getOwnerships();
+        Configuration.Definition.Attribute[] attributes = config.getEntities().get(entity).getInsert().getOwnerships();
         Assert.assertEquals("first-name", attributes[0].getAttribute());
         Assert.assertNull(attributes[0].getConceptValueType());
         Assert.assertEquals("first_name", attributes[0].getColumn());
@@ -69,13 +69,13 @@ public class ConfigurationTest {
         Assert.assertEquals(50, config.getRelations().get(relation).getConfig().getRowsPerCommit().intValue());
         Assert.assertNull(config.getRelations().get(relation).getInsert().getOwnerships());
 
-        Configuration.Player[] players = config.getRelations().get(relation).getInsert().getPlayers();
-        Configuration.Player player = players[0];
+        Configuration.Definition.Player[] players = config.getRelations().get(relation).getInsert().getPlayers();
+        Configuration.Definition.Player player = players[0];
         Assert.assertEquals("provider", player.getRole());
         Assert.assertTrue(player.getRequired());
-        Configuration.RoleGetter roleMatch = player.getMatch();
+        Configuration.Definition.Thing roleMatch = player.getMatch();
         Assert.assertEquals("company", roleMatch.getType());
-        Configuration.ConstrainingAttribute consAtt = roleMatch.getOwnerships()[0];
+        Configuration.Definition.Attribute consAtt = roleMatch.getOwnerships()[0];
         Assert.assertEquals("name", consAtt.getAttribute());
         Assert.assertEquals("company_name", consAtt.getColumn());
         Assert.assertNull(consAtt.getListSeparator());
@@ -119,7 +119,7 @@ public class ConfigurationTest {
         Assert.assertNull(consAtt.getListSeparator());
 
         attributes = config.getRelations().get(relation).getInsert().getOwnerships();
-        Configuration.ConstrainingAttribute attribute = attributes[0];
+        Configuration.Definition.Attribute attribute = attributes[0];
         Assert.assertEquals("started-at", attribute.getAttribute());
         Assert.assertEquals("started_at", attribute.getColumn());
         Assert.assertTrue(attribute.getRequired());
@@ -204,7 +204,7 @@ public class ConfigurationTest {
         Assert.assertTrue(player.getRequired());
         roleMatch = player.getMatch();
         Assert.assertEquals("call", roleMatch.getType());
-        Configuration.Player[] playerPlayers = roleMatch.getPlayers();
+        Configuration.Definition.Player[] playerPlayers = roleMatch.getPlayers();
         Assert.assertEquals("caller", playerPlayers[0].getRole());
         Assert.assertEquals("callee", playerPlayers[1].getRole());
         Assert.assertEquals("person", playerPlayers[0].getMatch().getType());

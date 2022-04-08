@@ -22,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -37,10 +37,10 @@ public class EntityGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.Entity entityConfiguration;
+    private final Configuration.Generator.Entity entityConfiguration;
     private final char fileSeparator;
 
-    public EntityGenerator(String filePath, Configuration.Entity entityConfiguration, char fileSeparator) throws IOException {
+    public EntityGenerator(String filePath, Configuration.Generator.Entity entityConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.entityConfiguration = entityConfiguration;
@@ -87,8 +87,8 @@ public class EntityGenerator implements Generator {
     public boolean valid(TypeQLInsert insert) {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + entityConfiguration.getInsert().getEntity())) return false;
-        for (Configuration.ConstrainingAttribute constrainingAttribute : entityConfiguration.getInsert().getRequiredOwnerships()) {
-            if (!insert.toString().contains("has " + constrainingAttribute.getAttribute())) return false;
+        for (Configuration.Definition.Attribute attribute : entityConfiguration.getInsert().getRequiredOwnerships()) {
+            if (!insert.toString().contains("has " + attribute.getAttribute())) return false;
         }
         return true;
     }

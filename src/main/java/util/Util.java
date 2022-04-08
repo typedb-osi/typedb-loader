@@ -19,7 +19,7 @@ package util;
 import config.Configuration;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -204,13 +204,13 @@ public class Util {
                 .toLowerCase();
     }
 
-    public static void setConstrainingAttributeConceptType(Configuration.ConstrainingAttribute[] attributes, TypeDBSession session) {
-        for (Configuration.ConstrainingAttribute attribute : attributes) {
+    public static void setConstrainingAttributeConceptType(Configuration.Definition.Attribute[] attributes, TypeDBSession session) {
+        for (Configuration.Definition.Attribute attribute : attributes) {
             attribute.setConceptValueType(session);
         }
     }
 
-    public static String playerType(Configuration.Player player) {
+    public static String playerType(Configuration.Definition.Player player) {
         if (player.getMatch().getOwnerships() != null) {
             return "byAttribute";
         } else if (player.getMatch().getAttribute() != null) {
@@ -222,7 +222,7 @@ public class Util {
         }
     }
 
-    public static Integer getRowsPerCommit(Configuration dc, Configuration.GeneratorConfig config) {
+    public static Integer getRowsPerCommit(Configuration dc, Configuration.Generator.GeneratorConfig config) {
         if (config != null) {
             return Objects.requireNonNullElseGet(config.getRowsPerCommit(), () -> dc.getGlobalConfig().getRowsPerCommit());
         } else {
@@ -230,7 +230,7 @@ public class Util {
         }
     }
 
-    public static Character getSeparator(Configuration dc, Configuration.GeneratorConfig config) {
+    public static Character getSeparator(Configuration dc, Configuration.Generator.GeneratorConfig config) {
         if (config != null) {
             return Objects.requireNonNullElseGet(config.getSeparator(), () -> dc.getGlobalConfig().getSeparator());
         } else {

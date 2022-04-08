@@ -22,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import util.GeneratorUtil;
 import util.Util;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
@@ -37,18 +37,17 @@ public class AttributeGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
     private final String filePath;
     private final String[] header;
-    private final Configuration.Attribute attributeConfiguration;
+    private final Configuration.Generator.Attribute attributeConfiguration;
     private final char fileSeparator;
 
-    public AttributeGenerator(String filePath, Configuration.Attribute attributeConfiguration, char fileSeparator) throws IOException {
+    public AttributeGenerator(String filePath, Configuration.Generator.Attribute attributeConfiguration, char fileSeparator) throws IOException {
         this.filePath = filePath;
         this.header = Util.getFileHeader(filePath, fileSeparator);
         this.attributeConfiguration = attributeConfiguration;
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx,
-                      String[] row) {
+    public void write(TypeDBTransaction tx, String[] row) {
 
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);

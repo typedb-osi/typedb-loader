@@ -16,7 +16,7 @@
 
 package util;
 
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 import config.Configuration;
 
 import java.time.LocalDate;
@@ -36,9 +36,9 @@ public class QueryUtilTest {
             return date.atStartOfDay();
         }
     }
-    public static void setPlayerAttributeTypes(Configuration.Relation relation, int playerIndex, TypeDBSession session) {
+    public static void setPlayerAttributeTypes(Configuration.Generator.Relation relation, int playerIndex, TypeDBSession session) {
         if (relation.getInsert().getPlayers()[playerIndex].getMatch() != null) {
-            Configuration.RoleGetter currentPlayerMatch = relation.getInsert().getPlayers()[playerIndex].getMatch();
+            Configuration.Definition.Thing currentPlayerMatch = relation.getInsert().getPlayers()[playerIndex].getMatch();
             if (currentPlayerMatch != null) {
                 // if attribute player
                 if (currentPlayerMatch.getAttribute() != null) {
@@ -49,7 +49,7 @@ public class QueryUtilTest {
                 // if byAttribute player
                 else if (currentPlayerMatch.getOwnerships() != null) {
                     System.out.println("byAttribute player, index " + playerIndex + " " + relation.getInsert().getRelation());
-                    for (Configuration.ConstrainingAttribute ownership : currentPlayerMatch.getOwnerships()) {
+                    for (Configuration.Definition.Attribute ownership : currentPlayerMatch.getOwnerships()) {
                         ownership.setConceptValueType(session);
                     }
                 }

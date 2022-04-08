@@ -17,12 +17,12 @@
 package config;
 
 import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.api.connection.TypeDBTransaction;
+import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 import util.Util;
-import com.vaticle.typedb.client.api.connection.TypeDBSession;
+import com.vaticle.typedb.client.api.TypeDBSession;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class ConfigurationValidation {
 
         // ATTRIBUTES:
         if (configuration.getAttributes() != null) {
-            for (Map.Entry<String, Configuration.Attribute> attribute : configuration.getAttributes().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.Attribute> attribute : configuration.getAttributes().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.ATTRIBUTES + "." + attribute.getKey();
                 // CONFIG
@@ -109,7 +109,7 @@ public class ConfigurationValidation {
 
         // validate entities:
         if (configuration.getEntities() != null) {
-            for (Map.Entry<String, Configuration.Entity> entity : configuration.getEntities().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.Entity> entity : configuration.getEntities().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.ENTITIES + "." + entity.getKey();
                 // CONFIG
@@ -144,7 +144,7 @@ public class ConfigurationValidation {
         // validate relations:
 
         if (configuration.getRelations() != null) {
-            for (Map.Entry<String, Configuration.Relation> relation : configuration.getRelations().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.Relation> relation : configuration.getRelations().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.RELATIONS + "." + relation.getKey();
                 // CONFIG
@@ -182,7 +182,7 @@ public class ConfigurationValidation {
 
         // validate appendAttribute:
         if (configuration.getAppendAttribute() != null) {
-            for (Map.Entry<String, Configuration.AppendAttribute> appendAttribute : configuration.getAppendAttribute().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.AppendAttribute> appendAttribute : configuration.getAppendAttribute().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.APPEND_ATTRIBUTE + "." + appendAttribute.getKey();
                 // CONFIG
@@ -224,7 +224,7 @@ public class ConfigurationValidation {
 
         // validate appendOrInsertAttribute:
         if (configuration.getAppendAttributeOrInsertThing() != null) {
-            for (Map.Entry<String, Configuration.AppendAttributeOrInsertThing> appendOrInsertAttribute : configuration.getAppendAttributeOrInsertThing().entrySet()) {
+            for (Map.Entry<String, Configuration.Generator.AppendAttributeOrInsertThing> appendOrInsertAttribute : configuration.getAppendAttributeOrInsertThing().entrySet()) {
                 // Breadcrumbs
                 String breadcrumbs = ConfigurationHandler.APPEND_ATTRIBUTE_OR_INSERT_THING + "." + appendOrInsertAttribute.getKey();
                 // CONFIG
@@ -268,7 +268,7 @@ public class ConfigurationValidation {
     public boolean valGeneratorConfig(HashMap<String, ArrayList<String>> validationReport,
                                       String breadcrumbs,
                                       Configuration dc,
-                                      Configuration.GeneratorConfig config) {
+                                      Configuration.Generator.GeneratorConfig config) {
         boolean valid = true;
         breadcrumbs = breadcrumbs + ".config";
         if (getSeparator(dc, config) == null) {
@@ -334,7 +334,7 @@ public class ConfigurationValidation {
     public void valAttributeGenerator(HashMap<String, ArrayList<String>> validationReport,
                                       String breadcrumbs,
                                       Configuration configuration,
-                                      Configuration.Attribute generator,
+                                      Configuration.Generator.Attribute generator,
                                       TypeDBSession session,
                                       boolean isInsert) {
         breadcrumbs = breadcrumbs + ".insert";
@@ -350,7 +350,7 @@ public class ConfigurationValidation {
                                          String breadcrumbs,
                                          Configuration configuration,
                                          Configuration.Generator generator,
-                                         Configuration.ConstrainingAttribute attribute,
+                                         Configuration.Definition.Attribute attribute,
                                          TypeDBSession session,
                                          boolean isInsert) {
         if (attribute.getAttribute() == null) {
@@ -411,12 +411,12 @@ public class ConfigurationValidation {
                                         String breadcrumbs,
                                         Configuration configuration,
                                         Configuration.Generator generator,
-                                        Configuration.ConstrainingAttribute[] constrainingAttributes,
+                                        Configuration.Definition.Attribute[] attributes,
                                         TypeDBSession session) {
-        if (constrainingAttributes == null) {
+        if (attributes == null) {
             validationReport.get("errors").add(breadcrumbs + ".ownerships: missing required ownerships list");
         } else {
-            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session, true);
+            valOwnerships(validationReport, breadcrumbs, configuration, generator, attributes, session, true);
         }
     }
 
@@ -424,11 +424,11 @@ public class ConfigurationValidation {
                                String breadcrumbs,
                                Configuration configuration,
                                Configuration.Generator generator,
-                               Configuration.ConstrainingAttribute[] constrainingAttributes,
+                               Configuration.Definition.Attribute[] attributes,
                                TypeDBSession session,
                                boolean isInsert) {
         int entryIdx = 0;
-        for (Configuration.ConstrainingAttribute attribute : constrainingAttributes) {
+        for (Configuration.Definition.Attribute attribute : attributes) {
             String aBreadcrumbs = breadcrumbs + ".ownerships.[" + entryIdx + "]";
             valConstrainingAttribute(validationReport, aBreadcrumbs, configuration, generator, attribute, session, isInsert);
             entryIdx += 1;
@@ -439,19 +439,19 @@ public class ConfigurationValidation {
                                           String breadcrumbs,
                                           Configuration configuration,
                                           Configuration.Generator generator,
-                                          Configuration.ConstrainingAttribute[] constrainingAttributes,
+                                          Configuration.Definition.Attribute[] attributes,
                                           TypeDBSession session) {
-        if (constrainingAttributes != null) {
-            valOwnerships(validationReport, breadcrumbs, configuration, generator, constrainingAttributes, session, true);
+        if (attributes != null) {
+            valOwnerships(validationReport, breadcrumbs, configuration, generator, attributes, session, true);
         }
     }
 
     private void valRelationPlayers(HashMap<String, ArrayList<String>> validationReport,
                                     String breadcrumbs,
-                                    Configuration.Relation relation,
+                                    Configuration.Generator.Relation relation,
                                     TypeDBSession session) {
         int playerIdx = 0;
-        for (Configuration.Player player : relation.getInsert().getPlayers()) {
+        for (Configuration.Definition.Player player : relation.getInsert().getPlayers()) {
             String pBreadcrumbs = breadcrumbs + ".players.[" + playerIdx + "]";
             if (player.getMatch() != null) {
                 if (playerType(player).equals("attribute")) {
@@ -473,7 +473,7 @@ public class ConfigurationValidation {
     private void valPlayerBasics(HashMap<String, ArrayList<String>> validationReport,
                                  String breadcrumbs,
                                  String relation,
-                                 Configuration.Player player,
+                                 Configuration.Definition.Player player,
                                  TypeDBSession session) {
         // does role exist?
         if (player.getRole() == null) {
@@ -491,7 +491,7 @@ public class ConfigurationValidation {
     private void valAttributePlayer(HashMap<String, ArrayList<String>> validationReport,
                                     String breadcrumbs,
                                     String relation,
-                                    Configuration.Player player,
+                                    Configuration.Definition.Player player,
                                     TypeDBSession session) {
         valPlayerBasics(validationReport, breadcrumbs, relation, player, session);
     }
@@ -499,12 +499,12 @@ public class ConfigurationValidation {
     private void valByAttributePlayer(HashMap<String, ArrayList<String>> validationReport,
                                       String breadcrumbs,
                                       String relation,
-                                      Configuration.Player player,
+                                      Configuration.Definition.Player player,
                                       TypeDBSession session) {
         valPlayerBasics(validationReport, breadcrumbs, relation, player, session);
         // ownerships present (or wouldn't be here), but validate all attributes:
-        Configuration.ConstrainingAttribute[] ownerships = player.getMatch().getOwnerships();
-        for (Configuration.ConstrainingAttribute att : ownerships) {
+        Configuration.Definition.Attribute[] ownerships = player.getMatch().getOwnerships();
+        for (Configuration.Definition.Attribute att : ownerships) {
             valConceptTypeInSchema(validationReport, session, breadcrumbs + ".ownerships", att.getAttribute(), "attribute");
         }
     }
@@ -512,14 +512,14 @@ public class ConfigurationValidation {
     private void valByPlayerPlayer(HashMap<String, ArrayList<String>> validationReport,
                                    String breadcrumbs,
                                    String relation,
-                                   Configuration.Player player,
+                                   Configuration.Definition.Player player,
                                    TypeDBSession session) {
         if (playerType(player).equals("attribute")) {
             valAttributePlayer(validationReport, breadcrumbs, relation, player, session);
         } else if (playerType(player).equals("byAttribute")) {
             valByAttributePlayer(validationReport, breadcrumbs, relation, player, session);
         } else if (playerType(player).equals("byPlayer")) {
-            for (Configuration.Player curPlayer : player.getMatch().getPlayers()) {
+            for (Configuration.Definition.Player curPlayer : player.getMatch().getPlayers()) {
                 valPlayerBasics(validationReport, breadcrumbs, relation, player, session);
                 valByPlayerPlayer(validationReport, breadcrumbs, player.getMatch().getType(), curPlayer, session);
             }
