@@ -119,18 +119,16 @@ A complete tutorial for TypeDB (Grakn) version < 2.0 can be found [on Medium](ht
 
 There is an [example repository](https://github.com/bayer-science-for-a-better-life/grami-example) for your convenience.
 
-## Compatibility
+## Compatibility Table
 
-TypeDB Loader version == 1.0.0 is tested for:
-- [Type DB](https://github.com/vaticle/typedb) == 2.5.0
+| TypeDB Loader  | TypeDB Client Used  | TypeDB          | TypeDB Cluster |
+| :------------: | :-----------------: | :-------------: | :------------: |
+| 1.1.0 to 1.2.0 | 2.8.0               | 2.8.x           / N/A            |
+| 1.0.0          | 2.5.0 to 2.7.1      | 2.5.x to 2.7.x  / N/A            |
+| 0.1.1          | 2.0.0 to 2.5.0      | 2.0.x to 2.4.x  | N/A            |
+| <0.1           | 1.8.0               | 1.8.x           | N/A            |
 
-GraMi (former name) version == 0.1.1 is tested for:
-- [grakn-core](https://github.com/vaticle/typedb) == 2.0.1
-
-Find the Readme for GraMi for grakn == 2.0.x [here](https://github.com/bayer-science-for-a-better-life/grami/blob/XXXXX/README.md)
-
-GraMi version < 0.1.0 is tested for: 
- - [grakn-core](https://github.com/vaticle/typedb) >= 1.8.2
+* [Type DB](https://github.com/vaticle/typedb)
 
 Find the Readme for GraMi for grakn < 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
 
