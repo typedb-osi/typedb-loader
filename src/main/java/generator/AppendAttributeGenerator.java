@@ -114,7 +114,7 @@ public class AppendAttributeGenerator implements Generator {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + appendConfiguration.getMatch().getType())) return false;
         for (Configuration.Definition.Attribute ownershipThingGetter : appendConfiguration.getMatch().getOwnerships()) {
-            if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
+            if (!insert.toString().contains("has " + ownershipThingGetter.getAttribute())) return false;
         }
         if (appendConfiguration.getInsert().getRequiredOwnerships() != null) {
             for (Configuration.Definition.Attribute attribute : appendConfiguration.getInsert().getRequiredOwnerships()) {
