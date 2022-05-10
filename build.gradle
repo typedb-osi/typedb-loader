@@ -39,8 +39,8 @@ publishing {
     }
     repositories {
         maven {
-            name = "VaticleMaven"
-            url = "https://repo.vaticle.com/repository/maven/"
+            name = "VaticleOSIMaven"
+            url = "https://repo.vaticle.com/repository/osi-maven/"
             credentials {
                 username = System.getenv("REPO_VATICLE_OSI_USERNAME")
                 password = System.getenv("REPO_VATICLE_OSI_PASSWORD")
