@@ -101,7 +101,7 @@ public class RelationGenerator implements Generator {
                 // ENTITY & RELATION PLAYER BY ATTRIBUTE(s)
                 if (playerType(player).equals("byAttribute")) {
                     ThingVariable.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
-                    if (playerMatchStatement.toString().contains(", has")) {
+                    if (playerMatchStatement.constraints().stream().anyMatch(ThingConstraint::isHas)) {
                         playerMatchStatements.add(playerMatchStatement);
                         playerVars.add(playerVar);
                         roleTypes.add(player.getRole());
@@ -186,7 +186,7 @@ public class RelationGenerator implements Generator {
             //terminating condition - byAttribute player:
             ArrayList<ThingVariable<?>> statements = new ArrayList<>();
             ThingVariable<?> statement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
-            if (statement != null && statement.toString().contains(", has")) {
+            if (statement != null && statement.constraints().stream().anyMatch(ThingConstraint::isHas)) {
                 statements.add(statement);
             }
             return statements;
