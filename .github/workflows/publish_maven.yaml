@@ -13,4 +13,5 @@ jobs:
       - name: Publish package
         run: gradle publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_VATICLE_OSI_USERNAME: ${{ secrets.REPO_VATICLE_OSI_USERNAME }}
+          REPO_VATICLE_OSI_PASSWORD: ${{ secrets.REPO_VATICLE_OSI_PASSWORD }}
