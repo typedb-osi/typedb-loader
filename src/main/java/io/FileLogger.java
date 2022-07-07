@@ -32,7 +32,7 @@ public class FileLogger {
     private final String directoryString;
 
     private FileLogger() {
-        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss").withZone(ZoneId.systemDefault());
+        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH_mm_ss").withZone(ZoneId.systemDefault());
         File directory = new File(DATE_TIME_FORMATTER.format(new Date().toInstant()));
         this.directoryString = directory.toString();
         if (! directory.exists()){
