@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.loader;
+package com.vaticle.typedb.osi.loader.loader;
 
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
-import com.vaticle.typedb.osi.config.Configuration;
-import com.vaticle.typedb.osi.generator.*;
-import com.vaticle.typedb.osi.util.TypeDBUtil;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.generator.*;
+import com.vaticle.typedb.osi.loader.generator.AppendAttributeGenerator;
+import com.vaticle.typedb.osi.loader.generator.AppendAttributeOrInsertThingGenerator;
+import com.vaticle.typedb.osi.loader.generator.AttributeGenerator;
+import com.vaticle.typedb.osi.loader.generator.EntityGenerator;
+import com.vaticle.typedb.osi.loader.generator.Generator;
+import com.vaticle.typedb.osi.loader.generator.RelationGenerator;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
+import com.vaticle.typedb.osi.loader.util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,10 +48,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.vaticle.typedb.osi.util.Util.getRowsPerCommit;
-import static com.vaticle.typedb.osi.util.Util.getSeparator;
-import static com.vaticle.typedb.osi.util.Util.playerType;
 
 public class AsyncLoaderWorker {
 
@@ -187,8 +189,8 @@ public class AsyncLoaderWorker {
             throws IOException, InterruptedException {
         initializeAttributeConceptValueType(session, attributeGenerator.getInsert());
         for (String filePath : attributeGenerator.getData()) {
-            Generator gen = new AttributeGenerator(filePath, attributeGenerator, getSeparator(dc, attributeGenerator.getConfig()));
-            asyncLoad(session, generatorKey, filePath, gen, getRowsPerCommit(dc, attributeGenerator.getConfig()));
+            Generator gen = new AttributeGenerator(filePath, attributeGenerator, Util.getSeparator(dc, attributeGenerator.getConfig()));
+            asyncLoad(session, generatorKey, filePath, gen, Util.getRowsPerCommit(dc, attributeGenerator.getConfig()));
             if (status == Status.ERROR) return;
         }
     }
@@ -197,8 +199,8 @@ public class AsyncLoaderWorker {
             throws IOException, InterruptedException {
         Util.setConstrainingAttributeConceptType(entityGenerator.getInsert().getOwnerships(), session);
         for (String filePath : entityGenerator.getData()) {
-            Generator gen = new EntityGenerator(filePath, entityGenerator, getSeparator(dc, entityGenerator.getConfig()));
-            asyncLoad(session, generatorKey, filePath, gen, getRowsPerCommit(dc, entityGenerator.getConfig()));
+            Generator gen = new EntityGenerator(filePath, entityGenerator, Util.getSeparator(dc, entityGenerator.getConfig()));
+            asyncLoad(session, generatorKey, filePath, gen, Util.getRowsPerCommit(dc, entityGenerator.getConfig()));
             if (status == Status.ERROR) return;
         }
     }
@@ -207,8 +209,8 @@ public class AsyncLoaderWorker {
             throws IOException, InterruptedException {
         initializeRelationAttributeConceptValueTypes(session, relation);
         for (String filePath : relation.getData()) {
-            Generator gen = new RelationGenerator(filePath, relation, getSeparator(dc, relation.getConfig()));
-            asyncLoad(session, generatorKey, filePath, gen, getRowsPerCommit(dc, relation.getConfig()));
+            Generator gen = new RelationGenerator(filePath, relation, Util.getSeparator(dc, relation.getConfig()));
+            asyncLoad(session, generatorKey, filePath, gen, Util.getRowsPerCommit(dc, relation.getConfig()));
             if (status == Status.ERROR) return;
         }
     }
@@ -217,8 +219,8 @@ public class AsyncLoaderWorker {
             throws IOException, InterruptedException {
         initializeAppendAttributeConceptValueTypes(session, appendAttribute);
         for (String filePath : appendAttribute.getData()) {
-            Generator gen = new AppendAttributeGenerator(filePath, appendAttribute, getSeparator(dc, appendAttribute.getConfig()));
-            asyncLoad(session, generatorKey, filePath, gen, getRowsPerCommit(dc, appendAttribute.getConfig()));
+            Generator gen = new AppendAttributeGenerator(filePath, appendAttribute, Util.getSeparator(dc, appendAttribute.getConfig()));
+            asyncLoad(session, generatorKey, filePath, gen, Util.getRowsPerCommit(dc, appendAttribute.getConfig()));
             if (status == Status.ERROR) return;
         }
     }
@@ -228,8 +230,8 @@ public class AsyncLoaderWorker {
             throws IOException, InterruptedException {
         initializeAppendAttributeConceptValueTypes(session, appendAttributeOrInsertThing);
         for (String filePath : appendAttributeOrInsertThing.getData()) {
-            Generator gen = new AppendAttributeOrInsertThingGenerator(filePath, appendAttributeOrInsertThing, getSeparator(dc, appendAttributeOrInsertThing.getConfig()));
-            asyncLoad(session, generatorKey, filePath, gen, getRowsPerCommit(dc, appendAttributeOrInsertThing.getConfig()));
+            Generator gen = new AppendAttributeOrInsertThingGenerator(filePath, appendAttributeOrInsertThing, Util.getSeparator(dc, appendAttributeOrInsertThing.getConfig()));
+            asyncLoad(session, generatorKey, filePath, gen, Util.getRowsPerCommit(dc, appendAttributeOrInsertThing.getConfig()));
             if (status == Status.ERROR) return;
         }
     }
@@ -286,15 +288,15 @@ public class AsyncLoaderWorker {
     }
 
     private void recursiveSetPlayerAttributeConceptValueTypes(TypeDBSession session, Configuration.Definition.Player player) {
-        if (playerType(player).equals("attribute")) {
+        if (Util.playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
             Configuration.Definition.Attribute currentAttribute = player.getMatch().getAttribute();
             currentAttribute.setAttribute(player.getMatch().getType());
             initializeAttributeConceptValueType(session, currentAttribute);
-        } else if (playerType(player).equals("byAttribute")) {
+        } else if (Util.playerType(player).equals("byAttribute")) {
             //terminating condition - byAttribute player:
             Util.setConstrainingAttributeConceptType(player.getMatch().getOwnerships(), session);
-        } else if (playerType(player).equals("byPlayer")) {
+        } else if (Util.playerType(player).equals("byPlayer")) {
             for (Configuration.Definition.Player curPlayer : player.getMatch().getPlayers()) {
                 recursiveSetPlayerAttributeConceptValueTypes(session, curPlayer);
             }

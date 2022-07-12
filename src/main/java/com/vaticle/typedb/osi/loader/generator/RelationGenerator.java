@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.generator;
+package com.vaticle.typedb.osi.loader.generator;
 
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
-import com.vaticle.typedb.osi.config.Configuration;
-import com.vaticle.typedb.osi.io.FileLogger;
-import com.vaticle.typedb.osi.util.GeneratorUtil;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.io.FileLogger;
+import com.vaticle.typedb.osi.loader.util.Util;
+import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -34,8 +34,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static com.vaticle.typedb.osi.util.GeneratorUtil.constrainThingWithHasAttributes;
-import static com.vaticle.typedb.osi.util.Util.playerType;
+import static com.vaticle.typedb.osi.loader.util.GeneratorUtil.constrainThingWithHasAttributes;
 
 public class RelationGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
@@ -88,7 +87,7 @@ public class RelationGenerator implements Generator {
                 String playerVar = "player-" + playerIdx;
 
                 // ATTRIBUTE PLAYER
-                if (playerType(player).equals("attribute")) {
+                if (Util.playerType(player).equals("attribute")) {
                     ThingVariable.Attribute playerMatchStatement = getAttributePlayerMatchStatement(row, player, playerVar);
                     if (playerMatchStatement != null) {
                         playerMatchStatements.add(playerMatchStatement);
@@ -99,7 +98,7 @@ public class RelationGenerator implements Generator {
                 }
 
                 // ENTITY & RELATION PLAYER BY ATTRIBUTE(s)
-                if (playerType(player).equals("byAttribute")) {
+                if (Util.playerType(player).equals("byAttribute")) {
                     ThingVariable.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
                     if (playerMatchStatement.constraints().stream().anyMatch(ThingConstraint::isHas)) {
                         playerMatchStatements.add(playerMatchStatement);
@@ -110,7 +109,7 @@ public class RelationGenerator implements Generator {
                 }
 
 //                // Relation PLAYER BY PLAYERs
-                if (playerType(player).equals("byPlayer")) {
+                if (Util.playerType(player).equals("byPlayer")) {
                     ArrayList<ThingVariable<?>> playerMatchStatement = getRelationPlayerMatchStatement(row, player, playerVar);
                     playerMatchStatements.addAll(playerMatchStatement);
                     playerVars.add(playerVar);
@@ -174,7 +173,7 @@ public class RelationGenerator implements Generator {
     private ArrayList<ThingVariable<?>> recursiveAssemblyMatchStatement(String[] row,
                                                                         Configuration.Definition.Player player,
                                                                         String playerVar) {
-        if (playerType(player).equals("attribute")) {
+        if (Util.playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
             ArrayList<ThingVariable<?>> statements = new ArrayList<>();
             ThingVariable<?> statement = getAttributePlayerMatchStatement(row, player, playerVar);
@@ -182,7 +181,7 @@ public class RelationGenerator implements Generator {
                 statements.add(statement);
             }
             return statements;
-        } else if (playerType(player).equals("byAttribute")) {
+        } else if (Util.playerType(player).equals("byAttribute")) {
             //terminating condition - byAttribute player:
             ArrayList<ThingVariable<?>> statements = new ArrayList<>();
             ThingVariable<?> statement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
@@ -190,7 +189,7 @@ public class RelationGenerator implements Generator {
                 statements.add(statement);
             }
             return statements;
-        } else if (playerType(player).equals("byPlayer")) {
+        } else if (Util.playerType(player).equals("byPlayer")) {
             // identify relation player "byPlayer"
             ArrayList<ThingVariable<?>> statements = new ArrayList<>();
             //create the relation statement with the player vars that will be filled in recursion:
@@ -227,15 +226,15 @@ public class RelationGenerator implements Generator {
         for (Configuration.Definition.Player player : relationConfiguration.getInsert().getRequiredPlayers()) {
             // if attribute player
             // the attribute must be in the match statement
-            if (playerType(player).equals("attribute")) {
+            if (Util.playerType(player).equals("attribute")) {
                 if (!validateAttributePlayer(player, insert)) {
                     return false;
                 }
-            } else if (playerType(player).equals("byAttribute")) {
+            } else if (Util.playerType(player).equals("byAttribute")) {
                 if (!validateByAttributePlayer(player, insert)) {
                     return false;
                 }
-            } else if (playerType(player).equals("byPlayer")) {
+            } else if (Util.playerType(player).equals("byPlayer")) {
                 if (!recursiveValidationPlayers(player, insert, "player-" + idx)) {
                     return false;
                 }
@@ -280,13 +279,13 @@ public class RelationGenerator implements Generator {
 
     private boolean recursiveValidationPlayers(Configuration.Definition.Player player, TypeQLInsert insert, String playerVar) {
 
-        if (playerType(player).equals("attribute")) {
+        if (Util.playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
             return validateAttributePlayer(player, insert);
-        } else if (playerType(player).equals("byAttribute")) {
+        } else if (Util.playerType(player).equals("byAttribute")) {
             //terminating condition - byAttribute player:
             return validateByAttributePlayer(player, insert);
-        } else if (playerType(player).equals("byPlayer")) {
+        } else if (Util.playerType(player).equals("byPlayer")) {
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
                 // if player is a relation with players - check validity of "shallow" relation player
                 Configuration.Definition.Player curPlayer = player.getMatch().getPlayers()[idx];

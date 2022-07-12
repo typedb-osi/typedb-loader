@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.status;
+package com.vaticle.typedb.osi.loader.status;
 
 
 public class MigrationStatus {

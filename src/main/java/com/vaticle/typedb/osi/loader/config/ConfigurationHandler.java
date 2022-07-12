@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.config;
+package com.vaticle.typedb.osi.loader.config;
 
 public enum ConfigurationHandler {
     ATTRIBUTES,

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.config;
+package com.vaticle.typedb.osi.loader.config;
 
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLMatch;
 
@@ -31,10 +31,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import static com.vaticle.typedb.osi.util.Util.getRowsPerCommit;
-import static com.vaticle.typedb.osi.util.Util.getSeparator;
-import static com.vaticle.typedb.osi.util.Util.playerType;
 
 public class ConfigurationValidation {
 
@@ -276,11 +272,11 @@ public class ConfigurationValidation {
                                       Configuration.Generator.GeneratorConfig config) {
         boolean valid = true;
         breadcrumbs = breadcrumbs + ".config";
-        if (getSeparator(dc, config) == null) {
+        if (Util.getSeparator(dc, config) == null) {
             validationReport.get("error").add(breadcrumbs + ".separator: missing required field: file separator must be specified here or in defaultConfig");
             valid = false;
         }
-        if (getRowsPerCommit(dc, config) == null) {
+        if (Util.getRowsPerCommit(dc, config) == null) {
             validationReport.get("error").add(breadcrumbs + ".rowsPerCommit: missing required field: rowsPerCommit must be specified here or in defaultConfig");
             valid = false;
         }
@@ -319,7 +315,7 @@ public class ConfigurationValidation {
         }
 
         // file missing or empty
-        Character fileSeparator = getSeparator(configuration, generator.getConfig());
+        Character fileSeparator = Util.getSeparator(configuration, generator.getConfig());
         if (data != null && fileSeparator != null) {
             for (String filepath : data) {
                 try {
@@ -402,7 +398,7 @@ public class ConfigurationValidation {
                                    String column) {
         for (String dataPath : generator.getData()) {
             try {
-                String[] header = Util.getFileHeader(dataPath, getSeparator(configuration, generator.getConfig()));
+                String[] header = Util.getFileHeader(dataPath, Util.getSeparator(configuration, generator.getConfig()));
                 if (Arrays.stream(header).noneMatch(headerColumn -> headerColumn.equals(column))) {
                     validationReport.get("errors").add(breadcrumbs + ".column: <" + column + "> column not found in header of file <" + dataPath + ">");
                 }
@@ -459,11 +455,11 @@ public class ConfigurationValidation {
         for (Configuration.Definition.Player player : relation.getInsert().getPlayers()) {
             String pBreadcrumbs = breadcrumbs + ".players.[" + playerIdx + "]";
             if (player.getMatch() != null) {
-                if (playerType(player).equals("attribute")) {
+                if (Util.playerType(player).equals("attribute")) {
                     valAttributePlayer(validationReport, pBreadcrumbs, relation.getInsert().getRelation(), player, session);
-                } else if (playerType(player).equals("byAttribute")) {
+                } else if (Util.playerType(player).equals("byAttribute")) {
                     valByAttributePlayer(validationReport, pBreadcrumbs, relation.getInsert().getRelation(), player, session);
-                } else if (playerType(player).equals("byPlayer")) {
+                } else if (Util.playerType(player).equals("byPlayer")) {
                     valByPlayerPlayer(validationReport, pBreadcrumbs, relation.getInsert().getRelation(), player, session);
                 } else {
                     validationReport.get("errors").add(pBreadcrumbs + ".match: missing field - must contain either an \"attribute\", \"ownerships\", or \"players\" field.");
@@ -519,11 +515,11 @@ public class ConfigurationValidation {
                                    String relation,
                                    Configuration.Definition.Player player,
                                    TypeDBSession session) {
-        if (playerType(player).equals("attribute")) {
+        if (Util.playerType(player).equals("attribute")) {
             valAttributePlayer(validationReport, breadcrumbs, relation, player, session);
-        } else if (playerType(player).equals("byAttribute")) {
+        } else if (Util.playerType(player).equals("byAttribute")) {
             valByAttributePlayer(validationReport, breadcrumbs, relation, player, session);
-        } else if (playerType(player).equals("byPlayer")) {
+        } else if (Util.playerType(player).equals("byPlayer")) {
             for (Configuration.Definition.Player curPlayer : player.getMatch().getPlayers()) {
                 valPlayerBasics(validationReport, breadcrumbs, relation, player, session);
                 valByPlayerPlayer(validationReport, breadcrumbs, player.getMatch().getType(), curPlayer, session);

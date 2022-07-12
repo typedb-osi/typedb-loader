@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.cli;
+package com.vaticle.typedb.osi.loader.cli;
 
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.osi.loader.cli.LoadOptions;
 import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typedb.osi.loader.TypeDBLoader;
+import com.vaticle.typedb.osi.loader.loader.TypeDBLoader;
 import org.junit.Test;
-import com.vaticle.typedb.osi.util.TypeDBUtil;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 
 import static org.junit.Assert.*;
 

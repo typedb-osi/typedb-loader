@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.config;
+package com.vaticle.typedb.osi.loader.config;
 
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.osi.type.AttributeValueType;
+import com.vaticle.typedb.osi.loader.type.AttributeValueType;
 import com.vaticle.typeql.lang.TypeQL;
 
 import java.util.ArrayList;

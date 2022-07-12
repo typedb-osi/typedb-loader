@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.config;
+package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.util.Util;
 import org.junit.Assert;
 import org.junit.Test;
 

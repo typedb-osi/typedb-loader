@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.preprocessor;
+package com.vaticle.typedb.osi.loader.preprocessor;
 
 public class RegexPreprocessor {
     String match;

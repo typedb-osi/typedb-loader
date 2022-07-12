@@ -15,10 +15,12 @@
  */
 
 
-package com.vaticle.typedb.osi.config;
+package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.osi.util.TypeDBUtil;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.config.ConfigurationValidation;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
+import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import org.apache.logging.log4j.LogManager;

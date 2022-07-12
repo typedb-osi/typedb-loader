@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.preprocessor;
+package com.vaticle.typedb.osi.loader.preprocessor;
 
+import com.vaticle.typedb.osi.loader.preprocessor.RegexPreprocessor;
 import org.junit.Assert;
 import org.junit.Test;
 

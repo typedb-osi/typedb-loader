@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.io;
+package com.vaticle.typedb.osi.loader.io;
 
 import org.apache.commons.io.FilenameUtils;
 

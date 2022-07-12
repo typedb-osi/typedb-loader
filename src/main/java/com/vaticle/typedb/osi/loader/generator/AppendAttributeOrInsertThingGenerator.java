@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.generator;
+package com.vaticle.typedb.osi.loader.generator;
 
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
-import com.vaticle.typedb.osi.config.Configuration;
-import com.vaticle.typedb.osi.io.FileLogger;
-import com.vaticle.typedb.osi.util.GeneratorUtil;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.io.FileLogger;
+import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
+import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -35,8 +35,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Stream;
-
-import static com.vaticle.typedb.osi.util.GeneratorUtil.constrainThingWithHasAttributes;
 
 public class AppendAttributeOrInsertThingGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
@@ -139,7 +137,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
                 }
             }
 
-            constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, appendOrInsertConfiguration.getInsert().getOwnerships());
+            GeneratorUtil.constrainThingWithHasAttributes(row, header, filePath, fileSeparator, insertStatement, appendOrInsertConfiguration.getInsert().getOwnerships());
 
             return TypeQL.insert(insertStatement);
         } else {

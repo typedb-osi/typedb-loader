@@ -18,13 +18,13 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Logger name="com.bayer.dt.tdl.error" level="WARN">
+        <Logger name="com.vaticle.typedb.osi.loader.error" level="WARN">
             <AppenderRef ref="AsyncData"/>
         </Logger>
-        <Logger name="" level="INFO">
+        <Logger name="com.vaticle.typedb.osi.loader.loader" level="INFO">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="AsyncLog"/>
         </Logger>
-        <Root level="OFF" />
+        <Root level="DEBUG" />
     </Loggers>
 </Configuration>

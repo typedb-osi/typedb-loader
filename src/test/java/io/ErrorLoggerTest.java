@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.io;
+package com.vaticle.typedb.osi.loader.io;
 
+import com.vaticle.typedb.osi.loader.io.FileLogger;
 import org.junit.Test;
 
 public class ErrorLoggerTest {

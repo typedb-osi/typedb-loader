@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.util;
+package com.vaticle.typedb.osi.loader.util;
 
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBClient;
@@ -23,7 +23,7 @@ import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 
-import static com.vaticle.typedb.osi.util.Util.loadSchemaFromFile;
+import static com.vaticle.typedb.osi.loader.util.Util.loadSchemaFromFile;
 
 public class TypeDBUtil {
 

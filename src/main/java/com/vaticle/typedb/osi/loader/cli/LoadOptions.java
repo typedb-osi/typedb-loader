@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.cli;
+package com.vaticle.typedb.osi.loader.cli;
 
 import picocli.CommandLine;
 

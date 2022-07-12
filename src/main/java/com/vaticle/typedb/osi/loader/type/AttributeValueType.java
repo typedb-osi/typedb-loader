@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.type;
+package com.vaticle.typedb.osi.loader.type;
 
 public enum AttributeValueType {
     STRING,

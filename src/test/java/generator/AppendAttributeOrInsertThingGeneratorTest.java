@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.generator;
+package com.vaticle.typedb.osi.loader.generator;
 
 
-import com.vaticle.typedb.osi.config.Configuration;
-import com.vaticle.typedb.osi.util.TypeDBUtil;
-import com.vaticle.typedb.osi.util.Util;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.generator.AppendAttributeOrInsertThingGenerator;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
+import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typeql.lang.query.TypeQLInsert;

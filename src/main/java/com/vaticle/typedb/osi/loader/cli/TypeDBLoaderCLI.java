@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.generator;
+package com.vaticle.typedb.osi.loader.cli;
 
-import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.osi.loader.loader.TypeDBLoader;
+import picocli.CommandLine;
 
-public interface Generator {
-    void write(TypeDBTransaction tx, String[] row);
-    char getFileSeparator();
+@CommandLine.Command(description = "Welcome to the CLI of TypeDB Loader - your TypeDB data loading tool", name = "typedb-loader", version = "1.0.0-alpha", mixinStandardHelpOptions = true)
+public class TypeDBLoaderCLI {
+
+    public static void main(String[] args) {
+        LoadOptions options = LoadOptions.parse(args);
+        options.print();
+        TypeDBLoader loader = new TypeDBLoader(options);
+        loader.load();
+    }
+
 }

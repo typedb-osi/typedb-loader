@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.util;
+package com.vaticle.typedb.osi.loader.util;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.osi.config.Configuration;
+import com.vaticle.typedb.osi.loader.config.Configuration;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -38,7 +38,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
-import static com.vaticle.typedb.osi.io.FileToInputStream.getInputStream;
+import static com.vaticle.typedb.osi.loader.io.FileToInputStream.getInputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Util {
