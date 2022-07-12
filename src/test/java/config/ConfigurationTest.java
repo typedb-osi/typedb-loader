@@ -16,7 +16,6 @@
 
 package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.Util;
 import org.junit.Assert;
 import org.junit.Test;

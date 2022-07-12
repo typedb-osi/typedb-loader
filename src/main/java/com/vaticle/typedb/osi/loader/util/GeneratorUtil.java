@@ -18,8 +18,8 @@ package com.vaticle.typedb.osi.loader.util;
 
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
-import com.vaticle.typedb.osi.loader.type.AttributeValueType;
 import com.vaticle.typedb.osi.loader.preprocessor.RegexPreprocessor;
+import com.vaticle.typedb.osi.loader.type.AttributeValueType;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;

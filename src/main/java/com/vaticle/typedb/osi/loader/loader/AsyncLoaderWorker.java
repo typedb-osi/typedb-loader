@@ -22,7 +22,6 @@ import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
 import com.vaticle.typedb.osi.loader.config.Configuration;
-import com.vaticle.typedb.osi.loader.generator.*;
 import com.vaticle.typedb.osi.loader.generator.AppendAttributeGenerator;
 import com.vaticle.typedb.osi.loader.generator.AppendAttributeOrInsertThingGenerator;
 import com.vaticle.typedb.osi.loader.generator.AttributeGenerator;

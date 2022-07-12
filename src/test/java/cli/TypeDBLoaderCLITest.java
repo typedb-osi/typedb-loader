@@ -19,13 +19,14 @@ package com.vaticle.typedb.osi.loader.cli;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.osi.loader.cli.LoadOptions;
-import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typedb.osi.loader.loader.TypeDBLoader;
-import org.junit.Test;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
+import com.vaticle.typeql.lang.TypeQL;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TypeDBLoaderCLITest {
 

@@ -16,12 +16,11 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.osi.loader.config.Configuration;
-import com.vaticle.typedb.osi.loader.generator.EntityGenerator;
-import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
-import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.osi.loader.config.Configuration;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
+import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
