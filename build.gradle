@@ -28,7 +28,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
 }
 
-mainClassName = 'cli.TypeDBLoaderCLI'
+mainClassName = 'com.vaticle.typedb.osi.loader.cli.TypeDBLoaderCLI'
 
 publishing {
     publications {
