@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package util;
+package com.vaticle.typedb.osi.util;
 
 import com.vaticle.typedb.client.api.TypeDBSession;
-import config.Configuration;
+import com.vaticle.typedb.osi.config.Configuration;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

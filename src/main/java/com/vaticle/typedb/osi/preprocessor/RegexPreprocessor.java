@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.io;
+package com.vaticle.typedb.osi.preprocessor;
 
-import org.junit.Test;
+public class RegexPreprocessor {
+    String match;
+    String replace;
 
-public class ErrorLoggerTest {
+    public RegexPreprocessor(String match, String replace) {
+        this.match = match;
+        this.replace = replace;
+    }
 
-    @Test
-    public void errorFileLogger() {
-        FileLogger logger = FileLogger.getLogger();
-        logger.logMalformed("entities.tsv", "shucks! There was a malformed row error");
-        logger.logUnavailable("entities.tsv", "shucks! There was a connection error");
-        logger.logInvalid("entities.tsv", "shucks! There was a invalid row error");
+    public String applyProcessor(String value) {
+        return value.replaceAll(match, replace);
     }
 
 }

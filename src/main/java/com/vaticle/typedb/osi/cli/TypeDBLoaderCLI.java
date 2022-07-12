@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.vaticle.typedb.osi.io;
+package com.vaticle.typedb.osi.cli;
 
-import org.junit.Test;
+import com.vaticle.typedb.osi.loader.TypeDBLoader;
+import picocli.CommandLine;
 
-public class ErrorLoggerTest {
+@CommandLine.Command(description = "Welcome to the CLI of TypeDB Loader - your TypeDB data loading tool", name = "typedb-loader", version = "1.0.0-alpha", mixinStandardHelpOptions = true)
+public class TypeDBLoaderCLI {
 
-    @Test
-    public void errorFileLogger() {
-        FileLogger logger = FileLogger.getLogger();
-        logger.logMalformed("entities.tsv", "shucks! There was a malformed row error");
-        logger.logUnavailable("entities.tsv", "shucks! There was a connection error");
-        logger.logInvalid("entities.tsv", "shucks! There was a invalid row error");
+    public static void main(String[] args) {
+        LoadOptions options = LoadOptions.parse(args);
+        options.print();
+        TypeDBLoader loader = new TypeDBLoader(options);
+        loader.load();
     }
 
 }

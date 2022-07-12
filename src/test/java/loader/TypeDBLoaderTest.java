@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package loader;
+package com.vaticle.typedb.osi.loader;
 
-import cli.LoadOptions;
-import util.TypeDBUtil;
+import com.vaticle.typedb.osi.cli.LoadOptions;
+import com.vaticle.typedb.osi.util.TypeDBUtil;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 
-import static util.QueryUtilTest.getDT;
+import static com.vaticle.typedb.osi.util.QueryUtilTest.getDT;
 
 
 public class TypeDBLoaderTest {
