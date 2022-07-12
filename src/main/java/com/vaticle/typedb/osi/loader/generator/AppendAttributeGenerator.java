@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class AppendAttributeGenerator implements Generator {
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.Generator.AppendAttribute appendConfiguration;

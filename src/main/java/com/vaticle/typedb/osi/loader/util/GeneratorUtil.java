@@ -38,7 +38,7 @@ import java.util.Arrays;
 
 public class GeneratorUtil {
 
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
 
     //TODO: remove this function and all the complications it provides... this would need to be either solved by a regex preprocessor, or is already solved by CSV.withIgnoreSurroundingSpaces()
     private static String cleanToken(String token) {

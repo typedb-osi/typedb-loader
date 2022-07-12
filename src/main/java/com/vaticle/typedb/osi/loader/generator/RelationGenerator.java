@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import static com.vaticle.typedb.osi.loader.util.GeneratorUtil.constrainThingWithHasAttributes;
 
 public class RelationGenerator implements Generator {
-    private static final Logger dataLogger = LogManager.getLogger("com.bayer.dt.tdl.error");
+    private static final Logger dataLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
     private final String filePath;
     private final String[] header;
     private final Configuration.Generator.Relation relationConfiguration;

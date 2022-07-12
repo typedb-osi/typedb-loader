@@ -43,7 +43,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Util {
 
-    private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
+    private static final Logger appLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
     //TODO: disallow duplicate header names, and why does ignoreEmptyLines not work???
     private static final CSVFormat CSV_FORMAT = CSVFormat.DEFAULT.withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
     private static final CSVFormat TSV_FORMAT = CSVFormat.DEFAULT.withDelimiter('\t').withEscape('\\').withIgnoreSurroundingSpaces().withNullString("");
