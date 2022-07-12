@@ -51,7 +51,7 @@ To illustrate how to use TypeDB Loader, we will use a slightly extended version 
 
 ### Configuration
 
-The configuration file tells TypeDB Loader what things you want to insert for each of your data files and how to do it. 
+The configuration file tells TypeDB Loader what things you want to insert for each of your data files and how to do it.
 
 Here are some example:
 
@@ -64,6 +64,8 @@ Here are some example:
  - [Custom Migration Order Example](https://github.com/typedb-osi/typedb-loader/wiki/07-Custom-Load-Order)
 
 For detailed documentation, please refer to the [WIKI](https://github.com/bayer-science-for-a-better-life/grami/wiki).
+
+The [config](https://github.com/typedb-osi/typedb-loader/tree/master/src/test/resources/phoneCalls/config.json) in the phone-calls test is a good starting example of a configuration.
 
 ### Migrate Data
 
