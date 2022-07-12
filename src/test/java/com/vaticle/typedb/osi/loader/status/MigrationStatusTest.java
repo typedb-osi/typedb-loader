@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package status;
+package com.vaticle.typedb.osi.loader.status;
 
 import org.junit.Test;
 
