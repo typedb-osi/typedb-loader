@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.vaticle.typedb:typedb-client:2.8.0")
-    implementation("com.vaticle.typeql:typeql-grammar:2.8.0")
+    implementation("com.vaticle.typedb:typedb-client:2.11.1")
+    implementation("com.vaticle.typeql:typeql-grammar:2.9.0")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("org.slf4j:slf4j-api:1.7.25")
     implementation("org.apache.logging.log4j:log4j-api:2.13.3")
