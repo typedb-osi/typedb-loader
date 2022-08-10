@@ -59,6 +59,9 @@ public class TypeDBLoader {
                 TypeDBUtil.loadAndDefineSchema(schemaClient, options.databaseName, dc.getGlobalConfig().getSchema());
                 Util.info("loaded schema...");
             }
+        } else {
+            validationReport.get("errors").forEach(Util::error);
+            System.exit(1);
         }
 
         TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, options.databaseName);
