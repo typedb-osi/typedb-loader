@@ -41,8 +41,12 @@ public class LoadOptions {
     public static LoadOptions parse(String[] args) {
         CommandLine commandLine = new CommandLine(new TypeDBLoaderCLI())
                 .addSubcommand("load", new LoadOptions());
-        CommandLine.ParseResult arguments = commandLine.parseArgs(args);
+        if (args.length == 0) {
+            commandLine.usage(commandLine.getOut());
+            System.exit(0);
+        }
 
+        CommandLine.ParseResult arguments = commandLine.parseArgs(args);
         if (arguments.isUsageHelpRequested()) {
             commandLine.usage(commandLine.getOut());
             System.exit(0);
