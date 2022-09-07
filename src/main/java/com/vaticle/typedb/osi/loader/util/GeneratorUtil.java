@@ -145,7 +145,7 @@ public class GeneratorUtil {
                 break;
             case LONG:
                 try {
-                    constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Integer.parseInt(cleanedValue));
+                    constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Long.parseLong(cleanedValue));
                 } catch (NumberFormatException numberFormatException) {
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type long for variable <%s> with non-<long> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
