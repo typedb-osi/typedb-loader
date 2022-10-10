@@ -115,7 +115,7 @@ public class LoadingData {
 
 A complete tutorial for TypeDB version >= 2.5.0 is in work and will be published asap.
 
-A complete tutorial for TypeDB version >= 2.5.0 is in work and will soon be [on Medium]()
+A complete tutorial for TypeDB version >= 2.5.0 is in work and will soon be on Medium.
 
 A complete tutorial for TypeDB (Grakn) version < 2.0 can be found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
 
