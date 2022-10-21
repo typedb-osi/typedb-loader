@@ -38,6 +38,9 @@ public class LoadOptions {
     @CommandLine.Option(names = {"-ls", "--loadSchema"}, description = "optional - reload schema when continuing a migration (ignored when clean migration)", defaultValue = "false")
     public boolean loadSchema;
 
+    @CommandLine.Option(names = {"-mi", "--allowMultiInsert"}, description = "Allow match-inserts to match multiple answers and insert for each.", defaultValue = "false")
+    public boolean multiInsert;
+
     public static LoadOptions parse(String[] args) {
         CommandLine commandLine = new CommandLine(new TypeDBLoaderCLI())
                 .addSubcommand("load", new LoadOptions());

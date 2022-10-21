@@ -21,6 +21,7 @@ import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
+import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,13 +59,13 @@ public class AttributeGeneratorTest {
 
         String[] row = Util.parseCSV(iterator.next());
         List<TypeQLInsert> insertStatements = gen.generateInsertStatements(row);
-        String tmp = "insert $a \"yes\" isa is-in-use;";
-        Assert.assertEquals(tmp, insertStatements.get(0).toString());
+        TypeQLInsert tmp = TypeQL.parseQuery("insert $a \"yes\" isa is-in-use;").asInsert();
+        Assert.assertEquals(tmp, insertStatements.get(0));
 
         row = Util.parseCSV(iterator.next());
         insertStatements = gen.generateInsertStatements(row);
-        tmp = "insert $a \"no\" isa is-in-use;";
-        Assert.assertEquals(tmp, insertStatements.get(0).toString());
+        tmp = TypeQL.parseQuery("insert $a \"no\" isa is-in-use;").asInsert();
+        Assert.assertEquals(tmp, insertStatements.get(0));
 
         try {
             Util.parseCSV(iterator.next());
@@ -74,7 +75,7 @@ public class AttributeGeneratorTest {
 
         row = Util.parseCSV(iterator.next());
         insertStatements = gen.generateInsertStatements(row);
-        tmp = "insert $a \"5\" isa is-in-use;";
-        Assert.assertEquals(tmp, insertStatements.get(0).toString());
+        tmp = TypeQL.parseQuery("insert $a \"5\" isa is-in-use;").asInsert();
+        Assert.assertEquals(tmp, insertStatements.get(0));
     }
 }

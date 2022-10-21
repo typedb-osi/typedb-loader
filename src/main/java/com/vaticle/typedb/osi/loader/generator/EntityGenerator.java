@@ -21,6 +21,7 @@ import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
@@ -45,8 +46,8 @@ public class EntityGenerator implements Generator {
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx,
-                      String[] row) {
+    @Override
+    public void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert) {
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
@@ -56,17 +57,17 @@ public class EntityGenerator implements Generator {
             dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
-        TypeQLInsert statement = generateThingInsertStatement(row);
-        if (valid(statement)) {
+        TypeQLInsert query = generateThingInsertStatement(row);
+        if (valid(query)) {
             try {
-                tx.query().insert(statement);
+                tx.query().insert(query);
             } catch (TypeDBClientException typeDBClientException) {
                 FileLogger.getLogger().logUnavailable(fileName, originalRow);
                 dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
         } else {
             FileLogger.getLogger().logInvalid(fileName, originalRow);
-            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + statement.toString().replace("\n", " ") + ">");
+            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + query.toString().replace("\n", " ") + ">");
         }
     }
 

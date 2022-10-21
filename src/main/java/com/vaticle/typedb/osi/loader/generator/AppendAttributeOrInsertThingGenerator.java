@@ -22,6 +22,7 @@ import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
@@ -34,7 +35,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.stream.Stream;
+
+import static com.vaticle.typedb.osi.loader.util.TypeDBUtil.safeInsert;
 
 public class AppendAttributeOrInsertThingGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
@@ -50,8 +54,8 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx,
-                      String[] row) {
+    @Override
+    public void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert) {
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
@@ -61,30 +65,32 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
             dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
-        TypeQLInsert appendStatement = generateMatchInsertStatement(row);
-        TypeQLInsert insertStatement = generateThingInsertStatement(row);
+        TypeQLInsert appendQuery = generateMatchInsertStatement(row);
+        TypeQLInsert insertQuery = generateThingInsertStatement(row);
 
-        if (appendAttributeInsertStatementValid(appendStatement)) {
+        if (appendAttributeInsertStatementValid(appendQuery)) {
             try {
-                final Stream<ConceptMap> insertedStream = tx.query().insert(appendStatement);
-                if (insertedStream.count() == 0) {
-                    if (thingInsertStatementValid(insertStatement)) {
-                        tx.query().insert(insertStatement);
+                Iterator<ConceptMap> answers = TypeDBUtil.executeMatch(tx, appendQuery);
+                if (!answers.hasNext()) {
+                    if (thingInsertStatementValid(insertQuery)) {
+                        tx.query().insert(insertQuery);
                     } else {
                         FileLogger.getLogger().logInvalid(fileName, originalRow);
-                        dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + insertStatement.toString().replace("\n", " ") + ">");
+                        dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + insertQuery.toString().replace("\n", " ") + ">");
                     }
+                } else {
+                    safeInsert(tx, appendQuery, answers, allowMultiInsert, filePath, originalRow, dataLogger);
                 }
             } catch (TypeDBClientException typeDBClientException) {
                 FileLogger.getLogger().logUnavailable(fileName, originalRow);
                 dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
         } else {
-            if (thingInsertStatementValid(insertStatement)) {
-                tx.query().insert(insertStatement);
+            if (thingInsertStatementValid(insertQuery)) {
+                tx.query().insert(insertQuery);
             } else {
                 FileLogger.getLogger().logInvalid(fileName, originalRow);
-                dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statements: <" + appendStatement.toString().replace("\n", " ") + "> and <" + insertStatement.toString().replace("\n", " ") + ">");
+                dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statements: <" + appendQuery.toString().replace("\n", " ") + "> and <" + insertQuery.toString().replace("\n", " ") + ">");
             }
         }
     }
@@ -149,7 +155,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
         if (insert == null) return false;
         if (!insert.toString().contains("isa " + appendOrInsertConfiguration.getMatch().getType())) return false;
         for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
-            if (!insert.toString().contains(", has " + ownershipThingGetter.getAttribute())) return false;
+            if (!insert.toString().contains("has " + ownershipThingGetter.getAttribute())) return false;
         }
         if (appendOrInsertConfiguration.getInsert().getRequiredOwnerships() != null) {
             for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getInsert().getRequiredOwnerships()) {

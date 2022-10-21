@@ -21,6 +21,7 @@ import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
+import com.vaticle.typedb.osi.loader.cli.LoadOptions;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.generator.AppendAttributeGenerator;
 import com.vaticle.typedb.osi.loader.generator.AppendAttributeOrInsertThingGenerator;
@@ -52,23 +53,25 @@ public class AsyncLoaderWorker {
 
     private static final DecimalFormat countFormat = new DecimalFormat("#,###");
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.00");
+    private final Configuration dc;
+    private final LoadOptions loadOptions;
     private final ExecutorService executor;
     private final int threads;
     private final String databaseName;
     private final AtomicBoolean hasError;
     private final int batchGroup;
-    private final Configuration dc;
     private Status status;
 
     private enum Status {OK, ERROR}
 
-    public AsyncLoaderWorker(Configuration dc, String databaseName) {
+    public AsyncLoaderWorker(Configuration dc, LoadOptions loadOptions) {
         this.dc = dc;
+        this.loadOptions = loadOptions;
         this.threads = dc.getGlobalConfig().getParallelisation();
-        this.databaseName = databaseName;
+        this.databaseName = loadOptions.databaseName;
         this.hasError = new AtomicBoolean(false);
         this.batchGroup = 1;
-        this.executor = Executors.newFixedThreadPool(threads, new NamedThreadFactory(databaseName));
+        this.executor = Executors.newFixedThreadPool(threads, new NamedThreadFactory(this.databaseName));
         this.status = Status.OK;
     }
 
@@ -379,7 +382,7 @@ public class AsyncLoaderWorker {
                         try (TypeDBTransaction tx = session.transaction(TypeDBTransaction.Type.WRITE)) {
                             rows.forEach(csv -> {
                                 Util.debug("async-writer-{}: {}", id, csv);
-                                gen.write(tx, csv);
+                                gen.write(tx, csv, loadOptions.multiInsert);
                             });
                             tx.commit();
                         }

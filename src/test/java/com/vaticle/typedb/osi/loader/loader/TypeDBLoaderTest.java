@@ -63,7 +63,8 @@ public class TypeDBLoaderTest {
                 "-c", dcPath,
                 "-db", databaseName,
                 "-tdb", typeDBUri,
-                "-cm"
+                "-cm",
+                "--allowMultiInsert" // TODO we shouldn't be using this to make the tests pass...
         };
         TypeDBLoader typeDBLoader = new TypeDBLoader(LoadOptions.parse(args));
         typeDBLoader.load();

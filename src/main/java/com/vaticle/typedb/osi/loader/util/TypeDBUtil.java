@@ -20,8 +20,19 @@ import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBClient;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.client.api.answer.ConceptMap;
+import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
+import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
+import com.vaticle.typeql.lang.query.TypeQLInsert;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import static com.vaticle.typedb.osi.loader.util.Util.loadSchemaFromFile;
 
@@ -59,7 +70,7 @@ public class TypeDBUtil {
         loadAndDefineSchema(client, databaseName, schemaPath);
     }
 
-    private static void defineToGrakn(TypeDBClient client, String databaseName, String schemaAsString) {
+    private static void defineToTypeDB(TypeDBClient client, String databaseName, String schemaAsString) {
         TypeDBSession schemaSession = getSchemaSession(client, databaseName);
         TypeQLDefine q = TypeQL.parseQuery(schemaAsString);
 
@@ -75,7 +86,40 @@ public class TypeDBUtil {
 
     public static void loadAndDefineSchema(TypeDBClient client, String databaseName, String schemaPath) {
         String schema = loadSchemaFromFile(schemaPath);
-        defineToGrakn(client, databaseName, schema);
+        defineToTypeDB(client, databaseName, schema);
     }
 
+    public static Iterator<ConceptMap> executeMatch(TypeDBTransaction tx, TypeQLInsert query) {
+        if (!query.match().isPresent()) throw new RuntimeException("Expected TypeQL 'match' to be present");
+        return tx.query().match(query.match().get()).iterator();
+    }
+
+    public static void safeInsert(TypeDBTransaction tx, TypeQLInsert query, Iterator<ConceptMap> matches, boolean allowMultiInsert, String filePath, String row, Logger dataLogger) {
+        assert query.match().isPresent();
+        String fileName = FilenameUtils.getName(filePath);
+        ConceptMap answer = matches.next();
+        if (!allowMultiInsert && matches.hasNext()) {
+            FileLogger.getLogger().logTooManyMatches(fileName, row);
+            dataLogger.error("Match-insert skipped - File <" + filePath + "> row <" + row + "> generates query <" + query + "> which matched more than 1 answer.");
+        } else {
+            tx.query().insert(TypeDBUtil.replaceMatchWithAnswer(query, answer));
+            while (matches.hasNext()) {
+                answer = matches.next();
+                tx.query().insert(TypeDBUtil.replaceMatchWithAnswer(query, answer));
+            }
+        }
+    }
+
+    public static TypeQLInsert replaceMatchWithAnswer(TypeQLInsert query, ConceptMap ans) {
+        assert query.match().isPresent();
+        List<ThingVariable<?>> insertVars = query.asInsert().variables();
+        List<BoundVariable> matchVars = new ArrayList<>();
+        ans.map().forEach((var, concept) -> {
+            if (concept.isThing()) matchVars.add(TypeQL.var(var).iid(concept.asThing().getIID()));
+            else if (concept.asType().getLabel().scope().isPresent()) {
+                matchVars.add(TypeQL.var(var).type(concept.asType().getLabel().scope().get(), concept.asType().getLabel().name()));
+            } else matchVars.add(TypeQL.var(var).type(concept.asType().getLabel().name()));
+        });
+        return TypeQL.match(matchVars).insert(insertVars);
+    }
 }

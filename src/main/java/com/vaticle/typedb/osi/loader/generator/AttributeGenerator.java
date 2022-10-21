@@ -47,7 +47,8 @@ public class AttributeGenerator implements Generator {
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx, String[] row) {
+    @Override
+    public void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert) {
 
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
@@ -62,7 +63,7 @@ public class AttributeGenerator implements Generator {
             if (isValid(statement)) {
                 try {
                     tx.query().insert(statement);
-                } catch (TypeDBClientException graknClientException) {
+                } catch (TypeDBClientException clientException) {
                     FileLogger.getLogger().logUnavailable(fileName, originalRow);
                     dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
                 }

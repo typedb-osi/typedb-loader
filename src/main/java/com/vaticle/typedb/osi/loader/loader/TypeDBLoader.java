@@ -87,7 +87,7 @@ public class TypeDBLoader {
                 Runtime.getRuntime().addShutdownHook(
                         NamedThreadFactory.create(AsyncLoaderWorker.class, "shutdown").newThread(client::close)
                 );
-                asyncLoaderWorker = new AsyncLoaderWorker(dc, options.databaseName);
+                asyncLoaderWorker = new AsyncLoaderWorker(dc, options);
                 asyncLoaderWorker.run(client);
             } finally {
                 if (asyncLoaderWorker != null) asyncLoaderWorker.close();

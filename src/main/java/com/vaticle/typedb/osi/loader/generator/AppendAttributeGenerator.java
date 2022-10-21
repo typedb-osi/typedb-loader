@@ -17,10 +17,12 @@
 package com.vaticle.typedb.osi.loader.generator;
 
 import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.client.api.answer.ConceptMap;
 import com.vaticle.typedb.client.common.exception.TypeDBClientException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
+import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
@@ -33,6 +35,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import static com.vaticle.typedb.osi.loader.util.TypeDBUtil.safeInsert;
 
 public class AppendAttributeGenerator implements Generator {
     private static final Logger dataLogger = LogManager.getLogger("com.vaticle.typedb.osi.loader.error");
@@ -48,8 +53,8 @@ public class AppendAttributeGenerator implements Generator {
         this.fileSeparator = fileSeparator;
     }
 
-    public void write(TypeDBTransaction tx,
-                      String[] row) {
+    @Override
+    public void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert) {
         String fileName = FilenameUtils.getName(filePath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
@@ -59,18 +64,24 @@ public class AppendAttributeGenerator implements Generator {
             dataLogger.error("Malformed Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_malformed.log" + ">");
         }
 
-        TypeQLInsert statement = generateMatchInsertStatement(row);
+        TypeQLInsert query = generateMatchInsertStatement(row);
 
-        if (appendAttributeInsertStatementValid(statement)) {
+        if (appendAttributeInsertStatementValid(query)) {
             try {
-                tx.query().insert(statement);
+                Iterator<ConceptMap> answers = TypeDBUtil.executeMatch(tx, query);
+                if (!answers.hasNext()) {
+                    FileLogger.getLogger().logNoMatches(fileName, originalRow);
+                    dataLogger.error("Match-insert failed - File <" + filePath + "> row <" + originalRow + "> generates query <" + query + "> which matched no answers.");
+                } else {
+                    safeInsert(tx, query, answers, allowMultiInsert, filePath, originalRow, dataLogger);
+                }
             } catch (TypeDBClientException typeDBClientException) {
                 FileLogger.getLogger().logUnavailable(fileName, originalRow);
                 dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
         } else {
             FileLogger.getLogger().logInvalid(fileName, originalRow);
-            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + statement.toString().replace("\n", " ") + ">");
+            dataLogger.error("Invalid Row detected in <" + filePath + "> - written to <" + fileNoExtension + "_invalid.log" + "> - invalid Statement: <" + query.toString().replace("\n", " ") + ">");
         }
     }
 

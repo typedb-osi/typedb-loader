@@ -21,6 +21,7 @@ import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
+import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -72,61 +73,61 @@ public class AppendAttributeGeneratorTest {
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        String tmp = "match $thing isa person, has phone-number \"+7 171 898 0853\";\n" +
-                "insert $thing has twitter-username \"@jojo\", has nick-name \"another\";";
-        Assert.assertEquals(tmp, statement.toString());
+        TypeQLInsert tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+7 171 898 0853\";\n" +
+                "insert $thing has twitter-username \"@jojo\", has nick-name \"another\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+263 498 495 0617\";\n" +
-                "insert $thing has twitter-username \"@hui\", has twitter-username \"@bui\", has nick-name \"yetanoter\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+263 498 495 0617\";\n" +
+                "insert $thing has twitter-username \"@hui\", has twitter-username \"@bui\", has nick-name \"yetanoter\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+370 351 224 5176\";\n" +
-                "insert $thing has twitter-username \"@lalulix\", has nick-name \"one more\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+370 351 224 5176\";\n" +
+                "insert $thing has twitter-username \"@lalulix\", has nick-name \"one more\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+81 308 988 7153\";\n" +
-                "insert $thing has twitter-username \"@go34\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+81 308 988 7153\";\n" +
+                "insert $thing has twitter-username \"@go34\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+54 398 559 0423\";\n" +
-                "insert $thing has twitter-username \"@hadaaa\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+54 398 559 0423\";\n" +
+                "insert $thing has twitter-username \"@hadaaa\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+7 690 597 4443\";\n" +
-                "insert $thing has nick-name \"not inserted\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+7 690 597 4443\";\n" +
+                "insert $thing has nick-name \"not inserted\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+63 815 962 6097\";\n" +
-                "insert $thing has twitter-username \"@kuka\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+63 815 962 6097\";\n" +
+                "insert $thing has twitter-username \"@kuka\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $null isa null, has null \"null\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person;\n" +
-                "insert $thing has twitter-username \"@notinserted\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person;\n" +
+                "insert $thing has twitter-username \"@notinserted\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $null isa null, has null \"null\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
     }
@@ -139,29 +140,29 @@ public class AppendAttributeGeneratorTest {
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        String tmp = "match $thing isa person, has phone-number \"+36 318 105 5629\";\n" +
-                "insert $thing has fakebook-link \"fakebook.com/personOne\";";
-        Assert.assertEquals(tmp, statement.toString());
+        TypeQLInsert tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+36 318 105 5629\";\n" +
+                "insert $thing has fakebook-link \"fakebook.com/personOne\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         iterator.next();
         iterator.next();
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person, has phone-number \"+62 533 266 3426\";\n" +
-                "insert $thing has fakebook-link \"insertedWithoutAppliedRegex\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+62 533 266 3426\";\n" +
+                "insert $thing has fakebook-link \"insertedWithoutAppliedRegex\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa person;\n" +
-                "insert $thing has fakebook-link \"@notinserted\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person;\n" +
+                "insert $thing has fakebook-link \"@notinserted\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $null isa null, has null \"null\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
     }
 
@@ -173,9 +174,9 @@ public class AppendAttributeGeneratorTest {
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 
         TypeQLInsert statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        String tmp = "match $thing isa call, has started-at 2018-09-19T01:00:38;\n" +
-                "insert $thing has call-rating 5;";
-        Assert.assertEquals(tmp, statement.toString());
+        TypeQLInsert tmp = TypeQL.parseQuery("match $thing isa call, has started-at 2018-09-19T01:00:38;\n" +
+                "insert $thing has call-rating 5;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
 
         iterator.next();
@@ -184,14 +185,14 @@ public class AppendAttributeGeneratorTest {
         iterator.next();
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "insert $null isa null, has null \"null\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $null isa null, has null \"null\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
 
         statement = gen.generateMatchInsertStatement(Util.parseCSV(iterator.next()));
-        tmp = "match $thing isa call;\n" +
-                "insert $thing has call-rating 4;";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa call;\n" +
+                "insert $thing has call-rating 4;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
     }
 }
