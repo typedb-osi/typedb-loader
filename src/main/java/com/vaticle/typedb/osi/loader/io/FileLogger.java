@@ -82,6 +82,30 @@ public class FileLogger {
         }
     }
 
+    public void logNoMatches(String sourceFile, String row) {
+        try {
+            FileWriter fw = new FileWriter(directoryString + "/" + FilenameUtils.removeExtension(sourceFile) + "_no_matches.log", true);
+            fw.append(row.replace("null", ""));
+            fw.append("\n");
+            fw.flush();
+            fw.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    public void logTooManyMatches(String sourceFile, String row) {
+        try {
+            FileWriter fw = new FileWriter(directoryString + "/" + FilenameUtils.removeExtension(sourceFile) + "_too_many_matches.log", true);
+            fw.append(row.replace("null", ""));
+            fw.append("\n");
+            fw.flush();
+            fw.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
     public synchronized void logColumnWarnings(String sourceFile, String errorString) {
         try {
             FileWriter fw = new FileWriter(directoryString + "/" + FilenameUtils.removeExtension(sourceFile) + "_column_type.log", true);

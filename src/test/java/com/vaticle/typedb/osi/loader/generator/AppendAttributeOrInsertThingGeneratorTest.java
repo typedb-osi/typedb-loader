@@ -22,6 +22,7 @@ import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
+import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -70,37 +71,37 @@ public class AppendAttributeOrInsertThingGeneratorTest {
 
         String[] row = Util.parseCSV(iterator.next());
         TypeQLInsert statement = gen.generateMatchInsertStatement(row);
-        String tmp = "match $thing isa person, has phone-number \"+7 171 898 0853\";\n" +
-                "insert $thing has first-name \"Melli\", has last-name \"Winchcum\", has city \"London\", has age 55, has nick-name \"Mel\";";
-        Assert.assertEquals(tmp, statement.toString());
+        TypeQLInsert tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+7 171 898 0853\";\n" +
+                "insert $thing has first-name \"Melli\", has last-name \"Winchcum\", has city \"London\", has age 55, has nick-name \"Mel\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
         statement = gen.generateThingInsertStatement(row);
-        tmp = "insert $e isa person, has phone-number \"+7 171 898 0853\", has first-name \"Melli\", has last-name \"Winchcum\", has city \"London\", has age 55, has nick-name \"Mel\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $e isa person, has phone-number \"+7 171 898 0853\", has first-name \"Melli\", has last-name \"Winchcum\", has city \"London\", has age 55, has nick-name \"Mel\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.thingInsertStatementValid(statement));
 
         row = Util.parseCSV(iterator.next());
         statement = gen.generateMatchInsertStatement(row);
-        tmp = "match $thing isa person;\n" +
-                "insert $thing has first-name \"Sakura\", has city \"Fire Village\", has age 13;";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person;\n" +
+                "insert $thing has first-name \"Sakura\", has city \"Fire Village\", has age 13;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
         statement = gen.generateThingInsertStatement(row);
-        tmp = "insert $e isa person, has first-name \"Sakura\", has city \"Fire Village\", has age 13;";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $e isa person, has first-name \"Sakura\", has city \"Fire Village\", has age 13;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.thingInsertStatementValid(statement));
 
         iterator.next();
 
         row = Util.parseCSV(iterator.next());
         statement = gen.generateMatchInsertStatement(row);
-        tmp = "match $thing isa person, has phone-number \"+62 107 666 3334\";\n" +
-                "insert $thing has first-name \"Sasuke\", has city \"Fire Village\", has age 13;";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+62 107 666 3334\";\n" +
+                "insert $thing has first-name \"Sasuke\", has city \"Fire Village\", has age 13;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.appendAttributeInsertStatementValid(statement));
         statement = gen.generateThingInsertStatement(row);
-        tmp = "insert $e isa person, has phone-number \"+62 107 666 3334\", has first-name \"Sasuke\", has city \"Fire Village\", has age 13;";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $e isa person, has phone-number \"+62 107 666 3334\", has first-name \"Sasuke\", has city \"Fire Village\", has age 13;").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertTrue(gen.thingInsertStatementValid(statement));
 
         iterator.next();
@@ -108,13 +109,13 @@ public class AppendAttributeOrInsertThingGeneratorTest {
 
         row = Util.parseCSV(iterator.next());
         statement = gen.generateMatchInsertStatement(row);
-        tmp = "match $thing isa person, has phone-number \"+62 107 321 3333\";\n" +
-                "insert $thing has first-name \"Missing\", has last-name \"Age\", has city \"notinsertcity\", has nick-name \"notinsertnickname\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("match $thing isa person, has phone-number \"+62 107 321 3333\";\n" +
+                "insert $thing has first-name \"Missing\", has last-name \"Age\", has city \"notinsertcity\", has nick-name \"notinsertnickname\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.appendAttributeInsertStatementValid(statement));
         statement = gen.generateThingInsertStatement(row);
-        tmp = "insert $e isa person, has phone-number \"+62 107 321 3333\", has first-name \"Missing\", has last-name \"Age\", has city \"notinsertcity\", has nick-name \"notinsertnickname\";";
-        Assert.assertEquals(tmp, statement.toString());
+        tmp = TypeQL.parseQuery("insert $e isa person, has phone-number \"+62 107 321 3333\", has first-name \"Missing\", has last-name \"Age\", has city \"notinsertcity\", has nick-name \"notinsertnickname\";").asInsert();
+        Assert.assertEquals(tmp, statement);
         Assert.assertFalse(gen.thingInsertStatementValid(statement));
 
 

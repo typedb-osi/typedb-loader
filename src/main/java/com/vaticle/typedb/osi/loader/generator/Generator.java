@@ -19,6 +19,6 @@ package com.vaticle.typedb.osi.loader.generator;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 
 public interface Generator {
-    void write(TypeDBTransaction tx, String[] row);
+    void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert);
     char getFileSeparator();
 }
