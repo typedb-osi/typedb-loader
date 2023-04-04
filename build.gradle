@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.vaticle.typedb-osi'
-version '1.5.1'
+version '1.6.0'
 
 repositories {
     mavenCentral()
@@ -15,13 +15,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.vaticle.typedb:typedb-client:2.11.1")
-    implementation("com.vaticle.typeql:typeql-grammar:2.9.0")
+    implementation("com.vaticle.typedb:typedb-client:2.14.2")
+    implementation("com.vaticle.typeql:typeql-grammar:2.14.0")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("org.slf4j:slf4j-api:1.7.25")
     implementation("org.apache.logging.log4j:log4j-api:2.17.1")
     implementation("org.apache.logging.log4j:log4j-core:2.17.1")
-    implementation("info.picocli:picocli:4.5.1")
+    implementation("info.picocli:picocli:4.6.1")
     implementation("org.apache.commons:commons-csv:1.8")
     implementation("commons-io:commons-io:2.8.0")
     compileOnly("info.picocli:picocli-codegen:4.5.1")

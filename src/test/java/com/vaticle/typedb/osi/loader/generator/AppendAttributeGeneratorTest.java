@@ -39,7 +39,7 @@ public class AppendAttributeGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "append-attribute-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();

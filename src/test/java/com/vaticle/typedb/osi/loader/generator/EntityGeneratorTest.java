@@ -39,7 +39,7 @@ public class EntityGeneratorTest {
     public void genericEntityTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/generic/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dcp = new File("src/test/resources/generic/config.json").getAbsolutePath();
@@ -204,7 +204,7 @@ public class EntityGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dp = new File("src/test/resources/phoneCalls/person.csv").getAbsolutePath();

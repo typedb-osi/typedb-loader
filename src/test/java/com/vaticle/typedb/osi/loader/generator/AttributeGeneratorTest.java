@@ -38,7 +38,7 @@ public class AttributeGeneratorTest {
     public void generateInsertStatementsTest() throws IOException {
         String dbName = "attribute-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getClient("localhost:1729");
+        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
         TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
 
         String dp = new File("src/test/resources/phoneCalls/is-in-use.csv").getAbsolutePath();
