@@ -154,14 +154,14 @@ To connect to TypeDB Cluster, a set of options is provided:
 
 Ranges are [inclusive, exclusive).
 
-| TypeDB Loader  | TypeDB Client (internal) |     TypeDB      | TypeDB Cluster |
-|:--------------:|:------------------------:|:---------------:|:--------------:|
-|     1.6.0      |          2.14.0          |     2.14.x      |     2.14.x     |
-| 1.2.0 to 1.6.0 |      2.8.0 - 2.14.0      | 2.8.0 to 2.14.0 |      N/A       |
-| 1.1.0 to 1.2.0 |          2.8.0           |      2.8.x      |      N/A       |
-|     1.0.0      |      2.5.0 to 2.7.1      | 2.5.x to 2.7.x  |      N/A       |
-|     0.1.1      |      2.0.0 to 2.5.0      | 2.0.x to 2.4.x  |      N/A       |
-|      <0.1      |          1.8.0           |      1.8.x      |      N/A       |
+| TypeDB Loader  | TypeDB Client (internal) |      TypeDB      |  TypeDB Cluster  |
+|:--------------:|:------------------------:|:----------------:|:----------------:|
+|     1.6.0      |          2.14.2          | 2.14.x to 2.16.x | 2.14.x to 2.16.x |
+| 1.2.0 to 1.6.0 |      2.8.0 - 2.14.0      | 2.8.0 to 2.14.0  |       N/A        |
+| 1.1.0 to 1.2.0 |          2.8.0           |      2.8.x       |       N/A        |
+|     1.0.0      |      2.5.0 to 2.7.1      |  2.5.x to 2.7.x  |       N/A        |
+|     0.1.1      |      2.0.0 to 2.5.0      |  2.0.x to 2.4.x  |       N/A        |
+|      <0.1      |          1.8.0           |      1.8.x       |       N/A        |
 
 * [Type DB](https://github.com/vaticle/typedb)
 
