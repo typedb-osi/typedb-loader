@@ -33,7 +33,7 @@ import java.util.HashMap;
 public class ConfigurationValidationTest {
 
     private static final Logger appLogger = LogManager.getLogger("com.bayer.dt.tdl.loader");
-    private static final String graknURI = "localhost:1729";
+    private static final String typedbURI = "localhost:1729";
     private static final String databaseName = "config-validation-test";
 
     @Test
@@ -86,7 +86,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -118,7 +118,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -147,7 +147,7 @@ public class ConfigurationValidationTest {
     public void validateDataConfig() {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/config.json").getAbsolutePath());
         assert dc != null;
-        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -179,7 +179,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/config.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getClient(graknURI, Runtime.getRuntime().availableProcessors());
+        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();

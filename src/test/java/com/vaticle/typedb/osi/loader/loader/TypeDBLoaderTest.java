@@ -69,7 +69,7 @@ public class TypeDBLoaderTest {
         TypeDBLoader typeDBLoader = new TypeDBLoader(LoadOptions.parse(args));
         typeDBLoader.load();
 
-        TypeDBClient client = TypeDBUtil.getClient(typeDBUri, 4);
+        TypeDBClient client = TypeDBUtil.getCoreClient(typeDBUri, 4);
         TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName);
 
         testAttributes(session);

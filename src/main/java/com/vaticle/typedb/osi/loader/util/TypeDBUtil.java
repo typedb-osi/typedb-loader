@@ -18,9 +18,11 @@ package com.vaticle.typedb.osi.loader.util;
 
 import com.vaticle.typedb.client.TypeDB;
 import com.vaticle.typedb.client.api.TypeDBClient;
+import com.vaticle.typedb.client.api.TypeDBCredential;
 import com.vaticle.typedb.client.api.TypeDBSession;
 import com.vaticle.typedb.client.api.TypeDBTransaction;
 import com.vaticle.typedb.client.api.answer.ConceptMap;
+import com.vaticle.typedb.osi.loader.cli.LoadOptions;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
@@ -30,6 +32,7 @@ import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,12 +41,28 @@ import static com.vaticle.typedb.osi.loader.util.Util.loadSchemaFromFile;
 
 public class TypeDBUtil {
 
-    public static TypeDBClient getClient(String graknURI) {
-        return TypeDB.coreClient(graknURI);
+    public static TypeDBClient getClient(LoadOptions options) {
+        if (options.typedbClusterURI != null) {
+            TypeDBCredential credential;
+            if (options.tlsEnabled) {
+                if (options.tlsRootCAPath == null)
+                    throw new RuntimeException("When TLS is enabled a Root CA path must be provided");
+                credential = new TypeDBCredential(options.username, options.password, Path.of(options.tlsRootCAPath));
+            } else {
+                credential = new TypeDBCredential(options.username, options.password, false);
+            }
+            return TypeDB.clusterClient(options.typedbClusterURI, credential);
+        } else {
+            return TypeDB.coreClient(options.typedbURI);
+        }
     }
 
-    public static TypeDBClient getClient(String graknURI, int parallelization) {
-        return TypeDB.coreClient(graknURI, parallelization);
+    public static TypeDBClient getCoreClient(String typedbURI) {
+        return TypeDB.coreClient(typedbURI);
+    }
+
+    public static TypeDBClient getCoreClient(String typedbURI, int parallelization) {
+        return TypeDB.coreClient(typedbURI, parallelization);
     }
 
     public static TypeDBSession getDataSession(TypeDBClient client, String databaseName) {

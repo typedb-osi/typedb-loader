@@ -18,6 +18,8 @@ package com.vaticle.typedb.osi.loader.cli;
 
 import picocli.CommandLine;
 
+import javax.annotation.Nullable;
+
 @CommandLine.Command(name = "load", description = "load data and/or schema", mixinStandardHelpOptions = true)
 public class LoadOptions {
     @CommandLine.Spec
@@ -26,11 +28,26 @@ public class LoadOptions {
     @CommandLine.Option(names = {"-c", "--config"}, description = "config file in JSON format", required = true)
     public String dataConfigFilePath;
 
-    @CommandLine.Option(names = {"-db", "--database"}, description = "target database in your grakn instance", required = true)
+    @CommandLine.Option(names = {"-db", "--database"}, description = "target database in your TypeDB instance", required = true)
     public String databaseName;
 
-    @CommandLine.Option(names = {"-tdb", "--typedb"}, description = "optional - TypeDB server in format: server:port (default: localhost:1729)", defaultValue = "localhost:1729")
+    @CommandLine.Option(names = {"-tdb", "--typedb"}, description = "Connect to TypeDB Core server in format: server:port (default: localhost:1729)", defaultValue = "localhost:1729")
     public String typedbURI;
+
+    @CommandLine.Option(names = {"-tdbc", "--typedb-cluster"}, description = "Connect to TypeDB Cluster instead of TypeDB Core. Specify a cluster server with 'server:port'.")
+    public String typedbClusterURI;
+
+    @CommandLine.Option(names = {"--username"}, description = "Username")
+    public @Nullable String username;
+
+    @CommandLine.Option(names = {"--password"}, description = "Password", interactive = true, arity = "0..1")
+    public @Nullable String password;
+
+    @CommandLine.Option(names = {"--tls-enabled"}, description = "Connect to TypeDB Cluster with TLS encryption")
+    public boolean tlsEnabled;
+
+    @CommandLine.Option( names = {"--tls-root-ca"}, description = "Path to the TLS root CA file")
+    public @Nullable String tlsRootCAPath;
 
     @CommandLine.Option(names = {"-cm", "--cleanMigration"}, description = "optional - delete old schema and data and restart migration from scratch - default: continue previous migration, if exists", defaultValue = "false")
     public boolean cleanMigration;
@@ -74,7 +91,14 @@ public class LoadOptions {
         spec.commandLine().getOut().println("TypeDB Loader started with parameters:");
         spec.commandLine().getOut().println("\tconfiguration: " + dataConfigFilePath);
         spec.commandLine().getOut().println("\tdatabase name: " + databaseName);
-        spec.commandLine().getOut().println("\tTypeDB server: " + typedbURI);
+        if (typedbClusterURI != null) {
+            spec.commandLine().getOut().println("\tTypeDB cluster URI: " + typedbClusterURI);
+            spec.commandLine().getOut().println("\tTypeDB cluster username: " + username);
+            spec.commandLine().getOut().println("\tTypeDB cluster TLS enabled: " + tlsEnabled);
+            spec.commandLine().getOut().println("\tTypeDB cluster TLS path: " + (tlsRootCAPath == null ? "N/A" : tlsRootCAPath));
+        } else {
+            spec.commandLine().getOut().println("\tTypeDB server URI: " + typedbURI);
+        }
         spec.commandLine().getOut().println("\tdelete database and all data in it for a clean new migration?: " + cleanMigration);
         spec.commandLine().getOut().println("\treload schema (if not doing clean migration): " + loadSchema);
     }

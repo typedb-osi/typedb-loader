@@ -42,7 +42,7 @@ public class TypeDBLoader {
 
     public void load() {
         Util.info("validating your config...");
-        TypeDBClient schemaClient = TypeDBUtil.getClient(options.typedbURI);
+        TypeDBClient schemaClient = TypeDBUtil.getClient(options);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
         ArrayList<String> errors = new ArrayList<>();
@@ -83,7 +83,7 @@ public class TypeDBLoader {
         Instant start = Instant.now();
         try {
             AsyncLoaderWorker asyncLoaderWorker = null;
-            try (TypeDBClient client = TypeDB.coreClient(options.typedbURI, Runtime.getRuntime().availableProcessors())) {
+            try (TypeDBClient client = TypeDBUtil.getClient(options)) {
                 Runtime.getRuntime().addShutdownHook(
                         NamedThreadFactory.create(AsyncLoaderWorker.class, "shutdown").newThread(client::close)
                 );

@@ -115,7 +115,7 @@ public class TypeDBLoaderCLITest {
 
     private void clearData(String uri, String db) {
         System.out.println("Cleaning all previous loaded data in: " + db);
-        TypeDBClient client = TypeDBUtil.getClient(uri);
+        TypeDBClient client = TypeDBUtil.getCoreClient(uri);
         try (TypeDBSession session = TypeDBUtil.getDataSession(client, db)) {
             try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.WRITE)) {
                 txn.query().delete(TypeQL.parseQuery("match $x isa thing; delete $x isa thing;").asDelete());
