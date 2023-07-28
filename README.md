@@ -2,7 +2,7 @@
 ---
 ---
 
-###  
+###   
 
 [![TypeDB Loader Test](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml)
 [![TypeDB Loader Build](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml)
@@ -129,7 +129,7 @@ public class LoadingData {
 
 ## Step-by-Step Tutorial
 
-A complete tutorial for TypeDB version >= 2.5.0 is in work and will be published asap.
+A complete tutorial for TypeDB version >= 2.5.0 is in work and will be published.
 
 An example of configuration and usage of TypeDB Loader on real data can be
 found [in the TypeDB Examples](https://github.com/vaticle/typedb-examples/tree/master/biology/catalogue_of_life).
@@ -142,6 +142,7 @@ There is an [example repository](https://github.com/bayer-science-for-a-better-l
 ## Connecting to TypeDB Cluster
 
 To connect to TypeDB Cluster, a set of options is provided:
+
 ```
 --typedb-cluster=<address:port>
 --username=<username>
@@ -154,18 +155,20 @@ To connect to TypeDB Cluster, a set of options is provided:
 
 Ranges are [inclusive, exclusive).
 
-| TypeDB Loader  | TypeDB Client (internal) |      TypeDB      |  TypeDB Cluster  |
-|:--------------:|:------------------------:|:----------------:|:----------------:|
-|     1.6.0      |          2.14.2          | 2.14.x to 2.16.x | 2.14.x to 2.16.x |
-| 1.2.0 to 1.6.0 |      2.8.0 - 2.14.0      | 2.8.0 to 2.14.0  |       N/A        |
-| 1.1.0 to 1.2.0 |          2.8.0           |      2.8.x       |       N/A        |
-|     1.0.0      |      2.5.0 to 2.7.1      |  2.5.x to 2.7.x  |       N/A        |
-|     0.1.1      |      2.0.0 to 2.5.0      |  2.0.x to 2.4.x  |       N/A        |
-|      <0.1      |          1.8.0           |      1.8.x       |       N/A        |
+| TypeDB Loader | TypeDB Client (internal) |     TypeDB      | TypeDB Cluster  |
+|:-------------:|:------------------------:|:---------------:|:---------------:|
+|     1.7.0     |          2.18.1          |    2.18.x -     |    2.18.x -     |
+|     1.6.0     |          2.14.2          | 2.14.x - 2.17.x | 2.14.x - 2.16.x |
+| 1.2.0 - 1.6.0 |      2.8.0 - 2.14.0      | 2.8.0 - 2.14.0  |       N/A       |
+| 1.1.0 - 1.2.0 |          2.8.0           |      2.8.x      |       N/A       |
+|     1.0.0     |      2.5.0 - 2.7.1       |  2.5.x - 2.7.x  |       N/A       |
+|     0.1.1     |      2.0.0 - 2.5.0       |  2.0.x - 2.4.x  |       N/A       |
+|     <0.1      |          1.8.0           |      1.8.x      |       N/A       |
 
 * [Type DB](https://github.com/vaticle/typedb)
 
-Find the Readme for GraMi for grakn < 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
+Find the Readme for GraMi for grakn <
+2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
 
 ## Contributions
 

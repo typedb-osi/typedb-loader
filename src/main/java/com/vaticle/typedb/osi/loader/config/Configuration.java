@@ -39,7 +39,7 @@ public class Configuration {
     public static AttributeValueType getValueType(TypeDBSession session, String conceptType) {
         AttributeValueType valueType = null;
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
-            Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.var("t").type(conceptType)).get("t")).collect(Collectors.toSet());
+            Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.cVar("t").type(conceptType)).get(TypeQL.cVar("t"))).collect(Collectors.toSet());
             assert answers.size() == 1;
             for (ConceptMap answer : answers) {
                 valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());

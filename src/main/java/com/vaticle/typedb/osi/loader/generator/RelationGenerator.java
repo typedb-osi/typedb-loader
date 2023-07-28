@@ -27,7 +27,7 @@ import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -132,9 +132,9 @@ public class RelationGenerator implements Generator {
             ThingVariable.Relation insertStatement = null;
             for (int i = 0; i < roleTypes.size(); i++) {
                 if (insertStatement == null) {
-                    insertStatement = TypeQL.var("rel").rel(roleTypes.get(i), playerVars.get(i));
+                    insertStatement = TypeQL.cVar("rel").rel(roleTypes.get(i), TypeQL.cVar(playerVars.get(i)));
                 } else {
-                    insertStatement = insertStatement.rel(roleTypes.get(i), playerVars.get(i));
+                    insertStatement = insertStatement.rel(roleTypes.get(i), TypeQL.cVar(playerVars.get(i)));
                 }
             }
             if (insertStatement != null) {
@@ -145,19 +145,19 @@ public class RelationGenerator implements Generator {
 
                 return TypeQL.match(playerMatchStatements).insert(insertStatement);
             } else {
-                return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+                return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
             }
         } else {
-            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+            return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
         }
     }
 
     private ThingVariable.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Definition.Player player, String playerVar) {
-        ThingVariable.Thing playerMatchStatement = TypeQL.var(playerVar).isa(player.getMatch().getType());
+        ThingVariable.Thing playerMatchStatement = TypeQL.cVar(playerVar).isa(player.getMatch().getType());
         for (Configuration.Definition.Attribute consA : player.getMatch().getOwnerships()) {
-            ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+            ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, consA);
-            for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+            for (ThingConstraint.Predicate constraintValue : constraintValues) {
                 playerMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(consA.getAttribute(), constraintValue));
             }
         }
@@ -165,10 +165,10 @@ public class RelationGenerator implements Generator {
     }
 
     private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
-        ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+        ArrayList<ThingConstraint.Predicate> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                 row, header, filePath, fileSeparator, player.getMatch().getAttribute());
         if (constraints.size() > 0) {
-            return TypeQL.var(playerVar)
+            return TypeQL.cVar(playerVar)
                     .constrain(constraints.get(0))
                     .isa(player.getMatch().getType());
         } else {
@@ -203,15 +203,15 @@ public class RelationGenerator implements Generator {
             // identify relation player "byPlayer"
             ArrayList<ThingVariable<?>> statements = new ArrayList<>();
             //create the relation statement with the player vars that will be filled in recursion:
-            UnboundVariable ubv = TypeQL.var(playerVar);
+            UnboundConceptVariable ubv = TypeQL.cVar(playerVar);
             ThingVariable.Relation relationMatch = null;
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
                 Configuration.Definition.Player curPlayer = player.getMatch().getPlayers()[idx];
                 String curPlayerVar = playerVar + "-" + idx;
                 if (idx == 0) {
-                    relationMatch = ubv.rel(curPlayer.getRole(), curPlayerVar);
+                    relationMatch = ubv.rel(curPlayer.getRole(), TypeQL.cVar(curPlayerVar));
                 } else {
-                    relationMatch = relationMatch.rel(curPlayer.getRole(), curPlayerVar);
+                    relationMatch = relationMatch.rel(curPlayer.getRole(), TypeQL.cVar(curPlayerVar));
                 }
                 // this is where the recursion happens to fill the player var!
                 ArrayList<ThingVariable<?>> recursiveMatch = recursiveAssemblyMatchStatement(row, curPlayer, curPlayerVar);

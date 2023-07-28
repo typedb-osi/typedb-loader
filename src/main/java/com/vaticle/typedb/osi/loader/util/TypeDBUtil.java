@@ -134,10 +134,10 @@ public class TypeDBUtil {
         List<ThingVariable<?>> insertVars = query.asInsert().variables();
         List<BoundVariable> matchVars = new ArrayList<>();
         ans.map().forEach((var, concept) -> {
-            if (concept.isThing()) matchVars.add(TypeQL.var(var).iid(concept.asThing().getIID()));
+            if (concept.isThing()) matchVars.add(TypeQL.cVar(var).iid(concept.asThing().getIID()));
             else if (concept.asType().getLabel().scope().isPresent()) {
-                matchVars.add(TypeQL.var(var).type(concept.asType().getLabel().scope().get(), concept.asType().getLabel().name()));
-            } else matchVars.add(TypeQL.var(var).type(concept.asType().getLabel().name()));
+                matchVars.add(TypeQL.cVar(var).type(concept.asType().getLabel().scope().get(), concept.asType().getLabel().name()));
+            } else matchVars.add(TypeQL.cVar(var).type(concept.asType().getLabel().name()));
         });
         return TypeQL.match(matchVars).insert(insertVars);
     }

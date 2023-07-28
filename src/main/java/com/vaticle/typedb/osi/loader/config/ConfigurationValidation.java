@@ -377,7 +377,7 @@ public class ConfigurationValidation {
                                            String conceptType,
                                            String breadcrumbConceptType) {
         boolean exists = false;
-        TypeQLMatch query = TypeQL.match(TypeQL.var("t").type(conceptType));
+        TypeQLMatch query = TypeQL.match(TypeQL.cVar("t").type(conceptType));
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
             Util.trace(Integer.toString((int) txn.query().match(query).count()));
             exists = true;
@@ -532,7 +532,7 @@ public class ConfigurationValidation {
                              String breadcrumbs,
                              String relationType,
                              String roleType) {
-        TypeQLMatch query = TypeQL.match(TypeQL.type(relationType).relates(TypeQL.var("r"))).get("r");
+        TypeQLMatch query = TypeQL.match(TypeQL.type(relationType).relates(TypeQL.cVar("r"))).get(TypeQL.cVar("r"));
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
             Stream<ConceptMap> answers = txn.query().match(query);
             if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
@@ -547,7 +547,7 @@ public class ConfigurationValidation {
                                         String relationType,
                                         String role,
                                         String conceptType) {
-        TypeQLMatch query = TypeQL.match(TypeQL.var("c").plays(relationType, role)).get("c");
+        TypeQLMatch query = TypeQL.match(TypeQL.cVar("c").plays(relationType, role)).get(TypeQL.cVar("c"));
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
             Stream<ConceptMap> answers = txn.query().match(query);
             if (answers.noneMatch(c -> c.get("c").asThingType().getLabel().name().equals(conceptType))) {

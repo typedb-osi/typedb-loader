@@ -27,7 +27,7 @@ import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundVariable;
+import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -97,22 +97,22 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
-            ThingVariable.Thing entityMatchStatement = TypeQL.var("thing")
+            ThingVariable.Thing entityMatchStatement = TypeQL.cVar("thing")
                     .isa(appendOrInsertConfiguration.getMatch().getType());
             for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
-                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, ownershipThingGetter);
-                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                for (ThingConstraint.Predicate constraintValue : constraintValues) {
                     entityMatchStatement.constrain(GeneratorUtil.valueToHasConstraint(ownershipThingGetter.getAttribute(), constraintValue));
                 }
             }
 
-            UnboundVariable insertUnboundVar = TypeQL.var("thing");
+            UnboundConceptVariable insertUnboundVar = TypeQL.cVar("thing");
             ThingVariable.Thing insertStatement = null;
             for (Configuration.Definition.Attribute attributeToAppend : appendOrInsertConfiguration.getInsert().getOwnerships()) {
-                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
-                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                for (ThingConstraint.Predicate constraintValue : constraintValues) {
                     if (insertStatement == null) {
                         insertStatement = insertUnboundVar.constrain(GeneratorUtil.valueToHasConstraint(attributeToAppend.getAttribute(), constraintValue));
                     } else {
@@ -124,10 +124,10 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
             if (insertStatement != null) {
                 return TypeQL.match(entityMatchStatement).insert(insertStatement);
             } else {
-                return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+                return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
             }
         } else {
-            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+            return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
         }
     }
 
@@ -136,9 +136,9 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
             ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getMatch().getType());
 
             for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getMatch().getOwnerships()) {
-                ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+                ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attribute);
-                for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+                for (ThingConstraint.Predicate constraintValue : constraintValues) {
                     insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attribute.getAttribute(), constraintValue));
                 }
             }
@@ -147,7 +147,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
             return TypeQL.insert(insertStatement);
         } else {
-            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+            return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
         }
     }
 

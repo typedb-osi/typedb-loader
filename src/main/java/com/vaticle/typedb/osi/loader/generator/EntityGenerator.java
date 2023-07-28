@@ -79,7 +79,7 @@ public class EntityGenerator implements Generator {
 
             return TypeQL.insert(insertStatement);
         } else {
-            return TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null"));
+            return TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null"));
         }
     }
 
