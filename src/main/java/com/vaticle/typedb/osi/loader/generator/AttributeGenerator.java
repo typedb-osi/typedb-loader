@@ -76,20 +76,20 @@ public class AttributeGenerator implements Generator {
 
     public List<TypeQLInsert> generateInsertStatements(String[] row) {
         if (row.length > 0) {
-            ArrayList<ThingConstraint.Value<?>> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+            ArrayList<ThingConstraint.Predicate> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, attributeConfiguration.getInsert());
 
             List<TypeQLInsert> insertStatements = new ArrayList<>();
-            for (ThingConstraint.Value<?> constraint : constraints) {
+            for (ThingConstraint.Predicate constraint : constraints) {
                 insertStatements.add(TypeQL.insert(
-                        TypeQL.var("a")
+                        TypeQL.cVar("a")
                                 .constrain(constraint)
                                 .isa(attributeConfiguration.getInsert().getAttribute())
                 ));
             }
             return insertStatements;
         } else {
-            return List.of(TypeQL.insert(TypeQL.var("null").isa("null").has("null", "null")));
+            return List.of(TypeQL.insert(TypeQL.cVar("null").isa("null").has("null", "null")));
         }
 
     }

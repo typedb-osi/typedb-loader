@@ -22,6 +22,7 @@ import com.vaticle.typedb.osi.loader.preprocessor.RegexPreprocessor;
 import com.vaticle.typedb.osi.loader.type.AttributeValueType;
 import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLToken;
+import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
 import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
 import org.apache.commons.io.FilenameUtils;
@@ -55,9 +56,9 @@ public class GeneratorUtil {
                                                        ThingVariable<?> insertStatement,
                                                        Configuration.Definition.Attribute[] attributes) {
         for (Configuration.Definition.Attribute attribute : attributes) {
-            ArrayList<ThingConstraint.Value<?>> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
+            ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, attribute);
-            for (ThingConstraint.Value<?> constraintValue : constraintValues) {
+            for (ThingConstraint.Predicate constraintValue : constraintValues) {
                 insertStatement.constrain(GeneratorUtil.valueToHasConstraint(attribute.getAttribute(), constraintValue));
             }
         }
@@ -68,22 +69,22 @@ public class GeneratorUtil {
     }
 
     public static ThingVariable.Thing generateBoundThingVar(String schemaType) {
-        return TypeQL.var("e").isa(schemaType);
+        return TypeQL.cVar("e").isa(schemaType);
     }
 
     public static ThingConstraint.Has valueToHasConstraint(String attributeSchemaType,
-                                                           ThingConstraint.Value<?> valueConstraints) {
+                                                           ThingConstraint.Predicate valueConstraints) {
         if (valueConstraints != null) {
             return new ThingConstraint.Has(attributeSchemaType, valueConstraints);
         }
         return null;
     }
 
-    public static ArrayList<ThingConstraint.Value<?>> generateValueConstraintsConstrainingAttribute(String[] row,
-                                                                                                    String[] header,
-                                                                                                    String filepath,
-                                                                                                    char fileSeparator,
-                                                                                                    Configuration.Definition.Attribute attribute) {
+    public static ArrayList<ThingConstraint.Predicate> generateValueConstraintsConstrainingAttribute(String[] row,
+                                                                                                     String[] header,
+                                                                                                     String filepath,
+                                                                                                     char fileSeparator,
+                                                                                                     Configuration.Definition.Attribute attribute) {
 
         String attributeType = attribute.getAttribute();
         AttributeValueType attributeValueType = attribute.getConceptValueType();
@@ -99,11 +100,11 @@ public class GeneratorUtil {
         }
 
 
-        ArrayList<ThingConstraint.Value<?>> valueConstraints = new ArrayList<>();
+        ArrayList<ThingConstraint.Predicate> valueConstraints = new ArrayList<>();
         if (token != null && !token.isEmpty()) {
             String cleanedToken = cleanToken(token);
             if (listSeparator == null) {
-                ThingConstraint.Value<?> valueConstraint = generateValueConstraint(attributeType, attributeValueType, cleanedToken, preprocessor, row, filepath, fileSeparator);
+                ThingConstraint.Predicate valueConstraint = generateValueConstraint(attributeType, attributeValueType, cleanedToken, preprocessor, row, filepath, fileSeparator);
                 if (valueConstraint != null) {
                     valueConstraints.add(valueConstraint);
                 }
@@ -111,7 +112,7 @@ public class GeneratorUtil {
                 for (String exploded : cleanedToken.split(listSeparator)) {
                     String cleanedExplodedToken = cleanToken(exploded);
                     if (!cleanedExplodedToken.isEmpty()) {
-                        ThingConstraint.Value<?> valueConstraint = generateValueConstraint(attributeType, attributeValueType, cleanedExplodedToken, preprocessor, row, filepath, fileSeparator);
+                        ThingConstraint.Predicate valueConstraint = generateValueConstraint(attributeType, attributeValueType, cleanedExplodedToken, preprocessor, row, filepath, fileSeparator);
                         if (valueConstraint != null) {
                             valueConstraints.add(valueConstraint);
                         }
@@ -123,13 +124,13 @@ public class GeneratorUtil {
     }
 
 
-    public static ThingConstraint.Value<?> generateValueConstraint(String attributeSchemaType,
-                                                                   AttributeValueType attributeValueType,
-                                                                   String cleanedValue,
-                                                                   Configuration.PreprocessorConfig preprocessorConfig,
-                                                                   String[] row,
-                                                                   String filepath,
-                                                                   char fileSeparator) {
+    public static ThingConstraint.Predicate generateValueConstraint(String attributeSchemaType,
+                                                                    AttributeValueType attributeValueType,
+                                                                    String cleanedValue,
+                                                                    Configuration.PreprocessorConfig preprocessorConfig,
+                                                                    String[] row,
+                                                                    String filepath,
+                                                                    char fileSeparator) {
         String fileName = FilenameUtils.getName(filepath);
         String fileNoExtension = FilenameUtils.removeExtension(fileName);
         String originalRow = String.join(Character.toString(fileSeparator), row);
@@ -138,14 +139,14 @@ public class GeneratorUtil {
             cleanedValue = applyPreprocessor(cleanedValue, preprocessorConfig);
         }
 
-        ThingConstraint.Value<?> constraint = null;
+        ThingConstraint.Predicate constraint = null;
         switch (attributeValueType) {
             case STRING:
-                constraint = new ThingConstraint.Value.String(TypeQLToken.Predicate.Equality.EQ, cleanedValue);
+                constraint = new ThingConstraint.Predicate(new Predicate.String(TypeQLToken.Predicate.Equality.EQ, cleanedValue));
                 break;
             case LONG:
                 try {
-                    constraint = new ThingConstraint.Value.Long(TypeQLToken.Predicate.Equality.EQ, Long.parseLong(cleanedValue));
+                    constraint = new ThingConstraint.Predicate(new Predicate.Long(TypeQLToken.Predicate.Equality.EQ, Long.parseLong(cleanedValue)));
                 } catch (NumberFormatException numberFormatException) {
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type long for variable <%s> with non-<long> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
@@ -153,7 +154,7 @@ public class GeneratorUtil {
                 break;
             case DOUBLE:
                 try {
-                    constraint = new ThingConstraint.Value.Double(TypeQLToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue));
+                    constraint = new ThingConstraint.Predicate(new Predicate.Double(TypeQLToken.Predicate.Equality.EQ, Double.parseDouble(cleanedValue)));
                 } catch (NumberFormatException numberFormatException) {
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type double for variable <%s> with non-<double> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
@@ -161,9 +162,9 @@ public class GeneratorUtil {
                 break;
             case BOOLEAN:
                 if (cleanedValue.equalsIgnoreCase("true")) {
-                    constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, true);
+                    constraint = new ThingConstraint.Predicate(new Predicate.Boolean(TypeQLToken.Predicate.Equality.EQ, true));
                 } else if (cleanedValue.equalsIgnoreCase("false")) {
-                    constraint = new ThingConstraint.Value.Boolean(TypeQLToken.Predicate.Equality.EQ, false);
+                    constraint = new ThingConstraint.Predicate(new Predicate.Boolean(TypeQLToken.Predicate.Equality.EQ, false));
                 } else {
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type boolean for variable <%s> with non-<boolean> value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
@@ -181,7 +182,7 @@ public class GeneratorUtil {
                     } else {
                         dateTime = date.atStartOfDay();
                     }
-                    constraint = new ThingConstraint.Value.DateTime(TypeQLToken.Predicate.Equality.EQ, dateTime);
+                    constraint = new ThingConstraint.Predicate(new Predicate.DateTime(TypeQLToken.Predicate.Equality.EQ, dateTime));
                 } catch (DateTimeException dateTimeException) {
                     FileLogger.getLogger().logColumnWarnings(fileName, originalRow);
                     dataLogger.warn(String.format("column of type datetime for variable <%s> with non-<ISO 8601 format> datetime value <%s> - skipping column - faulty row written to <%s_column_type.log>", attributeSchemaType, cleanedValue, fileNoExtension));
