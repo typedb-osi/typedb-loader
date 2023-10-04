@@ -103,6 +103,10 @@ Once your configuration files are complete, you can use TypeDB Loader in one of 
 2. As a dependency in your own Java code:
 
 ```Java
+
+import com.vaticle.typedb.osi.loader.cli.LoadOptions;
+import com.vaticle.typedb.osi.loader.loader.TypeDBLoader;
+
 public class LoadingData {
 
     public void loadData() {
