@@ -92,7 +92,7 @@ Once your configuration files are complete, you can use TypeDB Loader in one of 
 
 ```Shell
 ./bin/typedbloader load \
-                -tdb localhost:1729, \
+                -tdb localhost:1729 \
                 -c /path/to/your/config.json \
                 -db databaseName \
                 -cm
