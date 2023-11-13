@@ -16,9 +16,9 @@
 
 package com.vaticle.typedb.osi.loader.util;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.google.gson.reflect.TypeToken;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

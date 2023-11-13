@@ -16,9 +16,9 @@
 
 package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.answer.ConceptMap;
 import com.vaticle.typedb.osi.loader.type.AttributeValueType;
 import com.vaticle.typeql.lang.TypeQL;
 
@@ -39,7 +39,7 @@ public class Configuration {
     public static AttributeValueType getValueType(TypeDBSession session, String conceptType) {
         AttributeValueType valueType = null;
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
-            Set<ConceptMap> answers = txn.query().match(TypeQL.match(TypeQL.cVar("t").type(conceptType)).get(TypeQL.cVar("t"))).collect(Collectors.toSet());
+            Set<ConceptMap> answers = txn.query().get(TypeQL.match(TypeQL.cVar("t").type(conceptType)).get(TypeQL.cVar("t"))).collect(Collectors.toSet());
             assert answers.size() == 1;
             for (ConceptMap answer : answers) {
                 valueType = AttributeValueType.valueOf(answer.get("t").asAttributeType().getValueType().name());

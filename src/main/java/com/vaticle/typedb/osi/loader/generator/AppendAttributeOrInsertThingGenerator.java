@@ -16,18 +16,18 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.common.exception.TypeDBClientException;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.common.exception.TypeDBDriverException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -81,7 +81,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
                 } else {
                     safeInsert(tx, appendQuery, answers, allowMultiInsert, filePath, originalRow, dataLogger);
                 }
-            } catch (TypeDBClientException typeDBClientException) {
+            } catch (TypeDBDriverException typeDBDriverException) {
                 FileLogger.getLogger().logUnavailable(fileName, originalRow);
                 dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
@@ -97,7 +97,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
-            ThingVariable.Thing entityMatchStatement = TypeQL.cVar("thing")
+            ThingStatement.Thing entityMatchStatement = TypeQL.cVar("thing")
                     .isa(appendOrInsertConfiguration.getMatch().getType());
             for (Configuration.Definition.Attribute ownershipThingGetter : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
@@ -107,8 +107,8 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
                 }
             }
 
-            UnboundConceptVariable insertUnboundVar = TypeQL.cVar("thing");
-            ThingVariable.Thing insertStatement = null;
+            ConceptVariableBuilder insertUnboundVar = TypeQL.cVar("thing");
+            ThingStatement.Thing insertStatement = null;
             for (Configuration.Definition.Attribute attributeToAppend : appendOrInsertConfiguration.getInsert().getOwnerships()) {
                 ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                         row, header, filePath, fileSeparator, attributeToAppend);
@@ -133,7 +133,7 @@ public class AppendAttributeOrInsertThingGenerator implements Generator {
 
     public TypeQLInsert generateThingInsertStatement(String[] row) {
         if (row.length > 0) {
-            ThingVariable.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getMatch().getType());
+            ThingStatement.Thing insertStatement = GeneratorUtil.generateBoundThingVar(appendOrInsertConfiguration.getMatch().getType());
 
             for (Configuration.Definition.Attribute attribute : appendOrInsertConfiguration.getMatch().getOwnerships()) {
                 ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(

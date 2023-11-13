@@ -16,13 +16,13 @@
 
 package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.common.exception.TypeDBClientException;
+import com.vaticle.typedb.driver.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.common.exception.TypeDBDriverException;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.query.TypeQLMatch;
+import com.vaticle.typeql.lang.query.TypeQLGet;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -377,15 +377,15 @@ public class ConfigurationValidation {
                                            String conceptType,
                                            String breadcrumbConceptType) {
         boolean exists = false;
-        TypeQLMatch query = TypeQL.match(TypeQL.cVar("t").type(conceptType));
+        TypeQLGet query = TypeQL.match(TypeQL.cVar("t").type(conceptType)).get();
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
-            Util.trace(Integer.toString((int) txn.query().match(query).count()));
+            Util.trace(Integer.toString((int) txn.query().get(query).count()));
             exists = true;
-        } catch (TypeDBClientException typeDBClientException) {
-            if (typeDBClientException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
+        } catch (TypeDBDriverException typeDBDriverException) {
+            if (typeDBDriverException.toString().contains("Invalid Type Read: The type '" + conceptType + "' does not exist.")) {
                 validationReport.get("errors").add(breadcrumbs + "." + breadcrumbConceptType + ": <" + conceptType + "> does not exist in schema");
             } else {
-                throw typeDBClientException;
+                throw typeDBDriverException;
             }
         }
         return exists;
@@ -532,9 +532,9 @@ public class ConfigurationValidation {
                              String breadcrumbs,
                              String relationType,
                              String roleType) {
-        TypeQLMatch query = TypeQL.match(TypeQL.type(relationType).relates(TypeQL.cVar("r"))).get(TypeQL.cVar("r"));
+        TypeQLGet query = TypeQL.match(TypeQL.type(relationType).relates(TypeQL.cVar("r"))).get(TypeQL.cVar("r"));
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
-            Stream<ConceptMap> answers = txn.query().match(query);
+            Stream<ConceptMap> answers = txn.query().get(query);
             if (answers.noneMatch(a -> a.get("r").asRoleType().getLabel().name().equals(roleType))) {
                 validationReport.get("errors").add(breadcrumbs + ".role: <" + roleType + "> is not a role for relation of type <" + relationType + "> in schema");
             }
@@ -547,9 +547,9 @@ public class ConfigurationValidation {
                                         String relationType,
                                         String role,
                                         String conceptType) {
-        TypeQLMatch query = TypeQL.match(TypeQL.cVar("c").plays(relationType, role)).get(TypeQL.cVar("c"));
+        TypeQLGet query = TypeQL.match(TypeQL.cVar("c").plays(relationType, role)).get(TypeQL.cVar("c"));
         try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.READ)) {
-            Stream<ConceptMap> answers = txn.query().match(query);
+            Stream<ConceptMap> answers = txn.query().get(query);
             if (answers.noneMatch(c -> c.get("c").asThingType().getLabel().name().equals(conceptType))) {
                 validationReport.get("errors").add(breadcrumbs + ".role: <" + role + "> is not player by <" + conceptType + "> in relation of type <" + relationType + "> in schema");
             }

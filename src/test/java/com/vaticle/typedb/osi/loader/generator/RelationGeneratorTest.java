@@ -16,8 +16,8 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.QueryUtilTest;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
@@ -41,14 +41,14 @@ public class RelationGeneratorTest {
 
         String dbName = "relation-generator-test";
         String sp = new File("src/test/resources/generic/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dcp = new File("src/test/resources/generic/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("rel1"));
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
                 Configuration.Definition.Attribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
@@ -59,7 +59,7 @@ public class RelationGeneratorTest {
             }
         }
         session.close();
-        client.close();
+        driver.close();
 
         String dp = new File("src/test/resources/generic/rel1.tsv").getAbsolutePath();
         RelationGenerator gen = new RelationGenerator(dp,
@@ -264,14 +264,14 @@ public class RelationGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "relation-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> relationKeys = new ArrayList<>(List.of("contract", "call", "in-use", "communication-channel", "communication-channel-pm"));
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         for (String relationKey : relationKeys) {
             if (dc.getRelations().get(relationKey).getInsert().getOwnerships() != null) {
                 Configuration.Definition.Attribute[] hasAttributes = dc.getRelations().get(relationKey).getInsert().getOwnerships();
@@ -289,7 +289,7 @@ public class RelationGeneratorTest {
             }
         }
         session.close();
-        client.close();
+        driver.close();
 
         testContracts(dc, relationKeys);
         testCalls(dc, relationKeys);

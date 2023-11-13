@@ -16,9 +16,9 @@
 
 package com.vaticle.typedb.osi.loader.loader;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
 import com.vaticle.typedb.common.collection.Either;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
 import com.vaticle.typedb.osi.loader.cli.LoadOptions;
@@ -75,7 +75,7 @@ public class AsyncLoaderWorker {
         this.status = Status.OK;
     }
 
-    public void run(TypeDBClient client) throws IOException, InterruptedException {
+    public void run(TypeDBDriver driver) throws IOException, InterruptedException {
 
         ArrayList<String> orderedBeforeGenerators = dc.getGlobalConfig().getOrderedBeforeGenerators();
         if (orderedBeforeGenerators == null) orderedBeforeGenerators = new ArrayList<>();
@@ -91,7 +91,7 @@ public class AsyncLoaderWorker {
         separateGenerators.addAll(orderedAfterGenerators);
         separateGenerators.addAll(ignoreGenerators);
 
-        try (TypeDBSession session = TypeDBUtil.getDataSession(client, databaseName)) {
+        try (TypeDBSession session = TypeDBUtil.getDataSession(driver, databaseName)) {
 
             //Load OrderBefore things...
             Util.info("loading ordered before things");

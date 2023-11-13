@@ -16,9 +16,9 @@
 
 package com.vaticle.typedb.osi.loader.cli;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
 import com.vaticle.typedb.osi.loader.loader.TypeDBLoader;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typeql.lang.TypeQL;
@@ -115,13 +115,13 @@ public class TypeDBLoaderCLITest {
 
     private void clearData(String uri, String db) {
         System.out.println("Cleaning all previous loaded data in: " + db);
-        TypeDBClient client = TypeDBUtil.getCoreClient(uri);
-        try (TypeDBSession session = TypeDBUtil.getDataSession(client, db)) {
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver(uri);
+        try (TypeDBSession session = TypeDBUtil.getDataSession(driver, db)) {
             try (TypeDBTransaction txn = session.transaction(TypeDBTransaction.Type.WRITE)) {
                 txn.query().delete(TypeQL.parseQuery("match $x isa thing; delete $x isa thing;").asDelete());
                 txn.commit();
             }
         }
-        client.close();
+        driver.close();
     }
 }

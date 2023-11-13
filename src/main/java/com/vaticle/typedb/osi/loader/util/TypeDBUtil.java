@@ -16,17 +16,18 @@
 
 package com.vaticle.typedb.osi.loader.util;
 
-import com.vaticle.typedb.client.TypeDB;
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBCredential;
-import com.vaticle.typedb.client.api.TypeDBSession;
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.TypeDB;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBCredential;
+import com.vaticle.typedb.driver.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.api.concept.Concept;
 import com.vaticle.typedb.osi.loader.cli.LoadOptions;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typeql.lang.TypeQL;
-import com.vaticle.typeql.lang.pattern.variable.BoundVariable;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.statement.Statement;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.TypeQLDefine;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
@@ -41,7 +42,7 @@ import static com.vaticle.typedb.osi.loader.util.Util.loadSchemaFromFile;
 
 public class TypeDBUtil {
 
-    public static TypeDBClient getClient(LoadOptions options) {
+    public static TypeDBDriver getDriver(LoadOptions options) {
         if (options.typedbClusterURI != null) {
             TypeDBCredential credential;
             if (options.tlsEnabled) {
@@ -51,46 +52,42 @@ public class TypeDBUtil {
             } else {
                 credential = new TypeDBCredential(options.username, options.password, false);
             }
-            return TypeDB.clusterClient(options.typedbClusterURI, credential);
+            return TypeDB.enterpriseDriver(options.typedbClusterURI, credential);
         } else {
-            return TypeDB.coreClient(options.typedbURI);
+            return TypeDB.coreDriver(options.typedbURI);
         }
     }
 
-    public static TypeDBClient getCoreClient(String typedbURI) {
-        return TypeDB.coreClient(typedbURI);
+    public static TypeDBDriver getCoreDriver(String typedbURI) {
+        return TypeDB.coreDriver(typedbURI);
     }
 
-    public static TypeDBClient getCoreClient(String typedbURI, int parallelization) {
-        return TypeDB.coreClient(typedbURI, parallelization);
+    public static TypeDBSession getDataSession(TypeDBDriver driver, String databaseName) {
+        return driver.session(databaseName, TypeDBSession.Type.DATA);
     }
 
-    public static TypeDBSession getDataSession(TypeDBClient client, String databaseName) {
-        return client.session(databaseName, TypeDBSession.Type.DATA);
+    public static TypeDBSession getSchemaSession(TypeDBDriver driver, String databaseName) {
+        return driver.session(databaseName, TypeDBSession.Type.SCHEMA);
     }
 
-    public static TypeDBSession getSchemaSession(TypeDBClient client, String databaseName) {
-        return client.session(databaseName, TypeDBSession.Type.SCHEMA);
+    private static void createDatabase(TypeDBDriver driver, String databaseName) {
+        driver.databases().create(databaseName);
     }
 
-    private static void createDatabase(TypeDBClient client, String databaseName) {
-        client.databases().create(databaseName);
-    }
-
-    private static void deleteDatabaseIfExists(TypeDBClient client, String databaseName) {
-        if (client.databases().contains(databaseName)) {
-            client.databases().get(databaseName).delete();
+    private static void deleteDatabaseIfExists(TypeDBDriver driver, String databaseName) {
+        if (driver.databases().contains(databaseName)) {
+            driver.databases().get(databaseName).delete();
         }
     }
 
-    public static void cleanAndDefineSchemaToDatabase(TypeDBClient client, String databaseName, String schemaPath) {
-        deleteDatabaseIfExists(client, databaseName);
-        createDatabase(client, databaseName);
-        loadAndDefineSchema(client, databaseName, schemaPath);
+    public static void cleanAndDefineSchemaToDatabase(TypeDBDriver driver, String databaseName, String schemaPath) {
+        deleteDatabaseIfExists(driver, databaseName);
+        createDatabase(driver, databaseName);
+        loadAndDefineSchema(driver, databaseName, schemaPath);
     }
 
-    private static void defineToTypeDB(TypeDBClient client, String databaseName, String schemaAsString) {
-        TypeDBSession schemaSession = getSchemaSession(client, databaseName);
+    private static void defineToTypeDB(TypeDBDriver driver, String databaseName, String schemaAsString) {
+        TypeDBSession schemaSession = getSchemaSession(driver, databaseName);
         TypeQLDefine q = TypeQL.parseQuery(schemaAsString);
 
         try (TypeDBTransaction writeTransaction = schemaSession.transaction(TypeDBTransaction.Type.WRITE)) {
@@ -103,14 +100,14 @@ public class TypeDBUtil {
         Util.info("Defined schema to database <" + databaseName + ">");
     }
 
-    public static void loadAndDefineSchema(TypeDBClient client, String databaseName, String schemaPath) {
+    public static void loadAndDefineSchema(TypeDBDriver driver, String databaseName, String schemaPath) {
         String schema = loadSchemaFromFile(schemaPath);
-        defineToTypeDB(client, databaseName, schema);
+        defineToTypeDB(driver, databaseName, schema);
     }
 
     public static Iterator<ConceptMap> executeMatch(TypeDBTransaction tx, TypeQLInsert query) {
         if (!query.match().isPresent()) throw new RuntimeException("Expected TypeQL 'match' to be present");
-        return tx.query().match(query.match().get()).iterator();
+        return tx.query().get(query.match().get().get()).iterator();
     }
 
     public static void safeInsert(TypeDBTransaction tx, TypeQLInsert query, Iterator<ConceptMap> matches, boolean allowMultiInsert, String filePath, String row, Logger dataLogger) {
@@ -131,9 +128,10 @@ public class TypeDBUtil {
 
     public static TypeQLInsert replaceMatchWithAnswer(TypeQLInsert query, ConceptMap ans) {
         assert query.match().isPresent();
-        List<ThingVariable<?>> insertVars = query.asInsert().variables();
-        List<BoundVariable> matchVars = new ArrayList<>();
-        ans.map().forEach((var, concept) -> {
+        List<ThingStatement<?>> insertVars = query.asInsert().statements();
+        List<Statement> matchVars = new ArrayList<>();
+        ans.variables().forEach((var) -> {
+            Concept concept = ans.get(var);
             if (concept.isThing()) matchVars.add(TypeQL.cVar(var).iid(concept.asThing().getIID()));
             else if (concept.asType().getLabel().scope().isPresent()) {
                 matchVars.add(TypeQL.cVar(var).type(concept.asType().getLabel().scope().get(), concept.asType().getLabel().name()));

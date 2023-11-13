@@ -17,8 +17,8 @@
 package com.vaticle.typedb.osi.loader.generator;
 
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
@@ -40,14 +40,14 @@ public class AppendAttributeOrInsertThingGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "append-or-insert-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> appendOrInsertKeys = new ArrayList<>(List.of("append-or-insert-person"));
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         for (String appendOrInsertkey : appendOrInsertKeys) {
             if (dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getInsert().getOwnerships() != null) {
                 Util.setConstrainingAttributeConceptType(dc.getAppendAttributeOrInsertThing().get(appendOrInsertkey).getInsert().getOwnerships(), session);
@@ -57,7 +57,7 @@ public class AppendAttributeOrInsertThingGeneratorTest {
             }
         }
         session.close();
-        client.close();
+        driver.close();
 
         testPerson(dc, appendOrInsertKeys);
     }

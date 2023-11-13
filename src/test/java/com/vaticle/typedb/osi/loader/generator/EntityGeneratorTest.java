@@ -16,8 +16,8 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
@@ -39,21 +39,21 @@ public class EntityGeneratorTest {
     public void genericEntityTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/generic/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dcp = new File("src/test/resources/generic/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         ArrayList<String> entityKeys = new ArrayList<>(List.of("entity1", "entity2", "entity3"));
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         for (String entityKey : entityKeys) {
             for (int idx = 0; idx < dc.getEntities().get(entityKey).getInsert().getOwnerships().length; idx++) {
                 setEntityHasAttributeConceptType(entityKey, idx, dc, session);
             }
         }
         session.close();
-        client.close();
+        driver.close();
 
         String dp = new File("src/test/resources/generic/entity1.tsv").getAbsolutePath();
         EntityGenerator gen = new EntityGenerator(dp,
@@ -204,15 +204,15 @@ public class EntityGeneratorTest {
     public void phoneCallsPersonTest() throws IOException {
         String dbName = "entity-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dp = new File("src/test/resources/phoneCalls/person.csv").getAbsolutePath();
         String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
         Configuration dc = Util.initializeConfig(dcp);
         assert dc != null;
         String entityKey = "person";
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         for (int idx = 0; idx < dc.getEntities().get(entityKey).getInsert().getOwnerships().length; idx++) {
             setEntityHasAttributeConceptType(entityKey, idx, dc, session);
         }
@@ -221,7 +221,7 @@ public class EntityGeneratorTest {
                 Objects.requireNonNullElseGet(dc.getEntities().get(entityKey).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
 
         session.close();
-        client.close();
+        driver.close();
 
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 

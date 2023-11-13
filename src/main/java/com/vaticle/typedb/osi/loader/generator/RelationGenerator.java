@@ -16,18 +16,18 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.api.answer.ConceptMap;
-import com.vaticle.typedb.client.common.exception.TypeDBClientException;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.answer.ConceptMap;
+import com.vaticle.typedb.driver.common.exception.TypeDBDriverException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import com.vaticle.typeql.lang.TypeQL;
+import com.vaticle.typeql.lang.builder.ConceptVariableBuilder;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
-import com.vaticle.typeql.lang.pattern.variable.UnboundConceptVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import com.vaticle.typeql.lang.query.TypeQLInsert;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -76,7 +76,7 @@ public class RelationGenerator implements Generator {
                 } else {
                     safeInsert(tx, query, answers, allowMultiInsert, filePath, originalRow, dataLogger);
                 }
-            } catch (TypeDBClientException typeDBClientException) {
+            } catch (TypeDBDriverException typeDBDriverException) {
                 FileLogger.getLogger().logUnavailable(fileName, originalRow);
                 dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
             }
@@ -88,7 +88,7 @@ public class RelationGenerator implements Generator {
 
     public TypeQLInsert generateMatchInsertStatement(String[] row) {
         if (row.length > 0) {
-            ArrayList<ThingVariable<?>> playerMatchStatements = new ArrayList<>();
+            ArrayList<ThingStatement<?>> playerMatchStatements = new ArrayList<>();
             ArrayList<String> playerVars = new ArrayList<>();
             ArrayList<String> roleTypes = new ArrayList<>();
 
@@ -98,7 +98,7 @@ public class RelationGenerator implements Generator {
 
                 // ATTRIBUTE PLAYER
                 if (Util.playerType(player).equals("attribute")) {
-                    ThingVariable.Attribute playerMatchStatement = getAttributePlayerMatchStatement(row, player, playerVar);
+                    ThingStatement.Attribute playerMatchStatement = getAttributePlayerMatchStatement(row, player, playerVar);
                     if (playerMatchStatement != null) {
                         playerMatchStatements.add(playerMatchStatement);
                         playerVars.add(playerVar);
@@ -109,7 +109,7 @@ public class RelationGenerator implements Generator {
 
                 // ENTITY & RELATION PLAYER BY ATTRIBUTE(s)
                 if (Util.playerType(player).equals("byAttribute")) {
-                    ThingVariable.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
+                    ThingStatement.Thing playerMatchStatement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
                     if (playerMatchStatement.constraints().stream().anyMatch(ThingConstraint::isHas)) {
                         playerMatchStatements.add(playerMatchStatement);
                         playerVars.add(playerVar);
@@ -120,7 +120,7 @@ public class RelationGenerator implements Generator {
 
 //                // Relation PLAYER BY PLAYERs
                 if (Util.playerType(player).equals("byPlayer")) {
-                    ArrayList<ThingVariable<?>> playerMatchStatement = getRelationPlayerMatchStatement(row, player, playerVar);
+                    ArrayList<ThingStatement<?>> playerMatchStatement = getRelationPlayerMatchStatement(row, player, playerVar);
                     playerMatchStatements.addAll(playerMatchStatement);
                     playerVars.add(playerVar);
                     roleTypes.add(player.getRole());
@@ -129,7 +129,7 @@ public class RelationGenerator implements Generator {
 
             }
 
-            ThingVariable.Relation insertStatement = null;
+            ThingStatement.Relation insertStatement = null;
             for (int i = 0; i < roleTypes.size(); i++) {
                 if (insertStatement == null) {
                     insertStatement = TypeQL.cVar("rel").rel(roleTypes.get(i), TypeQL.cVar(playerVars.get(i)));
@@ -152,8 +152,8 @@ public class RelationGenerator implements Generator {
         }
     }
 
-    private ThingVariable.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Definition.Player player, String playerVar) {
-        ThingVariable.Thing playerMatchStatement = TypeQL.cVar(playerVar).isa(player.getMatch().getType());
+    private ThingStatement.Thing getThingPlayerMatchStatementByAttribute(String[] row, Configuration.Definition.Player player, String playerVar) {
+        ThingStatement.Thing playerMatchStatement = TypeQL.cVar(playerVar).isa(player.getMatch().getType());
         for (Configuration.Definition.Attribute consA : player.getMatch().getOwnerships()) {
             ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                     row, header, filePath, fileSeparator, consA);
@@ -164,7 +164,7 @@ public class RelationGenerator implements Generator {
         return playerMatchStatement;
     }
 
-    private ThingVariable.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
+    private ThingStatement.Attribute getAttributePlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
         ArrayList<ThingConstraint.Predicate> constraints = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
                 row, header, filePath, fileSeparator, player.getMatch().getAttribute());
         if (constraints.size() > 0) {
@@ -176,35 +176,35 @@ public class RelationGenerator implements Generator {
         }
     }
 
-    private ArrayList<ThingVariable<?>> getRelationPlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
+    private ArrayList<ThingStatement<?>> getRelationPlayerMatchStatement(String[] row, Configuration.Definition.Player player, String playerVar) {
         return recursiveAssemblyMatchStatement(row, player, playerVar);
     }
 
-    private ArrayList<ThingVariable<?>> recursiveAssemblyMatchStatement(String[] row,
+    private ArrayList<ThingStatement<?>> recursiveAssemblyMatchStatement(String[] row,
                                                                         Configuration.Definition.Player player,
                                                                         String playerVar) {
         if (Util.playerType(player).equals("attribute")) {
             //terminating condition - attribute player:
-            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
-            ThingVariable<?> statement = getAttributePlayerMatchStatement(row, player, playerVar);
+            ArrayList<ThingStatement<?>> statements = new ArrayList<>();
+            ThingStatement<?> statement = getAttributePlayerMatchStatement(row, player, playerVar);
             if (statement != null) {
                 statements.add(statement);
             }
             return statements;
         } else if (Util.playerType(player).equals("byAttribute")) {
             //terminating condition - byAttribute player:
-            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
-            ThingVariable<?> statement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
+            ArrayList<ThingStatement<?>> statements = new ArrayList<>();
+            ThingStatement<?> statement = getThingPlayerMatchStatementByAttribute(row, player, playerVar);
             if (statement != null && statement.constraints().stream().anyMatch(ThingConstraint::isHas)) {
                 statements.add(statement);
             }
             return statements;
         } else if (Util.playerType(player).equals("byPlayer")) {
             // identify relation player "byPlayer"
-            ArrayList<ThingVariable<?>> statements = new ArrayList<>();
+            ArrayList<ThingStatement<?>> statements = new ArrayList<>();
             //create the relation statement with the player vars that will be filled in recursion:
-            UnboundConceptVariable ubv = TypeQL.cVar(playerVar);
-            ThingVariable.Relation relationMatch = null;
+            ConceptVariableBuilder ubv = TypeQL.cVar(playerVar);
+            ThingStatement.Relation relationMatch = null;
             for (int idx = 0; idx < player.getMatch().getPlayers().length; idx++) {
                 Configuration.Definition.Player curPlayer = player.getMatch().getPlayers()[idx];
                 String curPlayerVar = playerVar + "-" + idx;
@@ -214,7 +214,7 @@ public class RelationGenerator implements Generator {
                     relationMatch = relationMatch.rel(curPlayer.getRole(), TypeQL.cVar(curPlayerVar));
                 }
                 // this is where the recursion happens to fill the player var!
-                ArrayList<ThingVariable<?>> recursiveMatch = recursiveAssemblyMatchStatement(row, curPlayer, curPlayerVar);
+                ArrayList<ThingStatement<?>> recursiveMatch = recursiveAssemblyMatchStatement(row, curPlayer, curPlayerVar);
                 // now add whatever the recursion brought back:
                 statements.addAll(recursiveMatch);
             }

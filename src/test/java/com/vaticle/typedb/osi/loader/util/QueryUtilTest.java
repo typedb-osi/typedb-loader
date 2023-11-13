@@ -16,7 +16,7 @@
 
 package com.vaticle.typedb.osi.loader.util;
 
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 
 import java.time.LocalDate;

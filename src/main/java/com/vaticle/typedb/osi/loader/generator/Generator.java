@@ -16,7 +16,7 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
 
 public interface Generator {
     void write(TypeDBTransaction tx, String[] row, boolean allowMultiInsert);
