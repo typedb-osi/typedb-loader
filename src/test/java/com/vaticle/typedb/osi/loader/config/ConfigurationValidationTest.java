@@ -17,8 +17,8 @@
 
 package com.vaticle.typedb.osi.loader.config;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
 import org.apache.logging.log4j.LogManager;
@@ -86,7 +86,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
+        TypeDBDriver schemaDriver = TypeDBUtil.getCoreDriver(typedbURI);
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -98,13 +98,13 @@ public class ConfigurationValidationTest {
 
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchema());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaDriver, databaseName, dc.getGlobalConfig().getSchema());
             appLogger.info("cleaned database and migrated schema...");
         }
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaDriver, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
-        schemaClient.close();
+        schemaDriver.close();
         validationReport.get("warnings").forEach(appLogger::warn);
         validationReport.get("errors").forEach(appLogger::error);
 
@@ -118,7 +118,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/configValidationTest.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
+        TypeDBDriver schemaDriver = TypeDBUtil.getCoreDriver(typedbURI);
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -130,13 +130,13 @@ public class ConfigurationValidationTest {
 
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchema());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaDriver, databaseName, dc.getGlobalConfig().getSchema());
             appLogger.info("cleaned database and migrated schema...");
         }
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaDriver, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
-        schemaClient.close();
+        schemaDriver.close();
         validationReport.get("warnings").forEach(appLogger::warn);
         validationReport.get("errors").forEach(appLogger::error);
 
@@ -147,7 +147,7 @@ public class ConfigurationValidationTest {
     public void validateDataConfig() {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/generic/config.json").getAbsolutePath());
         assert dc != null;
-        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
+        TypeDBDriver schemaDriver = TypeDBUtil.getCoreDriver(typedbURI);
 
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
@@ -159,14 +159,14 @@ public class ConfigurationValidationTest {
         cv.validateSchemaPresent(validationReport);
 
         if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchema());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaDriver, databaseName, dc.getGlobalConfig().getSchema());
             appLogger.info("cleaned database and migrated schema...");
         }
 
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaDriver, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
-        schemaClient.close();
+        schemaDriver.close();
 
         validationReport.get("warnings").forEach(appLogger::warn);
         validationReport.get("errors").forEach(appLogger::error);
@@ -179,7 +179,7 @@ public class ConfigurationValidationTest {
         Configuration dc = Util.initializeConfig(new File("src/test/resources/phoneCalls/config.json").getAbsolutePath());
         assert dc != null;
 
-        TypeDBClient schemaClient = TypeDBUtil.getCoreClient(typedbURI, Runtime.getRuntime().availableProcessors());
+        TypeDBDriver schemaDriver = TypeDBUtil.getCoreDriver(typedbURI);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
 
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
@@ -189,14 +189,14 @@ public class ConfigurationValidationTest {
         validationReport.put("errors", errors);
         cv.validateSchemaPresent(validationReport);
         if (validationReport.get("errors").size() == 0) {
-            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, databaseName, dc.getGlobalConfig().getSchema());
+            TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaDriver, databaseName, dc.getGlobalConfig().getSchema());
             appLogger.info("cleaned database and migrated schema...");
         }
 
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaDriver, databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
         schemaSession.close();
-        schemaClient.close();
+        schemaDriver.close();
 
         validationReport.get("warnings").forEach(appLogger::warn);
         validationReport.get("errors").forEach(appLogger::error);

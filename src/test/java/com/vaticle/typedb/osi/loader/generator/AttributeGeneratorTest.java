@@ -16,8 +16,8 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.util.TypeDBUtil;
 import com.vaticle.typedb.osi.loader.util.Util;
@@ -38,8 +38,8 @@ public class AttributeGeneratorTest {
     public void generateInsertStatementsTest() throws IOException {
         String dbName = "attribute-generator-test";
         String sp = new File("src/test/resources/phoneCalls/schema.gql").getAbsolutePath();
-        TypeDBClient client = TypeDBUtil.getCoreClient("localhost:1729");
-        TypeDBUtil.cleanAndDefineSchemaToDatabase(client, dbName, sp);
+        TypeDBDriver driver = TypeDBUtil.getCoreDriver("localhost:1729");
+        TypeDBUtil.cleanAndDefineSchemaToDatabase(driver, dbName, sp);
 
         String dp = new File("src/test/resources/phoneCalls/is-in-use.csv").getAbsolutePath();
         String dcp = new File("src/test/resources/phoneCalls/config.json").getAbsolutePath();
@@ -50,10 +50,10 @@ public class AttributeGeneratorTest {
                 dc.getAttributes().get(attributeKey),
                 Objects.requireNonNullElseGet(dc.getAttributes().get(attributeKey).getConfig().getSeparator(), () -> dc.getGlobalConfig().getSeparator()));
 
-        TypeDBSession session = TypeDBUtil.getDataSession(client, dbName);
+        TypeDBSession session = TypeDBUtil.getDataSession(driver, dbName);
         dc.getAttributes().get(attributeKey).getInsert().setConceptValueType(session);
         session.close();
-        client.close();
+        driver.close();
 
         Iterator<String> iterator = Util.newBufferedReader(dp).lines().skip(1).iterator();
 

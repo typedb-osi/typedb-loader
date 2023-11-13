@@ -2,7 +2,7 @@
 ---
 ---
 
-###   
+###    
 
 [![TypeDB Loader Test](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/testandbuild.yaml)
 [![TypeDB Loader Build](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml/badge.svg)](https://github.com/bayer-science-for-a-better-life/grami/actions/workflows/release.yaml)
@@ -153,17 +153,18 @@ To connect to TypeDB Cluster, a set of options is provided:
 
 ## Compatibility Table
 
-Ranges are [inclusive, exclusive).
+Ranges are [inclusive, inclusive].
 
-| TypeDB Loader | TypeDB Client (internal) |     TypeDB      | TypeDB Cluster  |
-|:-------------:|:------------------------:|:---------------:|:---------------:|
-|     1.7.0     |          2.18.1          |    2.18.x -     |    2.18.x -     |
-|     1.6.0     |          2.14.2          | 2.14.x - 2.17.x | 2.14.x - 2.16.x |
-| 1.2.0 - 1.6.0 |      2.8.0 - 2.14.0      | 2.8.0 - 2.14.0  |       N/A       |
-| 1.1.0 - 1.2.0 |          2.8.0           |      2.8.x      |       N/A       |
-|     1.0.0     |      2.5.0 - 2.7.1       |  2.5.x - 2.7.x  |       N/A       |
-|     0.1.1     |      2.0.0 - 2.5.0       |  2.0.x - 2.4.x  |       N/A       |
-|     <0.1      |          1.8.0           |      1.8.x      |       N/A       |
+| TypeDB Loader | TypeDB Driver (internal) |     TypeDB      | TypeDB Cluster  |
+|:-------------:|:----------------------:|:---------------:|:---------------:|
+|     1.8.0     |        2.24.15         |    2.24.x -     |    2.24.x -     |
+|     1.7.0     |         2.18.1         |  2.18.x 2.23.x  |  2.18.x 2.23.x  |
+|     1.6.0     |         2.14.2         | 2.14.x - 2.17.x | 2.14.x - 2.16.x |
+| 1.2.0 - 1.5.x |     2.8.0 - 2.14.0     | 2.8.0 - 2.14.0  |       N/A       |
+| 1.1.0 - 1.1.x |         2.8.0          |      2.8.x      |       N/A       |
+|     1.0.0     |     2.5.0 - 2.7.1      |  2.5.x - 2.7.x  |       N/A       |
+|     0.1.1     |     2.0.0 - 2.4.x      |  2.0.x - 2.4.x  |       N/A       |
+|     <0.1      |         1.8.0          |      1.8.x      |       N/A       |
 
 * [Type DB](https://github.com/vaticle/typedb)
 

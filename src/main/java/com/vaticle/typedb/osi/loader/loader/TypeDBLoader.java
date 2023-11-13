@@ -16,9 +16,9 @@
 
 package com.vaticle.typedb.osi.loader.loader;
 
-import com.vaticle.typedb.client.TypeDB;
-import com.vaticle.typedb.client.api.TypeDBClient;
-import com.vaticle.typedb.client.api.TypeDBSession;
+import com.vaticle.typedb.driver.TypeDB;
+import com.vaticle.typedb.driver.api.TypeDBDriver;
+import com.vaticle.typedb.driver.api.TypeDBSession;
 import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
 import com.vaticle.typedb.osi.loader.cli.LoadOptions;
 import com.vaticle.typedb.osi.loader.config.Configuration;
@@ -42,7 +42,7 @@ public class TypeDBLoader {
 
     public void load() {
         Util.info("validating your config...");
-        TypeDBClient schemaClient = TypeDBUtil.getClient(options);
+        TypeDBDriver schemaDriver = TypeDBUtil.getDriver(options);
         ConfigurationValidation cv = new ConfigurationValidation(dc);
         HashMap<String, ArrayList<String>> validationReport = new HashMap<>();
         ArrayList<String> errors = new ArrayList<>();
@@ -53,10 +53,10 @@ public class TypeDBLoader {
 
         if (validationReport.get("errors").size() == 0) {
             if (options.cleanMigration) {
-                TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaClient, options.databaseName, dc.getGlobalConfig().getSchema());
+                TypeDBUtil.cleanAndDefineSchemaToDatabase(schemaDriver, options.databaseName, dc.getGlobalConfig().getSchema());
                 Util.info("cleaned database and migrated schema...");
             } else if (options.loadSchema) {
-                TypeDBUtil.loadAndDefineSchema(schemaClient, options.databaseName, dc.getGlobalConfig().getSchema());
+                TypeDBUtil.loadAndDefineSchema(schemaDriver, options.databaseName, dc.getGlobalConfig().getSchema());
                 Util.info("loaded schema...");
             }
         } else {
@@ -64,7 +64,7 @@ public class TypeDBLoader {
             System.exit(1);
         }
 
-        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaClient, options.databaseName);
+        TypeDBSession schemaSession = TypeDBUtil.getSchemaSession(schemaDriver, options.databaseName);
         cv.validateConfiguration(validationReport, schemaSession);
 
         if (validationReport.get("warnings").size() > 0) {
@@ -73,22 +73,22 @@ public class TypeDBLoader {
         if (validationReport.get("errors").size() > 0) {
             validationReport.get("errors").forEach(Util::error);
             schemaSession.close();
-            schemaClient.close();
+            schemaDriver.close();
             System.exit(1);
         }
         schemaSession.close();
-        schemaClient.close();
+        schemaDriver.close();
         Util.info("finished validating your config...");
 
         Instant start = Instant.now();
         try {
             AsyncLoaderWorker asyncLoaderWorker = null;
-            try (TypeDBClient client = TypeDBUtil.getClient(options)) {
+            try (TypeDBDriver driver = TypeDBUtil.getDriver(options)) {
                 Runtime.getRuntime().addShutdownHook(
-                        NamedThreadFactory.create(AsyncLoaderWorker.class, "shutdown").newThread(client::close)
+                        NamedThreadFactory.create(AsyncLoaderWorker.class, "shutdown").newThread(driver::close)
                 );
                 asyncLoaderWorker = new AsyncLoaderWorker(dc, options);
-                asyncLoaderWorker.run(client);
+                asyncLoaderWorker.run(driver);
             } finally {
                 if (asyncLoaderWorker != null) asyncLoaderWorker.close();
             }

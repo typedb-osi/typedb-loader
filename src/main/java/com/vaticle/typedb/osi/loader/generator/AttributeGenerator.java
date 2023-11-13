@@ -16,8 +16,8 @@
 
 package com.vaticle.typedb.osi.loader.generator;
 
-import com.vaticle.typedb.client.api.TypeDBTransaction;
-import com.vaticle.typedb.client.common.exception.TypeDBClientException;
+import com.vaticle.typedb.driver.api.TypeDBTransaction;
+import com.vaticle.typedb.driver.common.exception.TypeDBDriverException;
 import com.vaticle.typedb.osi.loader.config.Configuration;
 import com.vaticle.typedb.osi.loader.io.FileLogger;
 import com.vaticle.typedb.osi.loader.util.GeneratorUtil;
@@ -63,7 +63,7 @@ public class AttributeGenerator implements Generator {
             if (isValid(statement)) {
                 try {
                     tx.query().insert(statement);
-                } catch (TypeDBClientException clientException) {
+                } catch (TypeDBDriverException driverException) {
                     FileLogger.getLogger().logUnavailable(fileName, originalRow);
                     dataLogger.error("TypeDB Unavailable - Row in <" + filePath + "> not inserted - written to <" + fileNoExtension + "_unavailable.log" + ">");
                 }

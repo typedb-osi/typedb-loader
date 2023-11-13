@@ -24,7 +24,7 @@ import com.vaticle.typeql.lang.TypeQL;
 import com.vaticle.typeql.lang.common.TypeQLToken;
 import com.vaticle.typeql.lang.pattern.constraint.Predicate;
 import com.vaticle.typeql.lang.pattern.constraint.ThingConstraint;
-import com.vaticle.typeql.lang.pattern.variable.ThingVariable;
+import com.vaticle.typeql.lang.pattern.statement.ThingStatement;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,7 +53,7 @@ public class GeneratorUtil {
                                                        String[] header,
                                                        String filePath,
                                                        char fileSeparator,
-                                                       ThingVariable<?> insertStatement,
+                                                       ThingStatement insertStatement,
                                                        Configuration.Definition.Attribute[] attributes) {
         for (Configuration.Definition.Attribute attribute : attributes) {
             ArrayList<ThingConstraint.Predicate> constraintValues = GeneratorUtil.generateValueConstraintsConstrainingAttribute(
@@ -68,7 +68,7 @@ public class GeneratorUtil {
         return Arrays.asList(header).indexOf(column);
     }
 
-    public static ThingVariable.Thing generateBoundThingVar(String schemaType) {
+    public static ThingStatement.Thing generateBoundThingVar(String schemaType) {
         return TypeQL.cVar("e").isa(schemaType);
     }
 
