@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.vaticle.typedb-osi'
-version '1.8.0'
+version '1.9.0'
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.vaticle.typedb:typedb-driver:2.25.2")
+    implementation("com.vaticle.typedb:typedb-driver:2.25.6")
     implementation("com.vaticle.typeql:typeql-lang:2.25.0")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("org.slf4j:slf4j-api:1.7.25")
