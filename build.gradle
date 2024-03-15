@@ -5,18 +5,18 @@ plugins {
 }
 
 group 'com.vaticle.typedb-osi'
-version '1.8.0'
+version '1.9.0'
 
 repositories {
     mavenCentral()
     maven {
-        url "https://repo.vaticle.com/repository/maven/"
+        url "https://repo.typedb.com/public/public-release/maven/"
     }
 }
 
 dependencies {
-    implementation("com.vaticle.typedb:typedb-driver:2.25.6")
-    implementation("com.vaticle.typeql:typeql-lang:2.25.0")
+    implementation("com.vaticle.typedb:typedb-driver:2.26.6")
+    implementation("com.vaticle.typeql:typeql-lang:2.26.6")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("org.slf4j:slf4j-api:1.7.25")
     implementation("org.apache.logging.log4j:log4j-api:2.17.1")
@@ -39,11 +39,11 @@ publishing {
     }
     repositories {
         maven {
-            name = "VaticleOSIMaven"
-            url = "https://repo.vaticle.com/repository/osi-maven/"
+            name = "TypeDBOSI"
+            url = "https://maven.cloudsmith.io/typedb/osi/"
             credentials {
-                username = System.getenv("REPO_VATICLE_OSI_USERNAME")
-                password = System.getenv("REPO_VATICLE_OSI_PASSWORD")
+                username = System.getenv("REPO_TYPEDB_OSI_USERNAME")
+                password = System.getenv("REPO_TYPEDB_OSI_PASSWORD")
             }
         }
     }

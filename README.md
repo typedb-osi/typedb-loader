@@ -159,8 +159,9 @@ To connect to TypeDB Cluster, a set of options is provided:
 
 Ranges are [inclusive, inclusive].
 
-| TypeDB Loader | TypeDB Driver (internal) |     TypeDB      | TypeDB Cluster  |
+| TypeDB Loader | TypeDB Driver (internal) |     TypeDB      |  TypeDB Cloud   |
 |:-------------:|:------------------------:|:---------------:|:---------------:|
+|     1.9.0     |          2.26.6          |    2.25.x -     |    2.25.x -     |
 |     1.8.0     |          2.25.6          |    2.25.x -     |    2.25.x -     |
 |     1.7.0     |          2.18.1          |  2.18.x 2.23.x  |  2.18.x 2.23.x  |
 |     1.6.0     |          2.14.2          | 2.14.x - 2.17.x | 2.14.x - 2.16.x |
@@ -174,6 +175,12 @@ Ranges are [inclusive, inclusive].
 
 Find the Readme for GraMi for grakn <
 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
+
+### Package hosting
+Package repository hosting is graciously provided by  [Cloudsmith](https://cloudsmith.com).
+Cloudsmith is the only fully hosted, cloud-native, universal package management solution, that
+enables your organization to create, store and share packages in any format, to any place, with total
+confidence.
 
 ## Contributions
 

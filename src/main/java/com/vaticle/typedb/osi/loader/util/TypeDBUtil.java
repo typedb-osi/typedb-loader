@@ -52,7 +52,7 @@ public class TypeDBUtil {
             } else {
                 credential = new TypeDBCredential(options.username, options.password, false);
             }
-            return TypeDB.enterpriseDriver(options.typedbClusterURI, credential);
+            return TypeDB.cloudDriver(options.typedbClusterURI, credential);
         } else {
             return TypeDB.coreDriver(options.typedbURI);
         }
