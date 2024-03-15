@@ -13,5 +13,5 @@ jobs:
       - name: Publish package
         run: gradle publish
         env:
-          REPO_VATICLE_OSI_USERNAME: ${{ secrets.REPO_VATICLE_OSI_USERNAME }}
-          REPO_VATICLE_OSI_PASSWORD: ${{ secrets.REPO_VATICLE_OSI_PASSWORD }}
+          REPO_TYPEDB_OSI_USERNAME: ${{ secrets.REPO_TYPEDB_OSI_USERNAME }}
+          REPO_TYPEDB_OSI_PASSWORD: ${{ secrets.REPO_TYPEDB_OSI_PASSWORD }}
