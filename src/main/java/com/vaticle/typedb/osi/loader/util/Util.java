@@ -55,7 +55,7 @@ public class Util {
         } else if (separator == '\t') {
             return parseTSV(br.readLine());
         } else {
-            throw new IllegalArgumentException("currently supported separators are: <,>, <\t>");
+            return parseCSV(br.readLine(), separator);
         }
     }
 
@@ -108,19 +108,24 @@ public class Util {
         } else if (separator == '\t') {
             return parseTSV(line);
         } else {
-            throw new IllegalArgumentException("currently supported separators are: <,>, <\t>");
+            return parseCSV(line, separator);
         }
     }
 
     public static String[] parseCSV(String line) {
+        return parseCSV(line, ',');
+    }
+
+    public static String[] parseCSV(String line, char delimiter) {
         if (!line.isEmpty()) {
+            CSVFormat format = CSV_FORMAT.withDelimiter(delimiter);
             try {
-                CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+                CSVRecord csv = CSVParser.parse(line, format).getRecords().get(0);
                 return parse(csv);
             } catch (IOException ioException) {
                 line = line.replace("\"", "");
                 try {
-                    CSVRecord csv = CSVParser.parse(line, CSV_FORMAT).getRecords().get(0);
+                    CSVRecord csv = CSVParser.parse(line, format).getRecords().get(0);
                     return parse(csv);
                 } catch (IOException ioException2) {
                     //TODO LOG INTO ERRORS
@@ -130,7 +135,7 @@ public class Util {
         } else {
             return new String[0];
         }
-    }
+    }    
 
     public static String[] parseTSV(String line) {
         if (!line.isEmpty()) {
@@ -155,10 +160,18 @@ public class Util {
     private static String[] parse(CSVRecord record) {
         String[] arr = new String[record.size()];
         for (int i = 0; i < record.size(); i++) {
-            arr[i] = record.get(i);
-            if (arr[i] != null) {
-                if ((arr[i].equals("\\N") || arr[i].equalsIgnoreCase("null"))) arr[i] = null;
-                else arr[i] = escapeDoubleQuotes(arr[i]);
+            try {
+                arr[i] = record.get(i);
+                if (arr[i] != null) {
+                    if (arr[i].equals("\\N") || arr[i].equalsIgnoreCase("null")) {
+                        arr[i] = null;
+                    } else {
+                        arr[i] = escapeDoubleQuotes(arr[i]);
+                    }
+                }
+            } catch (Exception e) {
+                appLogger.error("Error parsing CSV record: " + record.toString());
+                arr[i] = null;
             }
         }
         return arr;
