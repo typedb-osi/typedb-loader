@@ -11,7 +11,15 @@
 
 ---
 
-If your [TypeDB](https://github.com/vaticle/typedb) project
+## Deprecation notice
+
+Please note that this project is no longer maintained and has been deprecated in favor of the new Loader: https://github.com/typedb/typedb-tools/tree/master/loader, an officially supported TypeDB binary that is much simpler and runs an order of magnitude faster against TypeDB 3.
+
+**Thank you**
+
+## Welcome
+
+If your [TypeDB](https://github.com/typedb/typedb) project
 
 - has a lot of data
 - and you want/need to focus on schema design, inference, and querying
@@ -44,7 +52,7 @@ into TypeDB **at scale**!
       let you know what you forgot. All BEFORE the database is touched.
 - Performance:
     - parallelized asynchronous writes to TypeDB to make the most of your hardware configuration, optimized with
-      engineers @vaticle
+      engineers @typedb
 - Stop/Restart (in re-implementation, currently NOT available):
     - tracking of your migration status to stop/restart, or restart after failure
 
@@ -136,7 +144,7 @@ public class LoadingData {
 A complete tutorial for TypeDB version >= 2.5.0 is in work and will be published.
 
 An example of configuration and usage of TypeDB Loader on real data can be
-found [in the TypeDB Examples](https://github.com/vaticle/typedb-examples/tree/master/biology/catalogue_of_life).
+found [in the TypeDB Examples](https://github.com/typedb/typedb-examples/tree/master/biology/catalogue_of_life).
 
 A complete tutorial for TypeDB (Grakn) version < 2.0 can be
 found [on Medium](https://medium.com/@hkuich/introducing-grami-a-data-migration-tool-for-grakn-d4051582f867).
@@ -171,7 +179,7 @@ Ranges are [inclusive, inclusive].
 |     0.1.1     |      2.0.0 - 2.4.x       |  2.0.x - 2.4.x  |       N/A       |
 |     <0.1      |          1.8.0           |      1.8.x      |       N/A       |
 
-* [Type DB](https://github.com/vaticle/typedb)
+* [Type DB](https://github.com/typedb/typedb)
 
 Find the Readme for GraMi for grakn <
 2.0 [here](https://github.com/bayer-science-for-a-better-life/grami/blob/b3d6d272c409d6c40254354027b49f90b255e1c3/README.md)
@@ -185,7 +193,7 @@ confidence.
 ## Contributions
 
 TypeDB Loader was built @[Bayer AG](https://www.bayer.com/) in the Semantic and Knowledge Graph Technology Group with
-the support of the engineers @[Vaticle](https://github.com/vaticle).
+the support of the engineers @[TypeDB](https://github.com/typedb).
 
 ## Licensing
 
